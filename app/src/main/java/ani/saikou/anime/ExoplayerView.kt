@@ -165,7 +165,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             orientationListener?.enable()
         }
 
-        playerView.subtitleView?.setStyle(CaptionStyleCompat(Color.WHITE,Color.TRANSPARENT,Color.TRANSPARENT,EDGE_TYPE_OUTLINE,Color.BLACK,
+        playerView.subtitleView?.setStyle(CaptionStyleCompat(Color.WHITE,Color.TRANSPARENT,Color.TRANSPARENT,EDGE_TYPE_OUTLINE,Color.DKGRAY,
             ResourcesCompat.getFont(this, R.font.poppins_bold)))
         playerView.subtitleView?.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
 

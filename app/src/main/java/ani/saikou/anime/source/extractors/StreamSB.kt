@@ -27,7 +27,7 @@ class StreamSB: Extractor(){
             )
         }catch (e:Exception){
             toastString(e.toString())
-            Episode.StreamLinks("", listOf(Episode.Quality("", "", null)),null)
+            Episode.StreamLinks(name, listOf(),null)
         }
     }
 }
