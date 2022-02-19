@@ -144,6 +144,7 @@ open class AnimeWatchFragment : Fragment() {
     fun onIconPressed(viewType:Int,reverse:Boolean){
         media.selected!!.recyclerStyle = viewType
         media.selected!!.recyclerReversed = reverse
+        model.saveSelected(media.id, media.selected!!, requireActivity())
         reload()
     }
 
@@ -152,6 +153,7 @@ open class AnimeWatchFragment : Fragment() {
         start = s
         end = e
         chipAdapter?.selected = i
+        model.saveSelected(media.id, media.selected!!, requireActivity())
         reload()
     }
 
