@@ -18,10 +18,9 @@ object MalSyncBackup {
                     "Gogoanime"->{
                         println("Gogo")
                         Json.decodeFromString<JsonObject>(json)["Pages"]?.jsonObject?.get(name)?.also {
-                            var slug = it.toString().replace("\n","").findBetween((if(dub) "-dub" else "") + "\":{\"identifier\":\"",if(!dub) "\"," else "-dub\",")
+                            println(it)
+                            val slug = it.toString().replace("\n","").findBetween((if(dub) "-dub" else "") + "\":{\"identifier\":\"","\",")
                             if(slug!=null){
-                                if(dub)
-                                    slug = "$slug-dub"
                                 println(slug)
                                 return Source(slug,"Automatically","")
                             }
