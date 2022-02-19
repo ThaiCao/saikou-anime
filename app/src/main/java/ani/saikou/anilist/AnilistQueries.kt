@@ -264,7 +264,7 @@ class AnilistQueries{
             if (list != null && list.isNotEmpty()) {
                 list.forEach { li->
                     li.jsonObject["entries"]!!.jsonArray.reversed().forEach {
-                        println("$type = "+it.jsonObject["media"]!!.jsonObject["title"]!!.jsonObject["english"].toString().trim('"').replace("\\\"", "\""))
+//                        println("$type = "+it.jsonObject["media"]!!.jsonObject["title"]!!.jsonObject["english"].toString().trim('"').replace("\\\"", "\""))
                         map[it.jsonObject["media"]!!.jsonObject["id"].toString().toInt()] =
                             Media(
                                 id = it.jsonObject["media"]!!.jsonObject["id"].toString().toInt(),
@@ -507,7 +507,7 @@ class AnilistQueries{
         }
         else{
             if(time!=null)
-                if ((System.currentTimeMillis()-time).also { println(it) } < (1000*60*60*24*7)) {
+                if ((System.currentTimeMillis()-time) < (1000*60*60*24*7)) {
                     logger("Loaded Genres from Save.")
                     success = true
                     Anilist.genres = genres

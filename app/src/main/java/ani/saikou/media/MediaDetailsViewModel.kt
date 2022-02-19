@@ -58,7 +58,7 @@ class MediaDetailsViewModel:ViewModel() {
     private val epsLoaded = mutableMapOf<Int,MutableMap<String,Episode>>()
     fun getEpisodes() : LiveData<MutableMap<Int,MutableMap<String,Episode>>> = episodes
     fun loadEpisodes(media: Media,i:Int){
-        logger("Loading Episodes : $epsLoaded")
+//        logger("Loading Episodes : $epsLoaded")
         if(!epsLoaded.containsKey(i)) {
             epsLoaded[i] = watchSources?.get(i)!!.getEpisodes(media)
         }

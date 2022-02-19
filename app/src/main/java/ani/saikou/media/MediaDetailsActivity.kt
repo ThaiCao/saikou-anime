@@ -155,10 +155,9 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         tabLayout.setOnItemSelectedListener { item ->
             selectFromID(item.itemId)
             viewPager.setCurrentItem(selected,false)
-            val sel = loadData<Selected>(media.id.toString())?:media.selected!!
+            val sel = model.loadSelected(media.id)
             sel.window = selected
             model.saveSelected(media.id,sel,this)
-            println(sel)
             true
         }
 
