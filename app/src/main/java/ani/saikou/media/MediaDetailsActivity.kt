@@ -12,7 +12,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.math.MathUtils
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
@@ -92,12 +91,16 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         binding.mediaTitleCollapse.text=media.userPreferredName
 
         //Fav Button
-        if (media.isFav) binding.mediaFav.setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.ic_round_favorite_24))
-        val favButton = PopImageButton(scope,this,binding.mediaFav,media,R.drawable.ic_round_favorite_24,R.drawable.ic_round_favorite_border_24,R.color.nav_tab,R.color.fav,true)
-        binding.mediaFav.setOnClickListener {
-            favButton.clicked()
+        if (Anilist.userid==null){
+            if (media.isFav) binding.mediaFav.setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.ic_round_favorite_24))
+            val favButton = PopImageButton(scope,this,binding.mediaFav,media,R.drawable.ic_round_favorite_24,R.drawable.ic_round_favorite_border_24,R.color.nav_tab,R.color.fav,true)
+            binding.mediaFav.setOnClickListener {
+                favButton.clicked()
+            }
         }
-
+        else{
+            binding.mediaFav.visibility = View.GONE
+        }
         fun progress() {
             if (media.userStatus != null) {
                 binding.mediaUserStatus.visibility = View.VISIBLE
@@ -231,18 +234,13 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
     }
     //Collapsing UI Stuff
     private var isCollapsed = false
-    private val percent = 30
+    private val percent = 45
     private var mMaxScrollSize = 0
     private var screenWidth:Float = 0f
 
     override fun onOffsetChanged(appBar: AppBarLayout, i: Int) {
         if (mMaxScrollSize == 0) mMaxScrollSize = appBar.totalScrollRange
         val percentage = abs(i) * 100 / mMaxScrollSize
-        val cap = MathUtils.clamp((percent - percentage) / percent.toFloat(), 0f, 1f)
-
-        binding.mediaCover.scaleX = 1f*cap
-        binding.mediaCover.scaleY = 1f*cap
-        binding.mediaCover.cardElevation = 32f*cap
 
         binding.mediaCover.visibility= if(binding.mediaCover.scaleX==0f) View.GONE else View.VISIBLE
 
@@ -250,6 +248,8 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             isCollapsed = true
             ObjectAnimator.ofFloat(binding.mediaTitle,"translationX",0f).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaAccessContainer,"translationX",screenWidth).setDuration(200).start()
+            ObjectAnimator.ofFloat(binding.mediaAddToList,"translationX",screenWidth).setDuration(200).start()
+            ObjectAnimator.ofFloat(binding.mediaCover,"translationX",screenWidth).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaTitleCollapse,"translationX",screenWidth).setDuration(200).start()
             binding.mediaBannerStatus.visibility=View.GONE
             this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_bg)
@@ -258,6 +258,8 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             isCollapsed = false
             ObjectAnimator.ofFloat(binding.mediaTitle,"translationX",-screenWidth).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaAccessContainer,"translationX",0f).setDuration(200).start()
+            ObjectAnimator.ofFloat(binding.mediaCover,"translationX",0f).setDuration(200).start()
+            ObjectAnimator.ofFloat(binding.mediaAddToList,"translationX",0f).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaTitleCollapse,"translationX",0f).setDuration(200).start()
             binding.mediaBannerStatus.visibility=View.VISIBLE
             this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_status)

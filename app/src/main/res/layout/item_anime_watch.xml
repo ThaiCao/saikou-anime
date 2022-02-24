@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="-24dp"
+    android:layout_marginEnd="-24dp"
     android:clipToPadding="false"
     android:orientation="vertical">
 
@@ -87,9 +89,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="16dp"
             android:ellipsize="marquee"
             android:fontFamily="@font/poppins_bold"
             android:marqueeRepeatLimit="marquee_forever"
@@ -243,6 +245,7 @@
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:requiresFadingEdge="horizontal"
         android:scrollbars="none">
 

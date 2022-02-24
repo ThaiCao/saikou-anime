@@ -64,14 +64,14 @@ open class AnimeWatchFragment : Fragment() {
         binding.animeSourceRecycler.updatePadding(bottom = binding.animeSourceRecycler.paddingBottom + navBarHeight)
         screenWidth = resources.displayMetrics.widthPixels.dp
 
-        val maxGridSize = (screenWidth / 200f).roundToInt()
+        val maxGridSize = (screenWidth / 92f).roundToInt()
         val gridLayoutManager = GridLayoutManager(requireContext(), maxGridSize)
 
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 val style =
                     binding.animeSourceRecycler.findViewHolderForAdapterPosition(position)?.itemViewType
-                        ?: style
+                        ?: 0
                 return when (position) {
                     0 -> maxGridSize
                     else -> when (style) {
