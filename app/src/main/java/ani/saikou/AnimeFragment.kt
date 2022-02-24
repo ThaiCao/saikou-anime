@@ -29,8 +29,7 @@ import ani.saikou.anilist.Anilist
 import ani.saikou.anilist.AnilistAnimeViewModel
 import ani.saikou.databinding.FragmentAnimeBinding
 import ani.saikou.media.MediaAdaptor
-import ani.saikou.media.MediaLargeAdaptor
-import ani.saikou.media.MediaPageAdaptor
+import ani.saikou.media.SearchActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -129,7 +128,7 @@ class AnimeFragment : Fragment() {
             if (it != null) {
                 binding.animeTrendingProgressBar.visibility = View.GONE
                 binding.animeTrendingViewPager.adapter =
-                    MediaPageAdaptor(it, requireActivity(), binding.animeTrendingViewPager)
+                    MediaAdaptor(2,it, requireActivity(),viewPager = binding.animeTrendingViewPager)
                 binding.animeTrendingViewPager.offscreenPageLimit = 3
                 binding.animeTrendingViewPager.getChildAt(0).overScrollMode =
                     RecyclerView.OVER_SCROLL_NEVER
@@ -154,16 +153,15 @@ class AnimeFragment : Fragment() {
         model.getUpdated().observe(viewLifecycleOwner) {
             if (it != null) {
                 binding.animeUpdatedProgressBar.visibility = View.GONE
-                binding.animeUpdatedRecyclerView.adapter = MediaAdaptor(it, requireActivity())
-                binding.animeUpdatedRecyclerView.layoutManager =
-                    LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+                binding.animeUpdatedRecyclerView.adapter = MediaAdaptor(0,it, requireActivity())
+                binding.animeUpdatedRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
                 binding.animeUpdatedRecyclerView.visibility = View.VISIBLE
             }
         }
 
         model.getPopular().observe(viewLifecycleOwner) {
             if (it != null) {
-                val adapter = MediaLargeAdaptor(it.results, requireActivity())
+                val adapter = MediaAdaptor(1,it.results, requireActivity())
                 var loading = false
                 binding.animePopularRecyclerView.adapter = adapter
                 binding.animePopularRecyclerView.layoutManager =

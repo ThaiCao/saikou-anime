@@ -98,7 +98,7 @@
     <string name="ep">Episode</string>
     <string name="chaps">Chapters</string>
     <string name="chap">Chapter</string>
-    <string name="wrong">Wrong Title?</string>
+    <string name="wrong"><u>Wrong Title?</u></string>
     <string-array name="manga_sources">
         <item>MANGABUDDY</item>
         <item>MANGASEE</item>
@@ -115,5 +115,6 @@
     <string name="make_default">Make Default</string>
     <string name="filler">Filler</string>
     <string name="adult">Adult</string>
+    <string name="list_only">List Only</string>
     <string name="tag">Tag</string>
 </resources>

@@ -16,10 +16,14 @@ import org.jsoup.Jsoup
 
 class FPlayer(private val getSize:Boolean): Extractor() {
     override fun getStreamLinks(name: String, url: String): Episode.StreamLinks {
+        println(url)
         val apiLink = url.replace("/v/","/api/source/")
         val tempQuality = mutableListOf<Episode.Quality>()
         try{
-        val jsonResponse = Json.decodeFromString<JsonObject>(Jsoup.connect(apiLink).ignoreContentType(true).post().body().text())
+        val jsonResponse = Json.decodeFromString<JsonObject>(Jsoup.connect(apiLink).ignoreContentType(true)
+            .header("referer",url)
+            .post().body().text().also { println(it) })
+
         if(jsonResponse["success"].toString() == "true") {
             val a = arrayListOf<Deferred<*>>()
             runBlocking {

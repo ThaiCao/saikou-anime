@@ -1,5 +1,6 @@
 package ani.saikou.anime
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,8 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.GridLayoutManager
 import ani.saikou.anime.source.AnimeSources
 import ani.saikou.anime.source.HSources
 import ani.saikou.anime.source.Sources
@@ -26,6 +26,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 
 open class AnimeWatchFragment : Fragment() {
@@ -38,8 +39,13 @@ open class AnimeWatchFragment : Fragment() {
 
     private var start = 0
     private var end : Int? = null
-    private var chipAdapter : AnimeWatchChipAdapter? = null
+    private var style = 0
+    private var reverse = false
 
+    private lateinit  var headerAdapter: AnimeWatchAdapter
+    private lateinit  var episodeAdapter: EpisodeAdapter
+
+    private var screenWidth = 0f
     private var progress = View.VISIBLE
 
     var continueEp:Boolean=false
@@ -52,7 +58,25 @@ open class AnimeWatchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.animeSourceRecycler.updatePadding(bottom = binding.animeSourceRecycler.paddingBottom + navBarHeight)
-        binding.animeSourceRecycler.layoutManager = LinearLayoutManager(requireContext())
+        screenWidth=resources.displayMetrics.widthPixels.dp
+
+        val maxGridSize=(screenWidth/200f).roundToInt()
+        val gridLayoutManager = GridLayoutManager(requireContext(),maxGridSize)
+        gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                return when (position) {
+                    0 -> maxGridSize
+                    else -> when (style){
+                        0->maxGridSize
+                        1->(maxGridSize.toFloat()/3).roundToInt()
+                        2->1
+                        else->maxGridSize
+                    }
+                }
+            }
+        }
+
+        binding.animeSourceRecycler.layoutManager =gridLayoutManager
         continueEp = model.continueMedia?:false
         model.getMedia().observe(viewLifecycleOwner){
             if(it!=null){
@@ -63,8 +87,10 @@ open class AnimeWatchFragment : Fragment() {
 
                 model.watchSources = if(media.isAdult) HSources else AnimeSources
 
-                val adapter = AnimeWatchAdapter(it,this,null,sources)
-                binding.animeSourceRecycler.adapter = adapter
+                headerAdapter = AnimeWatchAdapter(it,this,sources)
+                episodeAdapter = EpisodeAdapter(style,media,this)
+
+                binding.animeSourceRecycler.adapter = ConcatAdapter(headerAdapter,episodeAdapter)
 
                 model.getEpisodes().observe(viewLifecycleOwner) { loadedEpisodes ->
                     if (loadedEpisodes != null) {
@@ -97,7 +123,7 @@ open class AnimeWatchFragment : Fragment() {
                                 (divisions < 50) -> 50
                                 else -> 100
                             }
-                            chipAdapter = null
+                            headerAdapter.clearChips()
                             if (total>limit) {
                                 val arr = media.anime!!.episodes!!.keys.toTypedArray()
                                 val stored = ceil((total).toDouble() / limit).toInt()
@@ -105,7 +131,7 @@ open class AnimeWatchFragment : Fragment() {
                                 val last = if (position+1 == stored) total else (limit * (position+1))
                                 start = limit * (position)
                                 end = last-1
-                                chipAdapter = AnimeWatchChipAdapter(this,limit,arr,(1..stored).toList().toTypedArray(),position)
+                                headerAdapter.updateChips(limit,arr,(1..stored).toList().toTypedArray(),position)
                             }
                             reload()
                         }
@@ -141,10 +167,12 @@ open class AnimeWatchFragment : Fragment() {
         return sources[i]!!.live
     }
 
-    fun onIconPressed(viewType:Int,reverse:Boolean){
+    fun onIconPressed(viewType:Int,rev:Boolean){
         media.selected!!.recyclerStyle = viewType
         media.selected!!.recyclerReversed = reverse
         model.saveSelected(media.id, media.selected!!, requireActivity())
+        style=viewType
+        reverse = rev
         reload()
     }
 
@@ -152,7 +180,6 @@ open class AnimeWatchFragment : Fragment() {
         media.selected!!.chip = i
         start = s
         end = e
-        chipAdapter?.selected = i
         model.saveSelected(media.id, media.selected!!, requireActivity())
         reload()
     }
@@ -162,15 +189,21 @@ open class AnimeWatchFragment : Fragment() {
         model.onEpisodeClick(media,i,requireActivity().supportFragmentManager)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun reload(){
         val selected = model.loadSelected(media.id)
         model.saveSelected(media.id,selected,requireActivity())
-        val recyclerViewState = binding.animeSourceRecycler.layoutManager?.onSaveInstanceState()
-        val adapters: ArrayList<RecyclerView.Adapter<out RecyclerView.ViewHolder>> = arrayListOf(AnimeWatchAdapter(media,this,chipAdapter,sources))
-        if(media.anime?.episodes?.isNotEmpty()==true)
-            adapters.add(episodeAdapter(media,this,resources.displayMetrics.widthPixels.dp,selected.recyclerStyle,selected.recyclerReversed,start,end))
-        binding.animeSourceRecycler.adapter = ConcatAdapter(adapters)
-        binding.animeSourceRecycler.layoutManager?.onRestoreInstanceState(recyclerViewState)
+        headerAdapter.handleEpisodes()
+        episodeAdapter.notifyItemRangeRemoved(0,episodeAdapter.arr.size)
+        var arr : ArrayList<Episode> = arrayListOf()
+        if(media.anime!!.episodes!=null) {
+            val end = if (end != null && end!! < media.anime!!.episodes!!.size) end else null
+            arr.addAll(media.anime!!.episodes!!.values.toList().slice(start..(end ?: (media.anime!!.episodes!!.size - 1))))
+            arr = if (reverse) arr.reversed() as ArrayList<Episode> else arr
+        }
+        episodeAdapter.arr = arr
+        episodeAdapter.type = style
+        episodeAdapter.notifyItemRangeInserted(0,arr.size)
     }
 
     override fun onDestroy() {
