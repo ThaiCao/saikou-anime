@@ -48,11 +48,15 @@ class EpisodeAdapter(
         }
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return type
+    }
+
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when {
-            holder is EpisodeCompactViewHolder->{
-                val binding = (holder as EpisodeCompactViewHolder).binding
+        when (holder) {
+            is EpisodeCompactViewHolder -> {
+                val binding = holder.binding
                 setAnimation(fragment.requireContext(),holder.binding.root)
                 val ep = arr[position]
                 binding.itemEpisodeNumber.text = ep.number
@@ -69,8 +73,8 @@ class EpisodeAdapter(
                 }
                 handleProgress(binding.itemEpisodeProgressCont,binding.itemEpisodeProgress,binding.itemEpisodeProgressEmpty,media.id,ep.number)
             }
-            holder is EpisodeGridViewHolder->{
-                val binding = (holder as EpisodeGridViewHolder).binding
+            is EpisodeGridViewHolder -> {
+                val binding = holder.binding
                 setAnimation(fragment.requireContext(), binding.root)
                 val ep = arr[position]
                 Picasso.get().load(ep.thumb ?: media.cover).resize(400, 0)
@@ -103,7 +107,7 @@ class EpisodeAdapter(
                     ep.number
                 )
             }
-            holder is EpisodeListViewHolder->{
+            is EpisodeListViewHolder -> {
                 val binding = (holder as EpisodeListViewHolder).binding
                 setAnimation(fragment.requireContext(),holder.binding.root)
                 val ep = arr[position]
@@ -123,8 +127,7 @@ class EpisodeAdapter(
                     if (ep.number.toFloatOrNull()?:9999f<=media.userProgress!!.toFloat()) {
                         binding.root.alpha = 0.66f
                         binding.itemEpisodeViewed.visibility = View.VISIBLE
-                    }
-                    else{
+                    } else{
                         binding.root.alpha=1f
                         binding.itemEpisodeViewed.visibility = View.GONE
                         binding.root.setOnLongClickListener{
