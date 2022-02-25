@@ -4,7 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_marginStart="-16dp"
+    android:layout_marginEnd="-16dp"
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    android:padding="8dp">
 
 
     <com.google.android.material.textfield.TextInputLayout
@@ -58,7 +62,7 @@
             tools:ignore="TextContrastCheck,TouchTargetSizeCheck" />
 
         <CheckBox
-            android:id="@+id/searchAdultCheck2"
+            android:id="@+id/searchList"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"

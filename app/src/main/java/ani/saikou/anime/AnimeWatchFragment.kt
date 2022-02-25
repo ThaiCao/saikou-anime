@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.math.MathUtils.clamp
+import androidx.core.math.MathUtils
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
-
 open class AnimeWatchFragment : Fragment() {
     open val sources: Sources = AnimeSources
     private var _binding: FragmentAnimeWatchBinding? = null
@@ -45,10 +44,11 @@ open class AnimeWatchFragment : Fragment() {
     private lateinit var headerAdapter: AnimeWatchAdapter
     private lateinit var episodeAdapter: EpisodeAdapter
 
-    private var screenWidth = 0f
+    var screenWidth = 0f
     private var progress = View.VISIBLE
 
     var continueEp: Boolean = false
+    var loaded = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,20 +64,22 @@ open class AnimeWatchFragment : Fragment() {
         binding.animeSourceRecycler.updatePadding(bottom = binding.animeSourceRecycler.paddingBottom + navBarHeight)
         screenWidth = resources.displayMetrics.widthPixels.dp
 
-        val maxGridSize = (screenWidth / 92f).roundToInt()
+        var maxGridSize = (screenWidth / 100f).roundToInt()
+        maxGridSize += (maxGridSize%2)
 
-        println("max grid size = $maxGridSize")
+        println("max grid size = ${(maxGridSize.toFloat()).roundToInt()}")
 
         val gridLayoutManager = GridLayoutManager(requireContext(), maxGridSize)
 
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
-//                val style = binding.animeSourceRecycler.findViewHolderForAdapterPosition(position)?.itemViewType ?: style
+                val style = episodeAdapter.getItemViewType(position)
+
                 return when (position) {
                     0 -> maxGridSize
                     else -> when (style) {
                         0 -> maxGridSize
-                        1 -> (maxGridSize.toFloat() / 3).roundToInt()
+                        1 -> 2
                         2 -> 1
                         else -> maxGridSize
                     }
@@ -98,82 +100,89 @@ open class AnimeWatchFragment : Fragment() {
                 progress = View.GONE
                 binding.mediaInfoProgressBar.visibility = progress
 
-                model.watchSources = if (media.isAdult) HSources else AnimeSources
+                if(!loaded) {
+                    model.watchSources = if (media.isAdult) HSources else AnimeSources
 
-                headerAdapter = AnimeWatchAdapter(it, this, sources)
-                episodeAdapter = EpisodeAdapter(style, media, this)
+                    headerAdapter = AnimeWatchAdapter(it, this, sources)
+                    episodeAdapter = EpisodeAdapter(style, media, this)
 
-                binding.animeSourceRecycler.adapter = ConcatAdapter(headerAdapter, episodeAdapter)
+                    binding.animeSourceRecycler.adapter = ConcatAdapter(headerAdapter, episodeAdapter)
 
-                model.getEpisodes().observe(viewLifecycleOwner) { loadedEpisodes ->
-                    if (loadedEpisodes != null) {
-                        val episodes = loadedEpisodes[media.selected!!.source]
-                        if (episodes != null) {
-                            episodes.forEach { (i, episode) ->
-                                if (media.anime?.fillerEpisodes != null) {
-                                    if (media.anime!!.fillerEpisodes!!.containsKey(i)) {
-                                        episode.title = media.anime!!.fillerEpisodes!![i]?.title
-                                        episode.filler =
-                                            media.anime!!.fillerEpisodes!![i]?.filler ?: false
-                                    }
-                                }
-                                if (media.anime?.kitsuEpisodes != null) {
-                                    if (media.anime!!.kitsuEpisodes!!.containsKey(i)) {
-                                        episode.desc = media.anime!!.kitsuEpisodes!![i]?.desc
-                                        episode.title = media.anime!!.kitsuEpisodes!![i]?.title
-                                        episode.thumb =
-                                            media.anime!!.kitsuEpisodes!![i]?.thumb ?: media.cover
-                                    }
-                                }
-                            }
-                            media.anime?.episodes = episodes
-
-                            //CHIP GROUP
-                            val total = episodes.size
-                            val divisions = total.toDouble() / 10
-                            start = 0
-                            end = null
-                            val limit = when {
-                                (divisions < 25) -> 25
-                                (divisions < 50) -> 50
-                                else -> 100
-                            }
-                            headerAdapter.clearChips()
-                            if (total > limit) {
-                                val arr = media.anime!!.episodes!!.keys.toTypedArray()
-                                val stored = ceil((total).toDouble() / limit).toInt()
-                                val position = clamp(media.selected!!.chip, 0, stored - 1)
-                                val last =
-                                    if (position + 1 == stored) total else (limit * (position + 1))
-                                start = limit * (position)
-                                end = last - 1
-                                headerAdapter.updateChips(
-                                    limit,
-                                    arr,
-                                    (1..stored).toList().toTypedArray(),
-                                    position
-                                )
-                            }
-                            reload()
-                        }
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        awaitAll(
+                            async { model.loadKitsuEpisodes(media) },
+                            async { model.loadFillerEpisodes(media) }
+                        )
+                        model.loadEpisodes(media, media.selected!!.source)
                     }
+                    loaded = true
                 }
-
-                model.getKitsuEpisodes().observe(viewLifecycleOwner) { i ->
-                    media.anime?.kitsuEpisodes = i
-                }
-                model.getFillerEpisodes().observe(viewLifecycleOwner) { i ->
-                    media.anime?.fillerEpisodes = i
-                }
-
-                lifecycleScope.launch(Dispatchers.IO) {
-                    awaitAll(
-                        async { model.loadKitsuEpisodes(media) },
-                        async { model.loadFillerEpisodes(media) }
-                    )
-                    model.loadEpisodes(media, media.selected!!.source)
+                else{
+                    reload()
                 }
             }
+        }
+        model.getEpisodes().observe(viewLifecycleOwner) { loadedEpisodes ->
+            if (loadedEpisodes != null) {
+                val episodes = loadedEpisodes[media.selected!!.source]
+                if (episodes != null) {
+                    episodes.forEach { (i, episode) ->
+                        if (media.anime?.fillerEpisodes != null) {
+                            if (media.anime!!.fillerEpisodes!!.containsKey(i)) {
+                                episode.title = media.anime!!.fillerEpisodes!![i]?.title
+                                episode.filler =
+                                    media.anime!!.fillerEpisodes!![i]?.filler ?: false
+                            }
+                        }
+                        if (media.anime?.kitsuEpisodes != null) {
+                            if (media.anime!!.kitsuEpisodes!!.containsKey(i)) {
+                                episode.desc = media.anime!!.kitsuEpisodes!![i]?.desc
+                                episode.title = media.anime!!.kitsuEpisodes!![i]?.title
+                                episode.thumb =
+                                    media.anime!!.kitsuEpisodes!![i]?.thumb ?: media.cover
+                            }
+                        }
+                    }
+                    media.anime?.episodes = episodes
+
+                    //CHIP GROUP
+                    val total = episodes.size
+                    val divisions = total.toDouble() / 10
+                    start = 0
+                    end = null
+                    val limit = when {
+                        (divisions < 25) -> 25
+                        (divisions < 50) -> 50
+                        else -> 100
+                    }
+                    headerAdapter.clearChips()
+                    if (total > limit) {
+                        val arr = media.anime!!.episodes!!.keys.toTypedArray()
+                        val stored = ceil((total).toDouble() / limit).toInt()
+                        val position = MathUtils.clamp(media.selected!!.chip, 0, stored - 1)
+                        val last = if (position + 1 == stored) total else (limit * (position + 1))
+                        start = limit * (position)
+                        end = last - 1
+                        headerAdapter.updateChips(
+                            limit,
+                            arr,
+                            (1..stored).toList().toTypedArray(),
+                            position
+                        )
+                    }
+                    reload()
+                }
+            }
+        }
+
+        model.getKitsuEpisodes().observe(viewLifecycleOwner) { i ->
+            if(i!=null)
+                media.anime?.kitsuEpisodes = i
+        }
+
+        model.getFillerEpisodes().observe(viewLifecycleOwner) { i ->
+            if(i!=null)
+                media.anime?.fillerEpisodes = i
         }
     }
 
@@ -226,7 +235,7 @@ open class AnimeWatchFragment : Fragment() {
             arr = if (reverse) arr.reversed() as ArrayList<Episode> else arr
         }
         episodeAdapter.arr = arr
-        episodeAdapter.updateType(style,"Reload")
+        episodeAdapter.updateType(style)
         episodeAdapter.notifyItemRangeInserted(0, arr.size)
     }
 

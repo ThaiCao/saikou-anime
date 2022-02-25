@@ -1,6 +1,7 @@
 package ani.saikou.media
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -21,28 +22,43 @@ class SearchAdapter(private val activity: SearchActivity): RecyclerView.Adapter<
     }
 
     override fun onBindViewHolder(holder: SearchHeaderViewHolder, position: Int) {
-
         val binding = holder.binding
 
-        val adult = false
+        binding.searchBar.hint = activity.type
         val imm: InputMethodManager = activity.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE) as InputMethodManager
 
-        (if (activity.grid) binding.searchResultGrid else binding.searchResultList).alpha = 1f
-        (if (!activity.grid) binding.searchResultGrid else binding.searchResultList).alpha = 0.33f
+        when (activity.style){
+            0 -> {
+                binding.searchResultGrid.alpha = 1f
+                binding.searchResultList.alpha = 0.33f
+            }
+            1-> {
+                binding.searchResultList.alpha = 1f
+                binding.searchResultGrid.alpha = 0.33f
+            }
+        }
 
-        binding.searchGenre.setText(activity.intent.getStringExtra("genre")?:"")
+        var adult = activity.adult
+        var listOnly = activity.listOnly
+
+//        binding.searchBarText.setText(activity.searchText)
+
+        binding.searchAdultCheck.isChecked = adult
+        binding.searchList.isChecked = listOnly
+
+        binding.searchGenre.setText(activity.genre)
         binding.searchGenre.setAdapter(ArrayAdapter(binding.root.context, R.layout.item_dropdown,(Anilist.genres?: mapOf()).keys.toTypedArray()))
-        binding.searchSortBy.setText(activity.intent.getStringExtra("sortBy")?:"")
+        binding.searchSortBy.setText(activity.sortBy)
         binding.searchSortBy.setAdapter(ArrayAdapter(binding.root.context, R.layout.item_dropdown, Anilist.sortBy.keys.toTypedArray()))
+        binding.searchSortBy.setText(activity.tag)
         binding.searchTag.setAdapter(ArrayAdapter(binding.root.context, R.layout.item_dropdown, Anilist.tags?: arrayListOf()))
 
         fun searchTitle(){
             val search = if (binding.searchBarText.text.toString()!="") binding.searchBarText.text.toString() else null
-            val genre = if (binding.searchGenre.text.toString()!="") arrayListOf(binding.searchGenre.text.toString()) else null
+            val genre = if (binding.searchGenre.text.toString()!="") binding.searchGenre.text.toString() else null
             val sortBy = if (binding.searchSortBy.text.toString()!="") Anilist.sortBy[binding.searchSortBy.text.toString()] else null
-            val tag = if (binding.searchTag.text.toString()!="") arrayListOf(binding.searchTag.text.toString()) else null
-            activity.search(search,genre,tag,sortBy,adult)
-
+            val tag = if (binding.searchTag.text.toString()!="") binding.searchTag.text.toString() else null
+            activity.search(true,search,genre,tag,sortBy,adult,listOnly)
         }
 
         binding.searchBarText.doOnTextChanged { _, _, _, _ ->
@@ -75,18 +91,45 @@ class SearchAdapter(private val activity: SearchActivity): RecyclerView.Adapter<
         binding.searchResultGrid.setOnClickListener {
             it.alpha = 1f
             binding.searchResultList.alpha = 0.33f
-            activity.grid = true
-            saveData("searchGrid",true)
+            activity.style = 0
+            saveData("searchStyle",0)
             activity.recycler()
         }
         binding.searchResultList.setOnClickListener {
             it.alpha = 1f
             binding.searchResultGrid.alpha = 0.33f
-            activity.grid = false
-            saveData("searchGrid",false)
+            activity.style = 1
+            saveData("searchStyle",1)
             activity.recycler()
         }
 
+        if(Anilist.adult) {
+            binding.searchAdultCheck.visibility= View.VISIBLE
+            binding.searchAdultCheck.isChecked = adult
+            if(adult){
+                binding.searchGenreCont.visibility= View.GONE
+                binding.searchTagCont.visibility= View.VISIBLE
+            }
+            binding.searchAdultCheck.setOnCheckedChangeListener { _, b ->
+                adult = b
+                if(b && Anilist.tags!=null){
+                    binding.searchGenreCont.visibility= View.GONE
+                    binding.searchTagCont.visibility= View.VISIBLE
+                }else{
+                    binding.searchGenreCont.visibility= View.VISIBLE
+                    binding.searchTagCont.visibility= View.GONE
+                }
+                binding.searchGenre.setText("")
+                binding.searchTag.setText("")
+                searchTitle()
+            }
+        }else{
+            binding.searchAdultCheck.visibility= View.GONE
+        }
+        binding.searchList.setOnCheckedChangeListener { _, b ->
+            listOnly=b
+            searchTitle()
+        }
     }
 
     override fun getItemCount(): Int = 1

@@ -19,6 +19,8 @@ import ani.saikou.loadData
 import ani.saikou.loadImage
 import ani.saikou.media.Media
 import ani.saikou.media.SourceSearchDialogFragment
+import ani.saikou.px
+import com.google.android.material.chip.Chip
 
 class AnimeWatchAdapter(private val media: Media, private val fragment: AnimeWatchFragment,private val sources: Sources): RecyclerView.Adapter<AnimeWatchAdapter.ViewHolder>() {
 
@@ -114,24 +116,32 @@ class AnimeWatchAdapter(private val media: Media, private val fragment: AnimeWat
     @SuppressLint("SetTextI18n")
     fun updateChips(limit:Int, names : Array<String>, arr: Array<Int>, selected:Int=0){
         val binding = _binding
-        if(binding!=null)
-            for(position in arr.indices) {
+        if(binding!=null) {
+            val screenWidth = fragment.screenWidth.px
+            var select: Chip?=null
+            for (position in arr.indices) {
                 val last = if (position + 1 == arr.size) names.size else (limit * (position + 1))
                 val chip = ItemChipBinding.inflate(LayoutInflater.from(fragment.context), binding.animeSourceChipGroup, false).root
-                chip.isCheckable=true
-                fun selected(){
+                chip.isCheckable = true
+                fun selected() {
                     chip.isChecked = true
+                    binding.animeWatchChipScroll.smoothScrollTo((chip.left - screenWidth / 2) + (chip.width / 2), 0)
                 }
                 chip.text = "${names[limit * (position)]} - ${names[last - 1]}"
-                if(selected==position){
-                    selected()
-                }
+
                 chip.setOnClickListener {
                     selected()
                     fragment.onChipClicked(position, limit * (position), last - 1)
                 }
                 binding.animeSourceChipGroup.addView(chip)
+                if (selected == position) {
+                    selected()
+                    select = chip
+                }
             }
+            if(select!=null)
+                binding.animeWatchChipScroll.apply { post{ scrollTo((select.left - screenWidth / 2) + (select.width / 2), 0) } }
+        }
     }
 
     fun clearChips(){

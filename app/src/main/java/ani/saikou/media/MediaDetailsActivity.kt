@@ -9,6 +9,7 @@ import android.text.SpannableStringBuilder
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +31,7 @@ import ani.saikou.anime.AnimeWatchFragment
 import ani.saikou.anime.HWatchFragment
 import ani.saikou.databinding.ActivityMediaBinding
 import ani.saikou.manga.MangaSourceFragment
+import com.flaviofaria.kenburnsview.RandomTransitionGenerator
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
@@ -58,14 +60,11 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
 
         //Ui init
         initActivity(this)
-        this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_status)
+        this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_bg_inv)
 
         binding.mediaBanner.updateLayoutParams{ height += statusBarHeight }
-        binding.mediaBannerStatus.updateLayoutParams{ height += statusBarHeight }
-        binding.mediaBanner.translationY = -statusBarHeight.toFloat()
         binding.mediaClose.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
-        binding.mediaAppBar.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
-        binding.mediaCover.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
+        binding.mediaCollapsing.minimumHeight = statusBarHeight
         binding.mediaTab.updatePadding(bottom = navBarHeight)
 
         binding.mediaTitle.isSelected = true
@@ -76,6 +75,11 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         binding.mediaClose.setOnClickListener{
             onBackPressed()
         }
+
+        val adi = AccelerateDecelerateInterpolator()
+        val generator = RandomTransitionGenerator(20000, adi)
+        binding.mediaBanner.setTransitionGenerator(generator)
+
         val viewPager = binding.mediaViewPager
         tabLayout = binding.mediaTab
         viewPager.isUserInputEnabled = false
@@ -83,12 +87,12 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
 
         var media: Media = intent.getSerializableExtra("media") as Media
         media.selected = model.loadSelected(media.id)
-        println(media.selected)
+
         loadImage(media.cover,binding.mediaCoverImage)
         binding.mediaCoverImage.setOnClickListener{ openImage(media.cover) }
         loadImage(media.banner?:media.cover,binding.mediaBanner)
 //        binding.mediaBanner.setOnClickListener{ openImage(media.banner?:media.cover) }
-        loadImage(media.banner?:media.cover,binding.mediaBannerStatus)
+//        loadImage(media.banner?:media.cover,binding.mediaBannerStatus)
         binding.mediaTitle.text = media.userPreferredName
         binding.mediaTitleCollapse.text = media.userPreferredName
         binding.mediaStatus.text = media.status?:""
@@ -123,12 +127,9 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                         append(" / ")
                     }
                     bold { color(white) { append("${media.anime!!.totalEpisodes ?: "??"}") } }
-                    append(" Episodes")
                 }
-                else {
+                else
                     bold { color(white) {  append("${media.manga!!.totalChapters ?: "??"}") } }
-                    append(" Chapters")
-                }
             }
             binding.mediaTotal.text = text
         }
@@ -230,7 +231,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
 
     override fun onResume() {
         tabLayout.selectedItemId = idFromSelect()
-        binding.mediaBannerStatus.visibility=if (!isCollapsed) View.VISIBLE else View.GONE
         super.onResume()
     }
     //ViewPager
@@ -273,7 +273,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             ObjectAnimator.ofFloat(binding.mediaAccessContainer,"translationX",screenWidth).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaCover,"translationX",screenWidth).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaCollapseContainer,"translationX",screenWidth).setDuration(200).start()
-            binding.mediaBannerStatus.visibility=View.GONE
+            binding.mediaBanner.pause()
             this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_bg)
         }
         if (percentage <= percent && isCollapsed) {
@@ -282,8 +282,8 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             ObjectAnimator.ofFloat(binding.mediaAccessContainer,"translationX",0f).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaCover,"translationX",0f).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaCollapseContainer,"translationX",0f).setDuration(200).start()
-            binding.mediaBannerStatus.visibility=View.VISIBLE
-            this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_status)
+            binding.mediaBanner.resume()
+            this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_bg_inv)
         }
     }
     inner class PopImageButton(private val scope: CoroutineScope,private val activity: Activity,private val image:ImageView,private val media:Media,private val d1:Int,private val d2:Int,private val c1:Int,private val c2:Int,private val fav_or_not:Boolean? = null){

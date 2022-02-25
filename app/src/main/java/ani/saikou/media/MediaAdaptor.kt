@@ -40,7 +40,7 @@ class MediaAdaptor(
         }
 
     }
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (type){
             0->{

@@ -40,7 +40,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:clipToPadding="false"
-            android:padding="8dp">
+            android:padding="20dp">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/itemCompactCard"

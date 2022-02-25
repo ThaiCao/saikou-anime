@@ -29,7 +29,7 @@
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/animeTrendingViewPager"
                     android:layout_width="match_parent"
-                    android:layout_height="480dp" />
+                    android:layout_height="464dp" />
 
                 <LinearLayout
                     android:id="@+id/animeTitleContainer"
