@@ -11,6 +11,7 @@
     <color name="bg_white">#EEEEEE</color>
     <color name="bg">@color/bg_white</color>
     <color name="bg_opp">@color/bg_black</color>
+    <color name="fg">#A81F1F1F</color>
     <color name="nav_bg">#fff</color>
     <color name="nav_bg_inv">#00FFFFFF</color>
     <color name="nav_tab">#40000000</color>

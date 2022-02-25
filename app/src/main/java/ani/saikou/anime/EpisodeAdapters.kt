@@ -33,7 +33,7 @@ fun handleProgress(cont:LinearLayout,bar:View,empty:View,mediaId:Int,ep:String){
 }
 
 class EpisodeAdapter(
-    var type:Int,
+    private var type:Int,
     private val media: Media,
     private val fragment: AnimeWatchFragment,
     var arr: List<Episode> = arrayListOf()
@@ -49,65 +49,15 @@ class EpisodeAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
+        println("item $position - type $type")
         return type
     }
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder) {
-            is EpisodeCompactViewHolder -> {
-                val binding = holder.binding
-                setAnimation(fragment.requireContext(),holder.binding.root)
-                val ep = arr[position]
-                binding.itemEpisodeNumber.text = ep.number
-                binding.itemEpisodeFillerView.visibility = if (ep.filler)  View.VISIBLE else View.GONE
-                if (media.userProgress!=null) {
-                    if (ep.number.toFloatOrNull()?:9999f<=media.userProgress!!.toFloat())
-                        binding.root.alpha = 0.5f
-                    else{
-                        binding.root.setOnLongClickListener{
-                            updateAnilistProgress(media.id, ep.number)
-                            true
-                        }
-                    }
-                }
-                handleProgress(binding.itemEpisodeProgressCont,binding.itemEpisodeProgress,binding.itemEpisodeProgressEmpty,media.id,ep.number)
-            }
-            is EpisodeGridViewHolder -> {
-                val binding = holder.binding
-                setAnimation(fragment.requireContext(), binding.root)
-                val ep = arr[position]
-                Picasso.get().load(ep.thumb ?: media.cover).resize(400, 0)
-                    .into(binding.itemEpisodeImage)
-                binding.itemEpisodeNumber.text = ep.number
-                binding.itemEpisodeTitle.text = ep.title ?: media.name
-                if (ep.filler) {
-                    binding.itemEpisodeFiller.visibility = View.VISIBLE
-                    binding.itemEpisodeFillerView.visibility = View.VISIBLE
-                } else {
-                    binding.itemEpisodeFiller.visibility = View.GONE
-                    binding.itemEpisodeFillerView.visibility = View.GONE
-                }
-                if (media.userProgress != null) {
-                    if (ep.number.toFloatOrNull() ?: 9999f <= media.userProgress!!.toFloat()) {
-                        binding.root.alpha = 0.66f
-                        binding.itemEpisodeViewed.visibility = View.VISIBLE
-                    } else {
-                        binding.root.setOnLongClickListener {
-                            updateAnilistProgress(media.id, ep.number)
-                            true
-                        }
-                    }
-                }
-                handleProgress(
-                    binding.itemEpisodeProgressCont,
-                    binding.itemEpisodeProgress,
-                    binding.itemEpisodeProgressEmpty,
-                    media.id,
-                    ep.number
-                )
-            }
-            is EpisodeListViewHolder -> {
+        println("$position - ${holder.itemViewType} & $type")
+        when (holder.itemViewType) {
+            0 -> {
                 val binding = (holder as EpisodeListViewHolder).binding
                 setAnimation(fragment.requireContext(),holder.binding.root)
                 val ep = arr[position]
@@ -125,10 +75,11 @@ class EpisodeAdapter(
                 binding.itemEpisodeTitle.text = ep.title?:media.userPreferredName
                 if (media.userProgress!=null) {
                     if (ep.number.toFloatOrNull()?:9999f<=media.userProgress!!.toFloat()) {
-                        binding.root.alpha = 0.66f
+                        binding.root.alpha = 0.1f
+                        println("ep: ${ep.number} - watched, ${binding.root.alpha}")
                         binding.itemEpisodeViewed.visibility = View.VISIBLE
                     } else{
-                        binding.root.alpha=1f
+                        println("ep: ${ep.number} - not watched, ${binding.root.alpha}")
                         binding.itemEpisodeViewed.visibility = View.GONE
                         binding.root.setOnLongClickListener{
                             updateAnilistProgress(media.id, ep.number)
@@ -136,10 +87,63 @@ class EpisodeAdapter(
                         }
                     }
                 }else{
-                    binding.root.alpha=1f
                     binding.itemEpisodeViewed.visibility = View.GONE
                 }
 
+                handleProgress(binding.itemEpisodeProgressCont,binding.itemEpisodeProgress,binding.itemEpisodeProgressEmpty,media.id,ep.number)
+            }
+
+            1 -> {
+                val binding = (holder as EpisodeGridViewHolder).binding
+                setAnimation(fragment.requireContext(), binding.root)
+                val ep = arr[position]
+                Picasso.get().load(ep.thumb ?: media.cover).resize(400, 0)
+                    .into(binding.itemEpisodeImage)
+                binding.itemEpisodeNumber.text = ep.number
+                binding.itemEpisodeTitle.text = ep.title ?: media.name
+                if (ep.filler) {
+                    binding.itemEpisodeFiller.visibility = View.VISIBLE
+                    binding.itemEpisodeFillerView.visibility = View.VISIBLE
+                } else {
+                    binding.itemEpisodeFiller.visibility = View.GONE
+                    binding.itemEpisodeFillerView.visibility = View.GONE
+                }
+                if (media.userProgress != null) {
+                    if (ep.number.toFloatOrNull() ?: 9999f <= media.userProgress!!.toFloat()) {
+                        binding.root.alpha = 0.1f
+                        binding.itemEpisodeViewed.visibility = View.VISIBLE
+                    } else {
+                        binding.root.setOnLongClickListener {
+                            updateAnilistProgress(media.id, ep.number)
+                            true
+                        }
+                    }
+                }
+                handleProgress(
+                    binding.itemEpisodeProgressCont,
+                    binding.itemEpisodeProgress,
+                    binding.itemEpisodeProgressEmpty,
+                    media.id,
+                    ep.number
+                )
+            }
+
+            2 -> {
+                val binding = (holder as EpisodeCompactViewHolder).binding
+                setAnimation(fragment.requireContext(),holder.binding.root)
+                val ep = arr[position]
+                binding.itemEpisodeNumber.text = ep.number
+                binding.itemEpisodeFillerView.visibility = if (ep.filler)  View.VISIBLE else View.GONE
+                if (media.userProgress!=null) {
+                    if (ep.number.toFloatOrNull()?:9999f<=media.userProgress!!.toFloat())
+                        binding.root.alpha = 0.1f
+                    else{
+                        binding.root.setOnLongClickListener{
+                            updateAnilistProgress(media.id, ep.number)
+                            true
+                        }
+                    }
+                }
                 handleProgress(binding.itemEpisodeProgressCont,binding.itemEpisodeProgress,binding.itemEpisodeProgressEmpty,media.id,ep.number)
             }
         }
@@ -177,6 +181,11 @@ class EpisodeAdapter(
         }
     }
 
+    fun updateType(t:Int,name:String){
+
+        println("$type updated to $t - $name")
+        type = t
+    }
 }
 
 

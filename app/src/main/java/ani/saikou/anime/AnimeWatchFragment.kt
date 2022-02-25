@@ -65,13 +65,14 @@ open class AnimeWatchFragment : Fragment() {
         screenWidth = resources.displayMetrics.widthPixels.dp
 
         val maxGridSize = (screenWidth / 92f).roundToInt()
+
+        println("max grid size = $maxGridSize")
+
         val gridLayoutManager = GridLayoutManager(requireContext(), maxGridSize)
 
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
-                val style =
-                    binding.animeSourceRecycler.findViewHolderForAdapterPosition(position)?.itemViewType
-                        ?: 0
+//                val style = binding.animeSourceRecycler.findViewHolderForAdapterPosition(position)?.itemViewType ?: style
                 return when (position) {
                     0 -> maxGridSize
                     else -> when (style) {
@@ -90,6 +91,10 @@ open class AnimeWatchFragment : Fragment() {
             if (it != null) {
                 media = it
                 media.selected = model.loadSelected(media.id)
+
+                style = media.selected!!.recyclerStyle
+                reverse = media.selected!!.recyclerReversed
+
                 progress = View.GONE
                 binding.mediaInfoProgressBar.visibility = progress
 
@@ -221,7 +226,7 @@ open class AnimeWatchFragment : Fragment() {
             arr = if (reverse) arr.reversed() as ArrayList<Episode> else arr
         }
         episodeAdapter.arr = arr
-        episodeAdapter.type = style
+        episodeAdapter.updateType(style,"Reload")
         episodeAdapter.notifyItemRangeInserted(0, arr.size)
     }
 

@@ -5,6 +5,8 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -12,6 +14,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import androidx.core.text.bold
+import androidx.core.text.color
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
@@ -33,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+
 
 class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedListener {
 
@@ -64,10 +69,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         binding.mediaTab.updatePadding(bottom = navBarHeight)
 
         binding.mediaTitle.isSelected = true
-        binding.mediaTitleCollapse.isSelected = true
-        binding.mediaUserStatus.isSelected = true
-        binding.mediaAddToList.isSelected = true
-        binding.mediaTotal.isSelected = true
+
         mMaxScrollSize = binding.mediaAppBar.totalScrollRange
         binding.mediaAppBar.addOnOffsetChangedListener(this)
 
@@ -87,11 +89,12 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         loadImage(media.banner?:media.cover,binding.mediaBanner)
 //        binding.mediaBanner.setOnClickListener{ openImage(media.banner?:media.cover) }
         loadImage(media.banner?:media.cover,binding.mediaBannerStatus)
-        binding.mediaTitle.text=media.userPreferredName
-        binding.mediaTitleCollapse.text=media.userPreferredName
+        binding.mediaTitle.text = media.userPreferredName
+        binding.mediaTitleCollapse.text = media.userPreferredName
+        binding.mediaStatus.text = media.status?:""
 
         //Fav Button
-        if (Anilist.userid==null){
+        if (Anilist.userid!=null){
             if (media.isFav) binding.mediaFav.setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.ic_round_favorite_24))
             val favButton = PopImageButton(scope,this,binding.mediaFav,media,R.drawable.ic_round_favorite_24,R.drawable.ic_round_favorite_border_24,R.color.nav_tab,R.color.fav,true)
             binding.mediaFav.setOnClickListener {
@@ -101,21 +104,43 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         else{
             binding.mediaFav.visibility = View.GONE
         }
+
+        fun total(){
+            val text = SpannableStringBuilder().apply{
+                val white = ContextCompat.getColor(this@MediaDetailsActivity,R.color.bg_opp)
+                if(media.userStatus!=null) {
+                    append(if(media.anime!=null) "Watched " else "Read ")
+                    val typedValue = TypedValue()
+                    theme.resolveAttribute(R.attr.colorSecondary, typedValue, true)
+                    bold{ color(typedValue.data) { append("${media.userProgress}") } }
+                    append(" out of ")
+                }else{
+                    append("Total of ")
+                }
+                if(media.anime!=null) {
+                    if (media.anime!!.nextAiringEpisode != null) {
+                        bold { color(white) { append("${media.anime!!.nextAiringEpisode}") } }
+                        append(" / ")
+                    }
+                    bold { color(white) { append("${media.anime!!.totalEpisodes ?: "??"}") } }
+                    append(" Episodes")
+                }
+                else {
+                    bold { color(white) {  append("${media.manga!!.totalChapters ?: "??"}") } }
+                    append(" Chapters")
+                }
+            }
+            binding.mediaTotal.text = text
+        }
+
         fun progress() {
             if (media.userStatus != null) {
-                binding.mediaUserStatus.visibility = View.VISIBLE
-                binding.mediaUserProgress.visibility = View.VISIBLE
                 binding.mediaTotal.visibility = View.VISIBLE
-                binding.mediaAddToList.setText(R.string.list_editor)
-
-                binding.mediaUserStatus.text = media.userStatus
-                binding.mediaUserProgress.text = (media.userProgress ?: "~").toString()
+                binding.mediaAddToList.text = media.userStatus
             } else {
-                binding.mediaUserStatus.visibility = View.GONE
-                binding.mediaUserProgress.visibility = View.GONE
-                binding.mediaTotal.visibility = View.GONE
                 binding.mediaAddToList.setText(R.string.add)
             }
+            total()
             binding.mediaAddToList.setOnClickListener{
                 if (Anilist.userid!=null)
                     MediaListDialogFragment().show(supportFragmentManager, "dialog")
@@ -139,12 +164,10 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
 
         tabLayout.menu.clear()
         if (media.anime!=null){
-            binding.mediaTotal.text = if (media.anime!!.nextAiringEpisode!=null) " | "+(media.anime!!.nextAiringEpisode.toString()+" | "+(media.anime!!.totalEpisodes?:"~").toString()) else " | "+(media.anime!!.totalEpisodes?:"~").toString()
             viewPager.adapter = ViewPagerAdapter(supportFragmentManager, lifecycle,true,adult)
             tabLayout.inflateMenu(R.menu.anime_menu_detail)
         }
         else if (media.manga!=null){
-            binding.mediaTotal.text = " | "+(media.manga!!.totalChapters?:"~").toString()
             viewPager.adapter = ViewPagerAdapter(supportFragmentManager, lifecycle,false,adult)
             tabLayout.inflateMenu(R.menu.manga_menu_detail)
             anime = false
@@ -248,9 +271,8 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             isCollapsed = true
             ObjectAnimator.ofFloat(binding.mediaTitle,"translationX",0f).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaAccessContainer,"translationX",screenWidth).setDuration(200).start()
-            ObjectAnimator.ofFloat(binding.mediaAddToList,"translationX",screenWidth).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaCover,"translationX",screenWidth).setDuration(200).start()
-            ObjectAnimator.ofFloat(binding.mediaTitleCollapse,"translationX",screenWidth).setDuration(200).start()
+            ObjectAnimator.ofFloat(binding.mediaCollapseContainer,"translationX",screenWidth).setDuration(200).start()
             binding.mediaBannerStatus.visibility=View.GONE
             this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_bg)
         }
@@ -259,8 +281,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             ObjectAnimator.ofFloat(binding.mediaTitle,"translationX",-screenWidth).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaAccessContainer,"translationX",0f).setDuration(200).start()
             ObjectAnimator.ofFloat(binding.mediaCover,"translationX",0f).setDuration(200).start()
-            ObjectAnimator.ofFloat(binding.mediaAddToList,"translationX",0f).setDuration(200).start()
-            ObjectAnimator.ofFloat(binding.mediaTitleCollapse,"translationX",0f).setDuration(200).start()
+            ObjectAnimator.ofFloat(binding.mediaCollapseContainer,"translationX",0f).setDuration(200).start()
             binding.mediaBannerStatus.visibility=View.VISIBLE
             this.window.statusBarColor = ContextCompat.getColor(this, R.color.nav_status)
         }
