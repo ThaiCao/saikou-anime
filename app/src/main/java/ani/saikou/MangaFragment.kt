@@ -131,7 +131,7 @@ class MangaFragment : Fragment() {
             if (it != null) {
                 binding.mangaTrendingProgressBar.visibility = View.GONE
                 binding.mangaTrendingViewPager.adapter =
-                    MediaAdaptor(2,it, requireActivity(),viewPager = binding.mangaTrendingViewPager)
+                    MediaAdaptor(1,it, requireActivity(),viewPager = binding.mangaTrendingViewPager)
                 binding.mangaTrendingViewPager.offscreenPageLimit = 3
                 binding.mangaTrendingViewPager.getChildAt(0).overScrollMode =
                     RecyclerView.OVER_SCROLL_NEVER

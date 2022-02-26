@@ -57,7 +57,7 @@ class CharacterDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChang
         loadImage(character.banner,binding.characterBanner)
         loadImage(character.banner,binding.characterBannerStatus)
         loadImage(character.image,binding.characterCoverImage)
-        binding.characterCoverImage.setOnClickListener{ (openImage(character.image)) }
+        binding.characterCoverImage.setOnClickListener{ (openLinkInBrowser(character.image)) }
 //        binding.characterBanner.setOnClickListener{ openImage(character.banner) }
 
         model.getCharacter().observe(this) {
