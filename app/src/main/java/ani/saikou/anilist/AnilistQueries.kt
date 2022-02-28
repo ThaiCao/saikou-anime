@@ -40,6 +40,7 @@ fun executeQuery(query:String, variables:String="",force:Boolean=false,useToken:
 data class SearchResults(
     val type: String,
     var isAdult: Boolean,
+    var onList: Boolean,
     var perPage:Int?=null,
     var search: String? = null,
     var sort: String? = null,
@@ -543,6 +544,7 @@ class AnilistQueries{
         tags: ArrayList<String>? = null,
         format:String?=null,
         isAdult:Boolean=false,
+        onList: Boolean=false,
         id: Int?=null,
         hd:Boolean=false
     ): SearchResults? {
@@ -588,20 +590,23 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
 }
         """.replace("\n", " ").replace("""  """, "")
         val variables = """{\"type\":\"$type\",\"isAdult\":$isAdult
+            ${if (onList) """,\"onList\":$onList""" else ""}
             ${if (page != null) """,\"page\":\"$page\"""" else ""}
             ${if (id != null) """,\"id\":\"$id\"""" else ""}
             ${if (search != null) """,\"search\":\"$search\"""" else ""}
-            ${if (sort != null) """,\"sort\":\"$sort\"""" else ""}
+            ${if (Anilist.sortBy.containsKey(sort)) """,\"sort\":\"${Anilist.sortBy[sort]}\"""" else ""}
             ${if (format != null) """,\"format\":\"$format\"""" else ""}
             ${if (genres?.isNotEmpty() == true) """,\"genres\":\"${genres[0]}\"""" else ""}
             ${if (tags?.isNotEmpty() == true) """,\"tags\":\"${tags[0]}\"""" else ""}
             }""".replace("\n", " ").replace("""  """, "")
         val response = executeQuery(query, variables, true)
+        println(variables)
         if(response!=null){
             val a = if(response["data"]!=JsonNull) response["data"] else null
             val pag = a?.jsonObject?.get("Page") ?:return null
             val responseArray = arrayListOf<Media>()
             pag.jsonObject["media"]!!.jsonArray.forEach { i ->
+                val userStatus = if (i.jsonObject["mediaListEntry"] != JsonNull) i.jsonObject["mediaListEntry"]!!.jsonObject["status"].toString().trim('"') else null
                 responseArray.add(
                     Media(
                         id = i.jsonObject["id"].toString().toInt(),
@@ -615,7 +620,8 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
                         isFav = i.jsonObject["isFavourite"].toString() == "true",
                         userProgress = if (i.jsonObject["mediaListEntry"] != JsonNull) i.jsonObject["mediaListEntry"]!!.jsonObject["progress"].toString().toInt() else null,
                         userScore = if (i.jsonObject["mediaListEntry"] != JsonNull) i.jsonObject["mediaListEntry"]!!.jsonObject["score"].toString().toInt() else 0,
-                        userStatus = if (i.jsonObject["mediaListEntry"] != JsonNull) i.jsonObject["mediaListEntry"]!!.jsonObject["status"].toString().trim('"') else null,
+                        userStatus = userStatus,
+                        relation = if(onList) userStatus else null,
                         meanScore = if (i.jsonObject["meanScore"].toString().trim('"') != "null") i.jsonObject["meanScore"].toString().toInt() else null,
                         anime = if (i.jsonObject["type"].toString().trim('"') == "ANIME") Anime(totalEpisodes = if (i.jsonObject["episodes"] != JsonNull) i.jsonObject["episodes"].toString().toInt() else null, nextAiringEpisode = if (i.jsonObject["nextAiringEpisode"] != JsonNull) i.jsonObject["nextAiringEpisode"]!!.jsonObject["episode"].toString().toInt() - 1 else null) else null,
                         manga = if (i.jsonObject["type"].toString().trim('"') == "MANGA") Manga(totalChapters = if (i.jsonObject["chapters"] != JsonNull) i.jsonObject["chapters"].toString().toInt() else null) else null,
@@ -628,6 +634,7 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
                 search = search,
                 sort = sort,
                 isAdult = isAdult,
+                onList = onList,
                 genres = genres,
                 tags = tags,
                 format = format,

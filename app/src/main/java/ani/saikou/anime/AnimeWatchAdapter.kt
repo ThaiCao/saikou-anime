@@ -166,7 +166,7 @@ class AnimeWatchAdapter(private val media: Media, private val fragment: AnimeWat
                         }
                     }
                     val ep = media.anime.episodes!![continueEp]!!
-                    loadImage(ep.thumb?:media.banner?:media.cover,binding.itemEpisodeImage)
+                    binding.itemEpisodeImage.loadImage(ep.thumb?:media.banner?:media.cover)
                     if(ep.filler) binding.itemEpisodeFillerView.visibility = View.VISIBLE
                     binding.animeSourceContinueText.text = "Continue : Episode ${ep.number}${if(ep.filler) " - Filler" else ""}${if(ep.title!=null) "\n${ep.title}" else ""}"
                     binding.animeSourceContinue.setOnClickListener {

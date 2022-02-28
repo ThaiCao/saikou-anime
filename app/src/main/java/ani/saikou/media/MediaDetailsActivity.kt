@@ -88,9 +88,9 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         var media: Media = intent.getSerializableExtra("media") as Media
         media.selected = model.loadSelected(media.id)
 
-        loadImage(media.cover,binding.mediaCoverImage)
+        binding.mediaCoverImage.loadImage(media.cover)
         binding.mediaCoverImage.setOnClickListener{ openLinkInBrowser(media.cover) }
-        loadImage(media.banner?:media.cover,binding.mediaBanner)
+        binding.mediaBanner.loadImage(media.banner?:media.cover,400)
 //        binding.mediaBanner.setOnClickListener{ openImage(media.banner?:media.cover) }
 //        loadImage(media.banner?:media.cover,binding.mediaBannerStatus)
         binding.mediaTitle.text = media.userPreferredName
@@ -143,8 +143,10 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             }
             total()
             binding.mediaAddToList.setOnClickListener{
-                if (Anilist.userid!=null)
-                    MediaListDialogFragment().show(supportFragmentManager, "dialog")
+                if (Anilist.userid!=null) {
+                    if (supportFragmentManager.findFragmentByTag("dialog") == null)
+                        MediaListDialogFragment().show(supportFragmentManager, "dialog")
+                }
                 else toastString("Please Login with Anilist!")
             }
         }
@@ -304,7 +306,10 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                     if (fav_or_not) {
                         media.isFav = !media.isFav
                         clicked = media.isFav
-                        scope.launch(Dispatchers.IO) { Anilist.mutation.toggleFav(media.anime!=null,media.id) }
+                        scope.launch(Dispatchers.IO) {
+                            Anilist.mutation.toggleFav(media.anime!=null,media.id)
+                            Refresh.all()
+                        }
                     }
                 }
                 else clicked = !clicked

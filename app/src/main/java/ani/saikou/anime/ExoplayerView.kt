@@ -43,7 +43,7 @@ import com.google.android.exoplayer2.trackselection.MappingTrackSelector
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.CaptionStyleCompat
 import com.google.android.exoplayer2.ui.CaptionStyleCompat.EDGE_TYPE_OUTLINE
-import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.ui.TrackSelectionDialogBuilder
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
@@ -66,7 +66,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private lateinit var playbackParameters: PlaybackParameters
     private lateinit var mediaItem : MediaItem
 
-    private lateinit var playerView: PlayerView
+    private lateinit var playerView: StyledPlayerView
     private lateinit var exoSource: ImageButton
     private lateinit var exoRotate: ImageButton
     private lateinit var exoQuality: ImageButton
@@ -247,7 +247,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             }
         }
         fun handleController(){
-            if(playerView.isControllerVisible){
+            if(playerView.isControllerFullyVisible){
                 playerView.hideController()
             }else{
                 playerView.showController()

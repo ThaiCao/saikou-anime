@@ -15,9 +15,7 @@
         android:id="@+id/itemCompactBanner"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.75"
         android:scaleType="centerCrop"
-        android:transitionName="mediaCover"
         tools:ignore="ContentDescription,ImageContrastCheck"
         tools:srcCompat="@tools:sample/backgrounds/scenic[1]" />
 

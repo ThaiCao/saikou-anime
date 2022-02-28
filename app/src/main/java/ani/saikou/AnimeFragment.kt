@@ -92,7 +92,7 @@ class AnimeFragment : Fragment() {
             Refresh.activity[this.hashCode()]!!.postValue(true)
         }
         if(Anilist.avatar!=null){
-            loadImage(Anilist.avatar,binding.animeUserAvatar)
+            binding.animeUserAvatar.loadImage(Anilist.avatar)
             binding.animeUserAvatar.scaleType = ImageView.ScaleType.FIT_CENTER
         }
 
@@ -111,8 +111,8 @@ class AnimeFragment : Fragment() {
             binding.animeSearchBarText.performClick()
         }
 
-        loadImage("https://bit.ly/31bsIHq",binding.animeGenreImage)
-        loadImage( "https://bit.ly/2ZGfcuG",binding.animeTopScoreImage)
+        binding.animeGenreImage.loadImage("https://bit.ly/31bsIHq")
+        binding.animeTopScoreImage.loadImage( "https://bit.ly/2ZGfcuG")
 
         binding.animeGenre.setOnClickListener {
             ContextCompat.startActivity(
