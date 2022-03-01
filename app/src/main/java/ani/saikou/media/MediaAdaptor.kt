@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -21,6 +22,11 @@ import ani.saikou.databinding.ItemMediaPageBinding
 import ani.saikou.loadImage
 import ani.saikou.setAnimation
 import ani.saikou.setSafeOnClickListener
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import com.flaviofaria.kenburnsview.RandomTransitionGenerator
+import jp.wasabeef.glide.transformations.BlurTransformation
 import java.io.Serializable
 
 
@@ -100,7 +106,13 @@ class MediaAdaptor(
                 val media = mediaList?.get(position)
                 if(media!=null) {
                     b.itemCompactImage.loadImage(media.cover)
-                    b.itemCompactBanner.loadImage(media.banner?:media.cover,400)
+                    b.itemCompactBanner.setTransitionGenerator(RandomTransitionGenerator(20000, AccelerateDecelerateInterpolator()))
+                    Glide.with(b.itemCompactBanner)
+                        .load(media.banner?:media.cover)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .apply(RequestOptions.bitmapTransform(BlurTransformation(2, 3)))
+                        .override(400).into(b.itemCompactBanner)
+
                     b.itemCompactOngoing.visibility = if (media.status=="RELEASING")  View.VISIBLE else View.GONE
                     b.itemCompactTitle.text = media.userPreferredName
                     b.itemCompactScore.text = ((if(media.userScore==0) (media.meanScore?:0) else media.userScore)/10.0).toString()

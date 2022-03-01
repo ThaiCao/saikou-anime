@@ -134,7 +134,7 @@ class MangaFragment : Fragment() {
                 binding.mangaTrendingViewPager.offscreenPageLimit = 3
                 binding.mangaTrendingViewPager.getChildAt(0).overScrollMode =
                     RecyclerView.OVER_SCROLL_NEVER
-                binding.mangaTrendingViewPager.setPageTransformer(DepthPageTransformer())
+                binding.mangaTrendingViewPager.setPageTransformer(MediaPageTransformer())
                 trendHandler = Handler(Looper.getMainLooper())
                 trendRun = Runnable {
                     if (_binding != null) binding.mangaTrendingViewPager.currentItem =

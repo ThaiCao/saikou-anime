@@ -461,6 +461,11 @@ abstract class DoubleClickListener : GestureDetector.SimpleOnGestureListener() {
         return super.onSingleTapUp(e)
     }
 
+    override fun onLongPress(e: MotionEvent?) {
+        onLongPress(e)
+        super.onLongPress(e)
+    }
+
     override fun onDoubleTap(e: MotionEvent?): Boolean {
         processDoubleClickEvent(e)
         return super.onDoubleTap(e)
@@ -493,9 +498,9 @@ abstract class DoubleClickListener : GestureDetector.SimpleOnGestureListener() {
         onDoubleClick(e) //Do what ever u want on Double Click
     }
 
-    abstract fun onSingleClick(event: MotionEvent?)
+    open fun onSingleClick(event: MotionEvent?) {}
     abstract fun onDoubleClick(event: MotionEvent?)
-    abstract fun onScrollYClick(y:Float)
+    open fun onScrollYClick(y:Float) {}
 }
 
 fun View.circularReveal(x: Int, y: Int,time:Long) {
@@ -555,29 +560,20 @@ fun updateAnilistProgress(id:Int,number:String){
     }
 }
 
-class DepthPageTransformer : ViewPager2.PageTransformer {
-
-    override fun transformPage(view: View, position: Float) {
-        view.apply {
-            val pageWidth = width
-            when {
-                position < -1 -> { // [-Infinity,-1)
-                    alpha = 0f
-                }
-                position <= 0 -> { // [-1,0]
-                    alpha = 1f
-                    translationZ = position
-                    translationX = pageWidth * -(position/2)
-                }
-                position <= 1 -> { // [0,1]
-                    alpha = 1f
-                    translationZ = 1f
-                    translationX = 0f
-                }
-                else -> { // (1,+Infinity]
-                    alpha = 0f
-                }
-            }
+class MediaPageTransformer : ViewPager2.PageTransformer {
+    private fun parallax(view:View, position: Float, speed:Float){
+        if (position > -1 && position < 1) {
+            val width = view.width.toFloat()
+            view.translationX = -(position * width * speed)
         }
     }
+
+    override fun transformPage(view: View, position: Float) {
+
+        val bannerContainer = view.findViewById<View>(R.id.itemCompactBanner)
+        parallax(bannerContainer,position,0.8f)
+        val titleContainer = view.findViewById<View>(R.id.itemCompactTitleContainer)
+        parallax(titleContainer,position,0.5f)
+    }
 }
+

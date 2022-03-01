@@ -265,7 +265,6 @@ class AnilistQueries{
             if (list != null && list.isNotEmpty()) {
                 list.forEach { li->
                     li.jsonObject["entries"]!!.jsonArray.reversed().forEach {
-//                        println("$type = "+it.jsonObject["media"]!!.jsonObject["title"]!!.jsonObject["english"].toString().trim('"').replace("\\\"", "\""))
                         map[it.jsonObject["media"]!!.jsonObject["id"].toString().toInt()] =
                             Media(
                                 id = it.jsonObject["media"]!!.jsonObject["id"].toString().toInt(),
@@ -600,7 +599,6 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
             ${if (tags?.isNotEmpty() == true) """,\"tags\":\"${tags[0]}\"""" else ""}
             }""".replace("\n", " ").replace("""  """, "")
         val response = executeQuery(query, variables, true)
-        println(variables)
         if(response!=null){
             val a = if(response["data"]!=JsonNull) response["data"] else null
             val pag = a?.jsonObject?.get("Page") ?:return null
