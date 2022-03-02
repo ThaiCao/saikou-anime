@@ -11,6 +11,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.delay
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
+import org.jsoup.Connection
 import org.jsoup.Jsoup
 import java.io.Serializable
 import java.net.UnknownHostException
@@ -24,7 +25,7 @@ fun executeQuery(query:String, variables:String="",force:Boolean=false,useToken:
             .ignoreContentType(true).ignoreHttpErrors(true)
         if (Anilist.token!=null || force) {
             if (Anilist.token!=null && useToken) set.header("Authorization", "Bearer ${Anilist.token}")
-            val json = set.post().body().text()
+            val json = set.method(Connection.Method.POST).execute().body().toString()
             logger("JSON : $json", false)
             val js = Json.decodeFromString<JsonObject>(json)
             if(js["data"]!=JsonNull)
@@ -313,7 +314,8 @@ class AnilistQueries{
         val response = executeQuery(""" { Page(page: 1, perPage:30) { pageInfo { total currentPage hasNextPage } recommendations(sort: RATING_DESC, onList: true) { rating userRating mediaRecommendation { id isAdult mediaListEntry {progress score(format:POINT_100) status} chapters isFavourite episodes nextAiringEpisode {episode} meanScore isFavourite title {english romaji userPreferred } type status(version: 2) bannerImage coverImage { large } } } } } """)
         val responseArray = arrayListOf<Media>()
         val ids = arrayListOf<Int>()
-        if (response?.get("data")!=null && response["data"] !=JsonNull) response["data"]!!.jsonObject["Page"]!!.jsonObject["recommendations"]!!.jsonArray.reversed().forEach{
+        if (response?.get("data")!=null && response["data"] !=JsonNull)
+            response["data"]?.jsonObject?.get("Page")?.jsonObject?.get("recommendations")?.jsonArray?.reversed()?.forEach{
             val json = it.jsonObject["mediaRecommendation"]
             if(json!=null && json!=JsonNull){
                 val id =  json.jsonObject["id"]?.toString()?.toInt()?:return responseArray
@@ -599,11 +601,12 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
             ${if (tags?.isNotEmpty() == true) """,\"tags\":\"${tags[0]}\"""" else ""}
             }""".replace("\n", " ").replace("""  """, "")
         val response = executeQuery(query, variables, true)
+        println(variables)
         if(response!=null){
             val a = if(response["data"]!=JsonNull) response["data"] else null
             val pag = a?.jsonObject?.get("Page") ?:return null
             val responseArray = arrayListOf<Media>()
-            pag.jsonObject["media"]!!.jsonArray.forEach { i ->
+            pag.jsonObject["media"]?.jsonArray?.forEach { i ->
                 val userStatus = if (i.jsonObject["mediaListEntry"] != JsonNull) i.jsonObject["mediaListEntry"]!!.jsonObject["status"].toString().trim('"') else null
                 responseArray.add(
                     Media(

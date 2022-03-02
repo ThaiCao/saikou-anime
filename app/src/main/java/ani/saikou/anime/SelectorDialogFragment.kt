@@ -113,7 +113,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
                         }
                         fun load() {
                             binding.selectorProgressBar.visibility = View.GONE
-                            media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!] = episode!!
+                            media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode?:""] = episode!!
                             binding.selectorRecyclerView.layoutManager = LinearLayoutManager(
                                 requireActivity(),
                                 LinearLayoutManager.VERTICAL,
@@ -160,7 +160,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
         val keys = links.keys.toList()
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StreamViewHolder = StreamViewHolder(ItemStreamBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         override fun onBindViewHolder(holder: StreamViewHolder, position: Int) {
-            val server = if(position<keys.size) links[keys[position]]!!.server else null
+            val server = if(position<keys.size) links[keys[position]]?.server else null
             if(server!=null) {
                 holder.binding.streamName.text = server
                 holder.binding.streamRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -201,8 +201,8 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
         private inner class UrlViewHolder(val binding: ItemUrlBinding) : RecyclerView.ViewHolder(binding.root) {
             init {
                 itemView.setOnClickListener {
-                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedStream = stream
-                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedQuality = bindingAdapterPosition
+                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]?.selectedStream = stream
+                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]?.selectedQuality = bindingAdapterPosition
                     if(makeDefault){
                         media!!.selected!!.stream = stream
                         media!!.selected!!.quality = bindingAdapterPosition

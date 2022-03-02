@@ -246,19 +246,25 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         var prevSliderLocked = sliderLocked
         var locked = false
         val container = playerView.findViewById<View>(R.id.exo_controller_cont)
+        val screen = playerView.findViewById<View>(R.id.exo_black_screen)
         val lockButton = playerView.findViewById<ImageButton>(R.id.exo_unlock)
+        val timeline = playerView.findViewById<ExtendedTimeBar>(R.id.exo_progress)
         playerView.findViewById<ImageButton>(R.id.exo_lock).setOnClickListener{
             prevSliderLocked = sliderLocked
             sliderLocked = true
             locked = true
+            screen.visibility = View.GONE
             container.visibility = View.GONE
             lockButton.visibility = View.VISIBLE
+            timeline.setForceDisabled(true)
         }
         lockButton.setOnClickListener {
             sliderLocked = prevSliderLocked
             locked = false
+            screen.visibility = View.VISIBLE
             container.visibility = View.VISIBLE
             it.visibility = View.GONE
+            timeline.setForceDisabled(false)
         }
 
         //+85 Button

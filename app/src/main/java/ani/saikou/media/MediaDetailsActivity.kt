@@ -98,7 +98,8 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                 binding.mediaBanner.restart()
                 binding.mediaBanner.performClick()
             }
-            override fun onLongPress(e: MotionEvent?) {
+
+            override fun onLongClick(event: MotionEvent?) {
                 openLinkInBrowser(media.banner?:media.cover)
                 binding.mediaBanner.performClick()
             }

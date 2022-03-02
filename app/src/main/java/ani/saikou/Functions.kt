@@ -46,6 +46,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import com.google.android.exoplayer2.ui.DefaultTimeBar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.CoroutineScope
@@ -99,13 +101,17 @@ fun logger(e:Any?,print:Boolean=true){
 }
 
 fun saveData(fileName:String,data:Any,activity: Activity?=null){
-    val a = activity?: currActivity()
-    if (a!=null) {
-        val fos: FileOutputStream = a.openFileOutput(fileName, Context.MODE_PRIVATE)
-        val os = ObjectOutputStream(fos)
-        os.writeObject(data)
-        os.close()
-        fos.close()
+    try{
+        val a = activity?: currActivity()
+        if (a!=null) {
+            val fos: FileOutputStream = a.openFileOutput(fileName, Context.MODE_PRIVATE)
+            val os = ObjectOutputStream(fos)
+            os.writeObject(data)
+            os.close()
+            fos.close()
+        }
+    }catch (e:Exception){
+        toastString(e.toString())
     }
 }
 
@@ -272,11 +278,11 @@ fun toastString(s: String?){
 class ZoomOutPageTransformer(private val bottom:Boolean=false) : ViewPager2.PageTransformer {
     override fun transformPage(view: View, position: Float) {
         if (position == 0.0f) {
-            var cy = 0
-            if (bottom) cy = view.height
+//            var cy = 0
+//            if (bottom) cy = view.height
             setAnimation(view.context,view,300, floatArrayOf(1.3f,1f,1.3f,1f))
             ObjectAnimator.ofFloat(view,"alpha",0f,1.0f).setDuration(200).start()
-            ViewAnimationUtils.createCircularReveal(view, view.width / 2, cy, 0f, max(view.height, view.width)*1.5f).setDuration(400).start()
+//            ViewAnimationUtils.createCircularReveal(view, view.width / 2, cy, 0f, max(view.height, view.width)*1.5f).setDuration(400).start()
         }
     }
 }
@@ -375,8 +381,12 @@ fun String.findBetween(a:String,b:String):String?{
 
 fun ImageView.loadImage(url:String?,size:Int=0,headers: MutableMap<String, String>?=null){
     if(url!=null || url!="") {
-        val glideUrl = GlideUrl(url){ headers?: mutableMapOf() }
-        Glide.with(this).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.ALL).transition(withCrossFade()).override(size).into(this)
+        try{
+            val glideUrl = GlideUrl(url){ headers?: mutableMapOf() }
+            Glide.with(this).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.ALL).transition(withCrossFade()).override(size).into(this)
+        }catch (e:Exception){
+            logger(e.localizedMessage)
+        }
     }
 }
 
@@ -452,6 +462,24 @@ class FTActivityLifecycleCallbacks: Application.ActivityLifecycleCallbacks {
     override fun onActivityDestroyed(p0: Activity) {}
 }
 
+@SuppressLint("ViewConstructor")
+class ExtendedTimeBar(
+    context: Context,
+    attrs: AttributeSet?
+) : DefaultTimeBar(context, attrs) {
+    private var enabled = false
+    private var forceDisabled = false
+    override fun setEnabled(enabled: Boolean) {
+        this.enabled = enabled
+        super.setEnabled(!forceDisabled && this.enabled)
+    }
+
+    fun setForceDisabled(forceDisabled: Boolean) {
+        this.forceDisabled = forceDisabled
+        isEnabled = enabled
+    }
+}
+
 abstract class DoubleClickListener : GestureDetector.SimpleOnGestureListener() {
     private var timer: Timer? = null //at class level;
     private val delay:Long = 400
@@ -462,7 +490,7 @@ abstract class DoubleClickListener : GestureDetector.SimpleOnGestureListener() {
     }
 
     override fun onLongPress(e: MotionEvent?) {
-        onLongPress(e)
+        processLongClickEvent(e)
         super.onLongPress(e)
     }
 
@@ -498,9 +526,18 @@ abstract class DoubleClickListener : GestureDetector.SimpleOnGestureListener() {
         onDoubleClick(e) //Do what ever u want on Double Click
     }
 
+    private fun processLongClickEvent(e: MotionEvent?) {
+        if (timer != null) {
+            timer!!.cancel() //Cancels Running Tasks or Waiting Tasks.
+            timer!!.purge() //Frees Memory by erasing cancelled Tasks.
+        }
+        onLongClick(e) //Do what ever u want on Double Click
+    }
+
     open fun onSingleClick(event: MotionEvent?) {}
     abstract fun onDoubleClick(event: MotionEvent?)
     open fun onScrollYClick(y:Float) {}
+    open fun onLongClick(event:MotionEvent?) {}
 }
 
 fun View.circularReveal(x: Int, y: Int,time:Long) {
@@ -508,13 +545,17 @@ fun View.circularReveal(x: Int, y: Int,time:Long) {
 }
 
 fun openLinkInBrowser(link:String?){
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-    currActivity()?.startActivity(intent)
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+        currActivity()?.startActivity(intent)
+    }catch (e:Exception){
+        toastString(e.toString())
+    }
 }
 
 fun download(activity: Activity, episode:Episode, animeTitle:String){
     val manager = activity.getSystemService(AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
-    val stream = episode.streamLinks[episode.selectedStream]!!
+    val stream = episode.streamLinks[episode.selectedStream]?:return
     val uri = Uri.parse(stream.quality[episode.selectedQuality].url)
     val request: DownloadManager.Request = DownloadManager.Request(uri)
     if(stream.headers!=null) {
@@ -577,3 +618,10 @@ class MediaPageTransformer : ViewPager2.PageTransformer {
     }
 }
 
+class NoGestureSubsamplingImageView(context: Context?, attr: AttributeSet?) :
+    SubsamplingScaleImageView(context, attr) {
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        return false
+    }
+}

@@ -109,9 +109,9 @@ class MediaAdaptor(
                     b.itemCompactBanner.setTransitionGenerator(RandomTransitionGenerator(20000, AccelerateDecelerateInterpolator()))
                     Glide.with(b.itemCompactBanner)
                         .load(media.banner?:media.cover)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL).override(400)
                         .apply(RequestOptions.bitmapTransform(BlurTransformation(2, 3)))
-                        .override(400).into(b.itemCompactBanner)
+                        .into(b.itemCompactBanner)
 
                     b.itemCompactOngoing.visibility = if (media.status=="RELEASING")  View.VISIBLE else View.GONE
                     b.itemCompactTitle.text = media.userPreferredName
@@ -127,8 +127,9 @@ class MediaAdaptor(
                     }
                     @SuppressLint("NotifyDataSetChanged")
                     if (position == mediaList!!.size-2 && viewPager!=null) viewPager.post {
+                        val size = mediaList.size
                         mediaList.addAll(mediaList)
-                        notifyDataSetChanged()
+                        notifyItemRangeInserted(size-1,mediaList.size)
                     }
                 }
             }
