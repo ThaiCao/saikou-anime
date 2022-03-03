@@ -138,8 +138,10 @@ class MangaFragment : Fragment() {
                 if(mangaPageAdapter.trendingViewPager!=null) {
                     mangaPageAdapter.updateHeight()
                     model.getTrending().observe(viewLifecycleOwner) {
-                        if (it != null)
+                        if (it != null){
                             mangaPageAdapter.updateTrending(MediaAdaptor(2, it, requireActivity(), viewPager = mangaPageAdapter.trendingViewPager))
+                            mangaPageAdapter.updateAvatar()
+                        }
                     }
                 }
                 binding.mangaPageScrollTop.translationY = -(navBarHeight + bottomBar.height + bottomBar.marginBottom).toFloat()

@@ -37,10 +37,7 @@ class AnimePageAdapter: RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHolde
 
         binding.animeTitleContainer.updatePadding(top = statusBarHeight)
 
-        if (Anilist.avatar != null) {
-            binding.animeUserAvatar.loadImage(Anilist.avatar)
-            binding.animeUserAvatar.scaleType = ImageView.ScaleType.FIT_CENTER
-        }
+        updateAvatar()
 
         binding.animeSearchBar.hint = "ANIME"
         binding.animeSearchBarText.setOnClickListener {
@@ -109,6 +106,13 @@ class AnimePageAdapter: RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHolde
         binding.animeUpdatedRecyclerView.adapter = adaptor
         binding.animeUpdatedRecyclerView.layoutManager = LinearLayoutManager(binding.animeUpdatedRecyclerView.context, LinearLayoutManager.HORIZONTAL, false)
         binding.animeUpdatedRecyclerView.visibility = View.VISIBLE
+    }
+
+    fun updateAvatar(){
+        if (Anilist.avatar != null) {
+            binding.animeUserAvatar.loadImage(Anilist.avatar)
+            binding.animeUserAvatar.scaleType = ImageView.ScaleType.FIT_CENTER
+        }
     }
 
     inner class AnimePageViewHolder(val binding: ItemAnimePageBinding) : RecyclerView.ViewHolder(binding.root)

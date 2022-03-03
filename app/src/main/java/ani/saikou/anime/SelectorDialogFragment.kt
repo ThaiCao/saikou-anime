@@ -183,10 +183,11 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
             val binding = holder.binding
             val url = urls[position]
             binding.urlQuality.text = url.quality
-            binding.urlSize.visibility = if(url.size!=null) View.VISIBLE else View.GONE
-
-            binding.urlSize.text = DecimalFormat("#.##").format(url.size?:0).toString()+" MB"
+            binding.urlNote.text = url.note?:""
+            binding.urlNote.visibility = if(url.note!=null) View.VISIBLE else View.GONE
             if(url.quality!="Multi Quality") {
+                binding.urlSize.visibility = if(url.size!=null) View.VISIBLE else View.GONE
+                binding.urlSize.text = (if (url.note!=null) " : " else "")+DecimalFormat("#.##").format(url.size?:0).toString()+" MB"
                 binding.urlDownload.visibility = View.VISIBLE
                 binding.urlDownload.setOnClickListener {
                     media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedStream = stream

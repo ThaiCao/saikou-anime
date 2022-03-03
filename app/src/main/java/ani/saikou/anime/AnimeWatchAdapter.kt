@@ -34,7 +34,7 @@ class AnimeWatchAdapter(private val media: Media, private val fragment: AnimeWat
         _binding = binding
 
         //Timer
-        if (media.anime?.nextAiringEpisodeTime != null && (media.anime.nextAiringEpisodeTime!! - System.currentTimeMillis() / 1000) <= 86400 * 7.toLong()) {
+        if (media.anime?.nextAiringEpisode!=null && media.anime.nextAiringEpisodeTime != null && (media.anime.nextAiringEpisodeTime!! - System.currentTimeMillis() / 1000) <= 86400 * 7.toLong()) {
             binding.mediaCountdownContainer.visibility = View.VISIBLE
             binding.mediaCountdownText.text = "Episode ${media.anime.nextAiringEpisode!!+1} will be released in"
             object : CountDownTimer((media.anime.nextAiringEpisodeTime!! + 10000) * 1000 - System.currentTimeMillis(), 1000) {

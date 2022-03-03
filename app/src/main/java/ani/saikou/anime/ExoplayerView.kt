@@ -85,11 +85,12 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private var orientationListener : OrientationEventListener? =null
 
     private lateinit var media: Media
+    private lateinit var episode: Episode
     private lateinit var episodeArr: List<String>
     private var currentEpisodeIndex = 0
     private var epChanging = false
     private var progressDialog : AlertDialog.Builder?=null
-    private var dontAskProgressDialog = false
+    private var showProgressDialog = true
 
     private var currentWindow = 0
     private var playbackPosition: Long = 0
@@ -420,12 +421,13 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             model.getEpisode().observe(this) {
                 hideSystemBars()
                 if (it != null && !epChanging) {
+                    episode = it
                     media.selected = model.loadSelected(media.id)
                     model.setMedia(media)
                     currentEpisodeIndex = episodeArr.indexOf(it.number)
                     if (isInitialized) releasePlayer()
                     playbackPosition = loadData("${media.id}_${it.number}", this) ?: 0
-                    initPlayer(it)
+                    initPlayer()
                 }
             }
         }
@@ -454,24 +456,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
         playerView.findViewById<ImageButton>(R.id.exo_next_ep).setOnClickListener {
             if(episodeArr.size>currentEpisodeIndex+1 && isInitialized) {
-                if(exoPlayer.currentPosition/episodeLength>0.8f && Anilist.userid!=null) {
-                    if(progressDialog!=null) {
-                        progressDialog?.setCancelable(false)
-                            ?.setPositiveButton("Yes") { dialog, _ ->
-                                updateAnilistProgress(media.id,media.anime!!.selectedEpisode!!)
-                                dialog.dismiss()
-                                change(currentEpisodeIndex + 1)
-                            }
-                            ?.setNegativeButton("No") { dialog, _ ->
-                                dialog.dismiss()
-                                change(currentEpisodeIndex + 1)
-                            }
-                        progressDialog?.show()
-                    }else{
-                        updateAnilistProgress(media.id,media.anime!!.selectedEpisode!!)
-                        change(currentEpisodeIndex + 1)
-                    }
-                } else change(currentEpisodeIndex + 1)
+                progress { change(currentEpisodeIndex + 1) }
             }
             else
                 toastString("No next Episode Found!")
@@ -532,18 +517,21 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
         speedDialog.setOnCancelListener { hideSystemBars() }
 
-        dontAskProgressDialog = loadData<Boolean>("${media.id}_progressDialog") != true
-        progressDialog = if(dontAskProgressDialog && Anilist.userid!=null) AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Update progress on anilist?").apply {
+        showProgressDialog = loadData<Boolean>("${media.id}_progressDialog") != true
+        progressDialog = if(showProgressDialog && Anilist.userid!=null) AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Update progress on anilist?").apply {
             setMultiChoiceItems(arrayOf("Don't ask again"), booleanArrayOf(false)) { _, _, isChecked ->
-                if (isChecked) saveData("${media.id}_progressDialog", isChecked)
-                dontAskProgressDialog = isChecked
+                if (isChecked) {
+                    saveData("${media.id}_progressDialog", isChecked)
+                    progressDialog = null
+                }
+                showProgressDialog = isChecked
             }
             setOnCancelListener { hideSystemBars() }
         } else null
     }
 
     @SuppressLint("SetTextI18n")
-    private fun initPlayer(episode: Episode){
+    private fun initPlayer(){
         //Title
         episodeTitle.text = "Episode ${episode.number}${if(episode.title!="" && episode.title!=null && episode.title!="null") " : "+episode.title else ""}${if(episode.filler) "\n[Filler]" else ""}"
         episodeTitle.isSelected = true
@@ -595,14 +583,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         //Source
         exoSource.setOnClickListener {
-            changingServer = true
-            media.selected!!.stream = null
-            saveData("${media.id}_${media.anime!!.selectedEpisode}", exoPlayer.currentPosition, this)
-            model.saveSelected(media.id,media.selected!!,this)
-            model.onEpisodeClick(media,episode.number,this.supportFragmentManager,
-                launch = false,
-                cancellable = true
-            )
+            sourceClick()
         }
 
         //Quality Track
@@ -665,6 +646,17 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         outState.putInt(STATE_PLAYER_FULLSCREEN, isFullscreen)
         outState.putBoolean(STATE_PLAYER_PLAYING, isPlayerPlaying)
         super.onSaveInstanceState(outState)
+    }
+
+    private fun sourceClick(){
+        changingServer = true
+        media.selected!!.stream = null
+        saveData("${media.id}_${media.anime!!.selectedEpisode}", exoPlayer.currentPosition, this)
+        model.saveSelected(media.id,media.selected!!,this)
+        model.onEpisodeClick(media,episode.number,this.supportFragmentManager,
+            launch = false,
+            cancellable = true
+        )
     }
 
     override fun onPause() {
@@ -747,35 +739,38 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         super.onPlaybackStateChanged(playbackState)
     }
 
-    override fun onBackPressed() {
-        if(isInitialized) {
-            if (exoPlayer.currentPosition / episodeLength > 0.8f && Anilist.userid != null) {
-                if (dontAskProgressDialog) {
-                    progressDialog?.setCancelable(false)
-                        ?.setPositiveButton("Yes") { dialog, _ ->
-                            saveData("${media.id}_save_progress",true)
-                            updateAnilistProgress(media.id, media.anime!!.selectedEpisode!!)
-                            dialog.dismiss()
-                            super.onBackPressed()
-                        }
-                        ?.setNegativeButton("No") { dialog, _ ->
-                            saveData("${media.id}_save_progress",false)
-                            dialog.dismiss()
-                            super.onBackPressed()
-                        }
-                    progressDialog?.show()
-                } else {
-                    if(loadData<Boolean>("${media.id}_save_progress")==true)
+    fun progress(runnable: Runnable){
+        if (exoPlayer.currentPosition / episodeLength > 0.8f && Anilist.userid != null) {
+            if (showProgressDialog && progressDialog!=null) {
+                progressDialog?.setCancelable(false)
+                    ?.setPositiveButton("Yes") { dialog, _ ->
+                        saveData("${media.id}_save_progress",true)
                         updateAnilistProgress(media.id, media.anime!!.selectedEpisode!!)
-                    super.onBackPressed()
-                }
-            } else {
-                super.onBackPressed()
+                        dialog.dismiss()
+                        runnable.run()
+                    }
+                    ?.setNegativeButton("No") { dialog, _ ->
+                        saveData("${media.id}_save_progress",false)
+                        dialog.dismiss()
+                        runnable.run()
+                    }
+                progressDialog?.show()
             }
+            else {
+                if(loadData<Boolean>("${media.id}_save_progress")==true)
+                    updateAnilistProgress(media.id, media.anime!!.selectedEpisode!!)
+                runnable.run()
+            }
+        } else {
+            runnable.run()
         }
-        else{
-            super.onBackPressed()
-        }
+    }
+
+
+    override fun onBackPressed() {
+        if(isInitialized)
+            progress { super.onBackPressed() }
+        else super.onBackPressed()
     }
 
     private fun hideSystemBars() {

@@ -167,25 +167,29 @@ class MediaAdaptor(
     }
 
     fun clicked(position:Int,animate:View){
-        val media = mediaList?.get(position)
-        ContextCompat.startActivity(
-            activity,
-            Intent(activity, MediaDetailsActivity::class.java).putExtra(
-                "media",
-                media as Serializable
-            ),
-            ActivityOptionsCompat.makeSceneTransitionAnimation(
+        if(mediaList?.size?:0>position && position!=-1){
+            val media = mediaList?.get(position)
+            ContextCompat.startActivity(
                 activity,
-                Pair.create(animate, ViewCompat.getTransitionName(animate)!!)
-            ).toBundle()
-        )
+                Intent(activity, MediaDetailsActivity::class.java).putExtra(
+                    "media",
+                    media as Serializable
+                ),
+                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    activity,
+                    Pair.create(animate, ViewCompat.getTransitionName(animate)!!)
+                ).toBundle()
+            )
+        }
     }
 
     fun longClicked(position:Int):Boolean{
-        val media = mediaList?.get(position)?:return false
-        if(activity.supportFragmentManager.findFragmentByTag("list") == null) {
-            MediaListDialogSmallFragment.newInstance(media).show(activity.supportFragmentManager, "list")
-            return true
+        if(mediaList?.size?:0>position && position!=-1){
+            val media = mediaList?.get(position)?:return false
+            if(activity.supportFragmentManager.findFragmentByTag("list") == null) {
+                MediaListDialogSmallFragment.newInstance(media).show(activity.supportFragmentManager, "list")
+                return true
+            }
         }
         return false
     }

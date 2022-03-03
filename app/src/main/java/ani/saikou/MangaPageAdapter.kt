@@ -37,10 +37,7 @@ class MangaPageAdapter: RecyclerView.Adapter<MangaPageAdapter.MangaPageViewHolde
 
         binding.mangaTitleContainer.updatePadding(top = statusBarHeight)
 
-        if (Anilist.avatar != null) {
-            binding.mangaUserAvatar.loadImage(Anilist.avatar)
-            binding.mangaUserAvatar.scaleType = ImageView.ScaleType.FIT_CENTER
-        }
+        updateAvatar()
 
         binding.mangaSearchBar.hint = "MANGA"
         binding.mangaSearchBarText.setOnClickListener {
@@ -109,6 +106,13 @@ class MangaPageAdapter: RecyclerView.Adapter<MangaPageAdapter.MangaPageViewHolde
         binding.mangaNovelRecyclerView.adapter = adaptor
         binding.mangaNovelRecyclerView.layoutManager = LinearLayoutManager(binding.mangaNovelRecyclerView.context, LinearLayoutManager.HORIZONTAL, false)
         binding.mangaNovelRecyclerView.visibility = View.VISIBLE
+    }
+
+    fun updateAvatar(){
+        if (Anilist.avatar != null) {
+            binding.mangaUserAvatar.loadImage(Anilist.avatar)
+            binding.mangaUserAvatar.scaleType = ImageView.ScaleType.FIT_CENTER
+        }
     }
 
     inner class MangaPageViewHolder(val binding: ItemMangaPageBinding) : RecyclerView.ViewHolder(binding.root)

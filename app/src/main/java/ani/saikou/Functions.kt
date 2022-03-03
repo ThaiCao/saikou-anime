@@ -271,8 +271,12 @@ fun getMalMedia(media:Media) : Media{
 }
 
 fun toastString(s: String?){
-    currActivity()?.runOnUiThread { Toast.makeText(currActivity(), s, Toast.LENGTH_LONG).show() }
-    logger(s)
+    if(s!=null) {
+        currActivity()?.runOnUiThread {
+            Toast.makeText(currActivity(), s, Toast.LENGTH_LONG).show()
+        }
+        logger(s)
+    }
 }
 
 class ZoomOutPageTransformer(private val bottom:Boolean=false) : ViewPager2.PageTransformer {
