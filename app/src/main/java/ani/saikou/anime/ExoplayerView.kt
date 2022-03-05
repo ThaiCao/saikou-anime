@@ -281,6 +281,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     ObjectAnimator.ofFloat(exoBrightnessCont, "alpha", 1f, 0f).setDuration(300).start()
                     delay(300)
                     exoBrightnessCont.visibility = View.GONE
+                    checkNotch()
                 }
         }
         val volumeRunnable = Runnable {
@@ -289,6 +290,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     ObjectAnimator.ofFloat(exoVolumeCont, "alpha", 1f, 0f).setDuration(300).start()
                     delay(300)
                     exoVolumeCont.visibility = View.GONE
+                    checkNotch()
                 }
         }
         playerView.setControllerVisibilityListener {
@@ -532,6 +534,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     @SuppressLint("SetTextI18n")
     private fun initPlayer(){
+        checkNotch()
         //Title
         episodeTitle.text = "Episode ${episode.number}${if(episode.title!="" && episode.title!=null && episode.title!="null") " : "+episode.title else ""}${if(episode.filler) "\n[Filler]" else ""}"
         episodeTitle.isSelected = true

@@ -6,6 +6,8 @@ import android.app.Activity
 import android.app.Application
 import android.app.DatePickerDialog
 import android.app.DownloadManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -17,10 +19,7 @@ import android.os.*
 import android.text.InputFilter
 import android.text.Spanned
 import android.util.AttributeSet
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewAnimationUtils
+import android.view.*
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
 import android.widget.AutoCompleteTextView
@@ -29,6 +28,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import ani.saikou.anilist.Anilist
 import ani.saikou.anime.Episode
+import ani.saikou.databinding.ItemCountDownBinding
 import ani.saikou.media.Media
 import ani.saikou.media.Source
 import com.bumptech.glide.Glide
@@ -257,6 +258,15 @@ fun getMalMedia(media:Media) : Media{
             val a = res.select(".title-english").text()
             media.nameMAL = if (a!="") a else res.select(".title-name").text()
             media.typeMAL = if(res.select("div.spaceit_pad > a").isNotEmpty()) res.select("div.spaceit_pad > a")[0].text() else null
+            media.anime.op = arrayListOf()
+            res.select(".opnening > table > tbody > tr").forEach {
+                media.anime.op.add(it.text())
+            }
+            media.anime.ed = arrayListOf()
+            res.select(".ending > table > tbody > tr").forEach {
+                media.anime.ed.add(it.text())
+            }
+
         }else{
             val res = Jsoup.connect("https://myanimelist.net/manga/${media.idMAL}").ignoreHttpErrors(true).get()
             val b = res.select(".title-english").text()
@@ -279,14 +289,11 @@ fun toastString(s: String?){
     }
 }
 
-class ZoomOutPageTransformer(private val bottom:Boolean=false) : ViewPager2.PageTransformer {
+class ZoomOutPageTransformer : ViewPager2.PageTransformer {
     override fun transformPage(view: View, position: Float) {
         if (position == 0.0f) {
-//            var cy = 0
-//            if (bottom) cy = view.height
             setAnimation(view.context,view,300, floatArrayOf(1.3f,1f,1.3f,1f))
             ObjectAnimator.ofFloat(view,"alpha",0f,1.0f).setDuration(200).start()
-//            ViewAnimationUtils.createCircularReveal(view, view.width / 2, cy, 0f, max(view.height, view.width)*1.5f).setDuration(400).start()
         }
     }
 }
@@ -627,5 +634,32 @@ class NoGestureSubsamplingImageView(context: Context?, attr: AttributeSet?) :
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return false
+    }
+}
+
+fun copyToClipboard(string: String){
+    val activity = currActivity()?:return
+    val clipboard = getSystemService(activity,ClipboardManager::class.java)
+    val clip = ClipData.newPlainText("label", string)
+    clipboard?.setPrimaryClip(clip)
+    toastString("Copied \"$string\"")
+}
+
+@SuppressLint("SetTextI18n")
+fun countDown(media: Media, view: ViewGroup){
+    if (media.anime?.nextAiringEpisode != null && media.anime.nextAiringEpisodeTime != null && (media.anime.nextAiringEpisodeTime!! - System.currentTimeMillis() / 1000) <= 86400 * 7.toLong()) {
+        val v = ItemCountDownBinding.inflate(LayoutInflater.from(view.context), view, false)
+        view.addView(v.root,0)
+        v.mediaCountdownText.text = "Episode ${media.anime.nextAiringEpisode!!+1} will be released in"
+        object : CountDownTimer((media.anime.nextAiringEpisodeTime!! + 10000) * 1000 - System.currentTimeMillis(), 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val a = millisUntilFinished / 1000
+                v.mediaCountdown.text = "${a / 86400} days ${a % 86400 / 3600} hrs ${a % 86400 % 3600 / 60} mins ${a % 86400 % 3600 % 60} secs"
+            }
+            override fun onFinish() {
+                v.mediaCountdownContainer.visibility = View.GONE
+                toastString("Congrats Vro")
+            }
+        }.start()
     }
 }
