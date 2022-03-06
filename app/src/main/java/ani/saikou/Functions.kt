@@ -260,11 +260,15 @@ fun getMalMedia(media:Media) : Media{
             media.typeMAL = if(res.select("div.spaceit_pad > a").isNotEmpty()) res.select("div.spaceit_pad > a")[0].text() else null
             media.anime.op = arrayListOf()
             res.select(".opnening > table > tbody > tr").forEach {
-                media.anime.op.add(it.text())
+                val text = it.text()
+                if(!text.contains("Help improve our database"))
+                    media.anime.op.add(it.text())
             }
             media.anime.ed = arrayListOf()
             res.select(".ending > table > tbody > tr").forEach {
-                media.anime.ed.add(it.text())
+                val text = it.text()
+                if(!text.contains("Help improve our database"))
+                    media.anime.ed.add(it.text())
             }
 
         }else{

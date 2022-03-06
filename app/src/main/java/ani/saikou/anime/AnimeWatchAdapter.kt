@@ -32,9 +32,6 @@ class AnimeWatchAdapter(private val media: Media, private val fragment: AnimeWat
         val binding = holder.binding
         _binding = binding
 
-        //Timer
-        countDown(media,binding.animeSourceContainer)
-
         //Youtube
         if (media.anime!!.youtube != null) {
             binding.animeSourceYT.visibility = View.VISIBLE
@@ -184,5 +181,10 @@ class AnimeWatchAdapter(private val media: Media, private val fragment: AnimeWat
 
     override fun getItemCount(): Int = 1
 
-    inner class ViewHolder(val binding: ItemAnimeWatchBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class ViewHolder(val binding: ItemAnimeWatchBinding) : RecyclerView.ViewHolder(binding.root){
+        init {
+            //Timer
+            countDown(media,binding.animeSourceContainer)
+        }
+    }
 }

@@ -106,7 +106,15 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         })
         binding.mediaBanner.setOnTouchListener { _, motionEvent -> gestureDetector.onTouchEvent(motionEvent);true }
         binding.mediaTitle.text = media.userPreferredName
+        binding.mediaTitle.setOnLongClickListener {
+            copyToClipboard(media.userPreferredName)
+            true
+        }
         binding.mediaTitleCollapse.text = media.userPreferredName
+        binding.mediaTitleCollapse.setOnLongClickListener {
+            copyToClipboard(media.userPreferredName)
+            true
+        }
         binding.mediaStatus.text = media.status?:""
 
         //Fav Button
