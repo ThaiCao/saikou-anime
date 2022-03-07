@@ -81,7 +81,7 @@ class MangaSourceFragment : Fragment() {
 
                 if (media.format == "MANGA") {
                     binding.mangaSourceContainer.visibility = View.VISIBLE
-                    val sources: Array<String> = resources.getStringArray(R.array.manga_sources)
+                    val sources: ArrayList<String> = MangaSources.names
                     binding.mangaSource.setText(sources[media.selected!!.source])
                     binding.mangaSource.setAdapter(
                         ArrayAdapter(

@@ -475,7 +475,7 @@ class AnilistQueries{
                         responseArray.add(
                             Media(
                                 id = id,
-                                idMAL = json.jsonObject["idMal"]?.toString()?.toInt()?:return responseArray,
+                                idMAL = json.jsonObject["idMal"]!!.toString().toIntOrNull(),
                                 name = json.jsonObject["title"]!!.jsonObject["english"].toString().trim('"').replace("\\\"","\""),
                                 nameRomaji = json.jsonObject["title"]!!.jsonObject["romaji"].toString().trim('"').replace("\\\"","\""),
                                 userPreferredName = json.jsonObject["title"]!!.jsonObject["userPreferred"].toString().trim('"').replace("\\\"","\""),

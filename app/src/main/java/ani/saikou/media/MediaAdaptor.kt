@@ -1,6 +1,7 @@
 package ani.saikou.media
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -104,11 +105,13 @@ class MediaAdaptor(
                 if(media!=null) {
                     b.itemCompactImage.loadImage(media.cover)
                     b.itemCompactBanner.setTransitionGenerator(RandomTransitionGenerator(20000, AccelerateDecelerateInterpolator()))
-                    Glide.with(b.itemCompactBanner)
-                        .load(media.banner?:media.cover)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL).override(400)
-                        .apply(RequestOptions.bitmapTransform(BlurTransformation(2, 3)))
-                        .into(b.itemCompactBanner)
+                    val context = b.itemCompactBanner.context
+                    if(!(context as Activity).isDestroyed)
+                        Glide.with(context)
+                            .load(media.banner?:media.cover)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL).override(400)
+                            .apply(RequestOptions.bitmapTransform(BlurTransformation(2, 3)))
+                            .into(b.itemCompactBanner)
 
                     b.itemCompactOngoing.visibility = if (media.status=="RELEASING")  View.VISIBLE else View.GONE
                     b.itemCompactTitle.text = media.userPreferredName

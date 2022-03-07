@@ -215,15 +215,16 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //Play Pause
 
         exoPlay.setOnClickListener {
-            if (isInitialized) isPlayerPlaying = exoPlayer.isPlaying
-            (exoPlay.drawable as Animatable?)?.start()
-            if(isPlayerPlaying) {
-                Glide.with(this).load(R.drawable.anim_play_to_pause).into(exoPlay)
-                exoPlayer.pause()
-            }
-            else {
-                Glide.with(this).load(R.drawable.anim_pause_to_play).into(exoPlay)
-                exoPlayer.play()
+            if (isInitialized) {
+                isPlayerPlaying = exoPlayer.isPlaying
+                (exoPlay.drawable as Animatable?)?.start()
+                if (isPlayerPlaying) {
+                    Glide.with(this).load(R.drawable.anim_play_to_pause).into(exoPlay)
+                    exoPlayer.pause()
+                } else {
+                    Glide.with(this).load(R.drawable.anim_pause_to_play).into(exoPlay)
+                    exoPlayer.play()
+                }
             }
         }
 

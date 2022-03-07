@@ -572,6 +572,8 @@ fun download(activity: Activity, episode:Episode, animeTitle:String){
     val manager = activity.getSystemService(AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
     val stream = episode.streamLinks[episode.selectedStream]?:return
     val uri = Uri.parse(stream.quality[episode.selectedQuality].url)
+    val regex = "[\\\\/:*?\"<>|]".toRegex()
+    val aTitle = animeTitle.replace(regex, "")
     val request: DownloadManager.Request = DownloadManager.Request(uri)
     if(stream.headers!=null) {
         stream.headers.forEach{
@@ -581,19 +583,19 @@ fun download(activity: Activity, episode:Episode, animeTitle:String){
     CoroutineScope(Dispatchers.IO).launch {
         try{
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        val direct = File(Environment.DIRECTORY_DOWNLOADS + "/Saikou/${animeTitle}/")
+        val direct = File(Environment.DIRECTORY_DOWNLOADS + "/Saikou/${aTitle}/")
         if (!direct.exists()) direct.mkdirs()
 
-        val title =
-            "Episode ${episode.number} ${if (episode.title != null) " - ${episode.title}" else ""}"
+        var title = "Episode ${episode.number} ${if (episode.title != null) " - ${episode.title}" else ""}"
+        title = title.replace(regex,"")
 
         request.setDestinationInExternalPublicDir(
             Environment.DIRECTORY_DOWNLOADS,
-            "/Saikou/${animeTitle}/$title (${stream.quality[episode.selectedQuality].quality}).mp4"
+            "/Saikou/${aTitle}/$title (${stream.quality[episode.selectedQuality].quality}).mp4"
         )
-        request.setTitle("$title : $animeTitle")
+        request.setTitle("$title : $aTitle")
         manager.enqueue(request)
-        toastString("Started Downloading\n$title : $animeTitle")
+        toastString("Started Downloading\n$title : $aTitle")
         } catch (e:SecurityException){
             toastString("Please give permission to access Media from Settings, & Try again.")
         }

@@ -1,11 +1,15 @@
-package ani.saikou.manga.source
+package ani.saikou.manga.source.parsers
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Point
 import com.bumptech.glide.RequestBuilder
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
+import com.bumptech.glide.load.Transformation
+import com.bumptech.glide.load.engine.Resource
+import java.io.ByteArrayOutputStream
+import java.io.File
 import java.nio.charset.Charset
 import java.security.MessageDigest
 
@@ -13,17 +17,26 @@ import java.security.MessageDigest
  * Fixes the MangaReader images by cropping and moving around chunks of the image
  * Made by LagradOst
  * */
-class MangaReaderTransformation : BitmapTransformation() {
+class MangaReaderToTransformation : Transformation<File> {
     private val id = this.javaClass.name
     private val idBytes = id.toByteArray(Charset.defaultCharset())
 
+//    fun seedRand(start: Int, stop: Int){
+//        return floor(stop - start + 1) + start
+//    }
+
     override fun transform(
-        pool: BitmapPool, toTransform: Bitmap,
-        outWidth: Int, outHeight: Int
-    ): Bitmap {
+        context: Context,
+        resource: Resource<File>,
+        outWidth: Int,
+        outHeight: Int
+    ): Resource<File> {
         val width = 200
         val height = 200
-        val fullImage = Bitmap.createScaledBitmap(toTransform, totalWidth, totalHeight, true)
+
+        val file = resource.get()
+        val bitmap = BitmapFactory.decodeFile(file.path)
+        val fullImage = Bitmap.createScaledBitmap(bitmap, totalWidth, totalHeight, true)
 
         val diffList = listOf(
             Point(2, 1) to Point(0, 0),
@@ -79,8 +92,29 @@ class MangaReaderTransformation : BitmapTransformation() {
                 null
             )
         }
+        val newFile = File(context.cacheDir, file.name)
+        newFile.createNewFile()
+        val bos = ByteArrayOutputStream()
+        image.compress(Bitmap.CompressFormat.PNG, 0, bos)
+        val bitmapData = bos.toByteArray()
+        newFile.writeBytes(bitmapData)
+        return object : Resource<File> {
+            override fun getResourceClass(): Class<File> {
+                return newFile.javaClass
+            }
 
-        return image
+            override fun get(): File {
+                return newFile
+            }
+
+            override fun getSize(): Int {
+                return newFile.length().toInt()
+            }
+
+            override fun recycle() {
+                newFile.delete()
+            }
+        }
     }
 
     override fun updateDiskCacheKey(messageDigest: MessageDigest) {
@@ -88,7 +122,7 @@ class MangaReaderTransformation : BitmapTransformation() {
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is MangaReaderTransformation
+        return other is MangaReaderToTransformation
     }
 
     override fun hashCode(): Int {
@@ -98,10 +132,11 @@ class MangaReaderTransformation : BitmapTransformation() {
     companion object {
         const val totalHeight = 1145
         const val totalWidth = 784
-        private val transformation = MangaReaderTransformation()
+        private val transformation = MangaReaderToTransformation()
+
         fun <T> RequestBuilder<T>.transformMangaReader(): RequestBuilder<T> {
             return this.override(totalWidth, totalHeight)
-                .transform(transformation)
+                .transform(File("").javaClass, transformation)
         }
     }
 }
