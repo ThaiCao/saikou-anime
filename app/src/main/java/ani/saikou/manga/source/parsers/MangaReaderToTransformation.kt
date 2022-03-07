@@ -8,10 +8,12 @@ import android.graphics.Point
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.Transformation
 import com.bumptech.glide.load.engine.Resource
+import com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.Charset
 import java.security.MessageDigest
+import kotlin.math.floor
 
 /**
  * Fixes the MangaReader images by cropping and moving around chunks of the image
@@ -20,10 +22,105 @@ import java.security.MessageDigest
 class MangaReaderToTransformation : Transformation<File> {
     private val id = this.javaClass.name
     private val idBytes = id.toByteArray(Charset.defaultCharset())
+    private val currentList = mutableListOf<Int>()
+    private var j = 0
+    private var i = 0
 
-//    fun seedRand(start: Int, stop: Int){
-//        return floor(stop - start + 1) + start
-//    }
+    private fun seedRand(start: Int, stop: Int): Int {
+        val returnValue = floor(run_0x416663() * (stop - start + 1)).toInt() + start
+        if (returnValue > stop) return 0
+        return returnValue
+    }
+
+    fun initList() {
+        currentList.clear()
+        i = 0
+        j = 0
+        val initVars = listOf(115, 116, 97, 121)
+
+        for (i in 0 until 256) {
+            currentList.add(i)
+        }
+
+        var temp = 0
+        for (i in 0 until 256) {
+            val oldSpot = currentList[i]
+            temp = 255 and (temp + initVars[i % initVars.size] + oldSpot)
+            // Swaps
+            currentList[i] = currentList[temp]
+            currentList[temp] = oldSpot
+        }
+
+        run_0x20a9d0(256)
+    }
+
+    private fun run_0x416663(): Float {
+        var _0x5abc8f = run_0x20a9d0(6)
+        var _0x248754 = 281474976710656
+        var _0x166b5d = 0L
+        val _0x4c3ba3 = 4503599627370496
+        val _0x502fe4 = 0x100
+        val _0x5f099b = 0x2 * _0x4c3ba3
+
+        while (_0x5abc8f < _0x4c3ba3) {
+            _0x5abc8f = (_0x5abc8f + _0x166b5d) * _0x502fe4
+            _0x248754 *= _0x502fe4
+            _0x166b5d = run_0x20a9d0(1)
+        }
+        while (_0x5f099b <= _0x5abc8f) {
+            _0x5abc8f /= 0x2
+            _0x248754 /= 0x2
+            _0x166b5d = _0x166b5d shr 1
+        }
+        return (_0x5abc8f + _0x166b5d).toFloat() / _0x248754
+    }
+
+    private fun run_0x20a9d0(runs: Int): Long {
+        var _0x33fdb5 = 0L
+        var _0x1f6d89 = i
+        var _0x36b3d8 = j
+
+        for (i in runs - 1 downTo 0) {
+            // 1 -> 255 -> 0
+            _0x1f6d89 = 255 and (_0x1f6d89 + 1)
+
+            val _0x285233 = currentList[_0x1f6d89]
+            _0x36b3d8 = 255 and (_0x36b3d8 + _0x285233)
+
+            currentList[_0x1f6d89] =
+                currentList[_0x36b3d8]
+            currentList[_0x36b3d8] = _0x285233
+
+            _0x33fdb5 =
+                _0x33fdb5 * 256 + currentList[255 and (currentList[_0x1f6d89] + currentList[_0x36b3d8])]
+        }
+        i = _0x1f6d89
+        j = _0x36b3d8
+        return _0x33fdb5
+    }
+
+    private fun getShuffle(size: Int): MutableList<Int> {
+        initList()
+        // Getting changed
+        val _0x47c787 = mutableListOf<Int>()
+        // Empty to be filled
+        val _0x5b93da = mutableListOf<Int>()
+        for (i in 0 until size) {
+            _0x47c787.add(i)
+            _0x5b93da.add(0)
+        }
+
+        for (i in 0 until size) {
+            val value = seedRand(0, size - i - 1)
+
+            val _0x40e593 = _0x47c787[value]
+            _0x47c787.removeAt(value)
+
+            _0x5b93da[_0x40e593] = i
+        }
+        return _0x5b93da
+    }
+
 
     override fun transform(
         context: Context,
@@ -31,55 +128,58 @@ class MangaReaderToTransformation : Transformation<File> {
         outWidth: Int,
         outHeight: Int
     ): Resource<File> {
+        // Chunk size, i think there could be different sizes here but i haven't found on site
         val width = 200
         val height = 200
 
+        // Setup file
         val file = resource.get()
         val bitmap = BitmapFactory.decodeFile(file.path)
-        val fullImage = Bitmap.createScaledBitmap(bitmap, totalWidth, totalHeight, true)
+        val realWidth = bitmap.width
+        val realHeight = bitmap.height
 
-        val diffList = listOf(
-            Point(2, 1) to Point(0, 0),
-            Point(0, 0) to Point(1, 0),
-            Point(1, 1) to Point(2, 0),
-            Point(3, 0) to Point(3, 0),
+        val columns = (realWidth / width)
+        val rows = (realHeight / height)
+        val size = columns * rows
+        val shuffle = getShuffle(size)
 
-            Point(2, 4) to Point(0, 1),
-            Point(2, 3) to Point(1, 1),
-            Point(1, 3) to Point(2, 1),
-            Point(3, 4) to Point(3, 1),
+        val diffList = shuffle.mapIndexed { index, it ->
+            Point(it % columns, it / columns) to Point(index % columns, index / columns)
+        }.toMutableList()
 
-            Point(0, 4) to Point(0, 2),
-            Point(1, 4) to Point(1, 2),
-            Point(0, 1) to Point(2, 2),
-            Point(3, 3) to Point(3, 2),
+        // The sides and bottom are handled independently if the size isn't a factor of 200
+        if (realWidth % 200 != 0) {
+            val rightSideShuffle = getShuffle(rows)
+            rightSideShuffle.mapIndexed { index, it ->
+                diffList.add(
+                    Point(columns, it) to Point(columns, index)
+                )
+            }
+        }
+        if (realHeight % 200 != 0) {
+            val bottomSideShuffle = getShuffle(columns)
+            bottomSideShuffle.mapIndexed { index, it ->
+                diffList.add(
+                    Point(it, rows) to Point(index, rows)
+                )
+            }
+            // Corner is always same place
+            diffList.add(
+                Point(columns, rows) to Point(columns, rows)
+            )
+        }
 
-            Point(2, 2) to Point(0, 3),
-            Point(1, 0) to Point(1, 3),
-            Point(0, 3) to Point(2, 3),
-            Point(3, 1) to Point(3, 3),
 
-            Point(0, 2) to Point(0, 4),
-            Point(2, 0) to Point(1, 4),
-            Point(1, 2) to Point(2, 4),
-            Point(3, 2) to Point(3, 4),
-
-            Point(0, 5) to Point(0, 5),
-            Point(2, 5) to Point(1, 5),
-            Point(1, 5) to Point(2, 5),
-            Point(3, 5) to Point(3, 5),
-        )
-
-        val image = Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888)
+        val image = Bitmap.createBitmap(realWidth, realHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(image)
         diffList.forEach {
             val diffWidth =
-                if (it.first.x >= 3) (totalWidth % width) else width
+                if (it.first.x >= columns) (realWidth % width) else width
             val diffHeight =
-                if (it.first.y >= 5) (totalHeight % height) else height
+                if (it.first.y >= rows) (realHeight % height) else height
 
             val part = Bitmap.createBitmap(
-                fullImage,
+                bitmap,
                 it.first.x * width,
                 it.first.y * height,
                 diffWidth,
@@ -92,12 +192,15 @@ class MangaReaderToTransformation : Transformation<File> {
                 null
             )
         }
+
+        // Write the bitmap to a file and return the file
         val newFile = File(context.cacheDir, file.name)
         newFile.createNewFile()
         val bos = ByteArrayOutputStream()
         image.compress(Bitmap.CompressFormat.PNG, 0, bos)
         val bitmapData = bos.toByteArray()
         newFile.writeBytes(bitmapData)
+
         return object : Resource<File> {
             override fun getResourceClass(): Class<File> {
                 return newFile.javaClass
@@ -130,12 +233,9 @@ class MangaReaderToTransformation : Transformation<File> {
     }
 
     companion object {
-        const val totalHeight = 1145
-        const val totalWidth = 784
         private val transformation = MangaReaderToTransformation()
-
         fun <T> RequestBuilder<T>.transformMangaReader(): RequestBuilder<T> {
-            return this.override(totalWidth, totalHeight)
+            return this.override(SIZE_ORIGINAL, SIZE_ORIGINAL)
                 .transform(File("").javaClass, transformation)
         }
     }
