@@ -5,10 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Point
-import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.Transformation
 import com.bumptech.glide.load.engine.Resource
-import com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.math.BigInteger
@@ -20,6 +18,7 @@ import kotlin.math.floor
  * Fixes the MangaReader images by cropping and moving around chunks of the image
  * Made by LagradOst
  * */
+@Suppress("SameParameterValue")
 class MangaReaderToTransformation : Transformation<File> {
     private val id = this.javaClass.name
     private val idBytes = id.toByteArray(Charset.defaultCharset())
@@ -34,7 +33,7 @@ class MangaReaderToTransformation : Transformation<File> {
         return returnValue
     }
 
-    fun initList() {
+    private fun initList() {
         currentList.clear()
         i = 0
         j = 0
@@ -237,11 +236,4 @@ class MangaReaderToTransformation : Transformation<File> {
         return id.hashCode()
     }
 
-    companion object {
-        private val transformation = MangaReaderToTransformation()
-        fun <T> RequestBuilder<T>.transformMangaReader(): RequestBuilder<T> {
-            return this.override(SIZE_ORIGINAL, SIZE_ORIGINAL)
-                .transform(File("").javaClass, transformation)
-        }
-    }
 }

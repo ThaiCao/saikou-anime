@@ -54,7 +54,6 @@ class Gogo(private val dub:Boolean=false, override val name: String = "gogoanime
             withContext(Dispatchers.Default) {
                 Jsoup.connect(episode.link!!).ignoreHttpErrors(true).get().select("div.anime_muti_link > ul > li").forEach {
                     val name = it.select("a").text().replace("Choose this server", "")
-                    println(name)
                     if(name==server)
                         launch {
                             val directLinks = directLinkify(
@@ -105,7 +104,7 @@ class Gogo(private val dub:Boolean=false, override val name: String = "gogoanime
                 saveSource(slug, media.id, false)
             else{
                 var it = (media.nameMAL ?: media.nameRomaji) + if (dub) " (Dub)" else ""
-                live.postValue("Searching for $it")
+                setTextListener("Searching for $it")
                 logger("Gogo : Searching for $it")
                 var search = search(it)
                 if (search.isNotEmpty()) {
@@ -114,7 +113,7 @@ class Gogo(private val dub:Boolean=false, override val name: String = "gogoanime
                 } else {
                     it = media.nameRomaji + if (dub) " (Dub)" else ""
                     search = search(it)
-                    live.postValue("Searching for $it")
+                    setTextListener("Searching for $it")
                     logger("Gogo : Searching for $it")
                     if (search.isNotEmpty()) {
                         slug = search[0]
@@ -124,7 +123,7 @@ class Gogo(private val dub:Boolean=false, override val name: String = "gogoanime
             }
         }
         else {
-            live.postValue("Selected : ${slug.name}")
+            setTextListener("Selected : ${slug.name}")
         }
         if (slug!=null) return getSlugEpisodes(slug.link)
         }catch (e:Exception){

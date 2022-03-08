@@ -296,20 +296,6 @@ class MediaInfoFragment : Fragment() {
                 }
 
                 if (!media.relations.isNullOrEmpty()) {
-                    val bindi = ItemTitleRecyclerBinding.inflate(
-                        LayoutInflater.from(context),
-                        parent,
-                        false
-                    )
-                    bindi.itemRecycler.adapter =
-                        MediaAdaptor(0, media.relations!!, requireActivity())
-                    bindi.itemRecycler.layoutManager = LinearLayoutManager(
-                        requireContext(),
-                        LinearLayoutManager.HORIZONTAL,
-                        false
-                    )
-                    parent.addView(bindi.root)
-
                     if (media.sequel != null || media.prequel != null) {
                         val bind = ItemQuelsBinding.inflate(
                             LayoutInflater.from(context),
@@ -355,6 +341,21 @@ class MediaInfoFragment : Fragment() {
                         }
                         parent.addView(bind.root)
                     }
+
+                    val bindi = ItemTitleRecyclerBinding.inflate(
+                        LayoutInflater.from(context),
+                        parent,
+                        false
+                    )
+
+                    bindi.itemRecycler.adapter =
+                        MediaAdaptor(0, media.relations!!, requireActivity())
+                    bindi.itemRecycler.layoutManager = LinearLayoutManager(
+                        requireContext(),
+                        LinearLayoutManager.HORIZONTAL,
+                        false
+                    )
+                    parent.addView(bindi.root)
                 }
 
                 if (!media.recommendations.isNullOrEmpty()) {

@@ -48,17 +48,17 @@ class MangaReaderTo(override val name: String="MangaReader") : MangaParser() {
     override fun getChapters(media: Media): MutableMap<String, MangaChapter> {
         var source:Source? = loadData("mangareader_${media.id}")
         if (source==null) {
-            live.postValue("Searching : ${media.getMainName()}")
+            setTextListener("Searching : ${media.getMainName()}")
             val search = search(media.getMainName())
             if (search.isNotEmpty()) {
                 logger("MangaReader : ${search[0]}")
                 source = search[0]
-                live.postValue("Found : ${source.name}")
+                setTextListener("Found : ${source.name}")
                 saveSource(source,media.id)
             }
         }
         else{
-            live.postValue("Selected : ${source.name}")
+            setTextListener("Selected : ${source.name}")
         }
         if (source!=null) return getLinkChapters(source.link)
         return mutableMapOf()
@@ -83,7 +83,7 @@ class MangaReaderTo(override val name: String="MangaReader") : MangaParser() {
     }
 
     override fun saveSource(source: Source, id: Int, selected: Boolean) {
-        live.postValue("${if(selected) "Selected" else "Found"} : ${source.name}")
+        setTextListener("${if(selected) "Selected" else "Found"} : ${source.name}")
         saveData("mangareader_$id", source)
     }
 }
