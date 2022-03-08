@@ -11,6 +11,7 @@ import com.bumptech.glide.load.engine.Resource
 import com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.math.BigInteger
 import java.nio.charset.Charset
 import java.security.MessageDigest
 import kotlin.math.floor
@@ -27,7 +28,8 @@ class MangaReaderToTransformation : Transformation<File> {
     private var i = 0
 
     private fun seedRand(start: Int, stop: Int): Int {
-        val returnValue = floor(run_0x416663() * (stop - start + 1)).toInt() + start
+        val rand = run_0x416663()
+        val returnValue = floor(rand * (stop - start + 1)).toInt() + start
         if (returnValue > stop) return 0
         return returnValue
     }
@@ -56,7 +58,8 @@ class MangaReaderToTransformation : Transformation<File> {
 
     private fun run_0x416663(): Float {
         var _0x5abc8f = run_0x20a9d0(6)
-        var _0x248754 = 281474976710656
+        // This can get bigger than a long, hence BigInteger
+        var _0x248754 = BigInteger("281474976710656")
         var _0x166b5d = 0L
         val _0x4c3ba3 = 4503599627370496
         val _0x502fe4 = 0x100
@@ -64,15 +67,17 @@ class MangaReaderToTransformation : Transformation<File> {
 
         while (_0x5abc8f < _0x4c3ba3) {
             _0x5abc8f = (_0x5abc8f + _0x166b5d) * _0x502fe4
-            _0x248754 *= _0x502fe4
+            // 18446744073709552000
+            _0x248754 = _0x248754.multiply(BigInteger("256"))
             _0x166b5d = run_0x20a9d0(1)
         }
+
         while (_0x5f099b <= _0x5abc8f) {
             _0x5abc8f /= 0x2
-            _0x248754 /= 0x2
+            _0x248754 = _0x248754.divide(BigInteger("2"))
             _0x166b5d = _0x166b5d shr 1
         }
-        return (_0x5abc8f + _0x166b5d).toFloat() / _0x248754
+        return (_0x5abc8f + _0x166b5d).toFloat() / _0x248754.toLong()
     }
 
     private fun run_0x20a9d0(runs: Int): Long {
