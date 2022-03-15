@@ -7,6 +7,7 @@
     tools:context=".settings.SettingsActivity">
 
     <LinearLayout
+        android:id="@+id/settingsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -52,7 +53,7 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/imageView4"
+                android:id="@+id/settingsLogo"
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:layout_gravity="center"
@@ -74,8 +75,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
+                android:fontFamily="@font/poppins_bold"
                 android:text="@string/anime"
-                android:textColor="?attr/colorSecondary" />
+                android:textColor="?attr/colorSecondary"
+                tools:ignore="TextContrastCheck" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -121,12 +124,15 @@
                 android:layout_marginEnd="-32dp"
                 android:layout_marginBottom="8dp"
                 android:fontFamily="@font/poppins_bold"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:paddingStart="32dp"
                 android:paddingEnd="32dp"
                 android:text="@string/player_settings"
                 android:textAlignment="viewStart"
                 android:textAllCaps="false"
                 android:textColor="@color/bg_opp"
+                app:cornerRadius="0dp"
                 app:icon="@drawable/ic_round_video_settings_24"
                 app:iconPadding="16dp"
                 app:iconSize="24dp" />
@@ -136,8 +142,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
+                android:fontFamily="@font/poppins_bold"
                 android:text="@string/manga"
-                android:textColor="?attr/colorSecondary" />
+                android:textColor="?attr/colorSecondary"
+                tools:ignore="TextContrastCheck" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -183,12 +191,15 @@
                 android:layout_marginEnd="-32dp"
                 android:layout_marginBottom="8dp"
                 android:fontFamily="@font/poppins_bold"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:paddingStart="32dp"
                 android:paddingEnd="32dp"
                 android:text="@string/reader_settings"
                 android:textAlignment="viewStart"
                 android:textAllCaps="false"
                 android:textColor="@color/bg_opp"
+                app:cornerRadius="0dp"
                 app:icon="@drawable/ic_round_reader_settings"
                 app:iconPadding="16dp"
                 app:iconSize="24dp" />
@@ -198,8 +209,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
+                android:fontFamily="@font/poppins_bold"
                 android:text="@string/ui"
-                android:textColor="?attr/colorSecondary" />
+                android:textColor="?attr/colorSecondary"
+                tools:ignore="TextContrastCheck" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -227,10 +240,10 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:alpha="0.33"
-                        android:background="@color/nav_bg_inv"
-                        app:srcCompat="@drawable/ic_round_brightness_high_24"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:src="@drawable/ic_round_brightness_high_24"
                         app:tint="@color/bg_opp"
-                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,ImageContrastCheck" />
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,ImageContrastCheck,DuplicateSpeakableTextCheck" />
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -245,10 +258,9 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:alpha="0.33"
-                        android:background="@color/nav_bg_inv"
-                        android:rotation="-45"
+                        android:background="?android:attr/selectableItemBackground"
                         android:scaleX="-1"
-                        app:srcCompat="@drawable/ic_round_brightness_4_24"
+                        android:src="@drawable/ic_round_brightness_4_24"
                         app:tint="@color/bg_opp"
                         tools:ignore="ContentDescription,SpeakableTextPresentCheck,ImageContrastCheck" />
                 </androidx.cardview.widget.CardView>
@@ -262,12 +274,14 @@
 
                     <ImageButton
                         android:id="@+id/settingsUiAuto"
+                        style="@style/ExoMediaButton.Pause"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:background="@color/nav_bg_inv"
-                        app:srcCompat="@drawable/ic_round_brightness_auto_24"
+                        android:alpha="0.33"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:src="@drawable/ic_round_brightness_auto_24"
                         app:tint="@color/bg_opp"
-                        tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+                        tools:ignore="ContentDescription,SpeakableTextPresentCheck,ImageContrastCheck" />
                 </androidx.cardview.widget.CardView>
 
             </LinearLayout>
@@ -281,12 +295,15 @@
                 android:layout_marginEnd="-32dp"
                 android:layout_marginBottom="8dp"
                 android:fontFamily="@font/poppins_bold"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:paddingStart="32dp"
                 android:paddingEnd="32dp"
                 android:text="@string/ui_settings"
                 android:textAlignment="viewStart"
                 android:textAllCaps="false"
                 android:textColor="@color/bg_opp"
+                app:cornerRadius="0dp"
                 app:icon="@drawable/ic_round_remove_red_eye_24"
                 app:iconPadding="16dp"
                 app:iconSize="24dp" />
@@ -296,8 +313,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
+                android:fontFamily="@font/poppins_bold"
                 android:text="@string/about"
-                android:textColor="?attr/colorSecondary" />
+                android:textColor="?attr/colorSecondary"
+                tools:ignore="TextContrastCheck" />
 
             <Button
                 android:id="@+id/settingsDev"
@@ -307,12 +326,15 @@
                 android:layout_marginStart="-32dp"
                 android:layout_marginEnd="-32dp"
                 android:fontFamily="@font/poppins_bold"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:paddingStart="32dp"
                 android:paddingEnd="32dp"
                 android:text="@string/devs"
                 android:textAlignment="viewStart"
                 android:textAllCaps="false"
                 android:textColor="@color/bg_opp"
+                app:cornerRadius="0dp"
                 app:icon="@drawable/ic_round_accessible_forward_24"
                 app:iconPadding="16dp"
                 app:iconSize="24dp" />
@@ -325,22 +347,25 @@
                 android:layout_marginStart="-32dp"
                 android:layout_marginEnd="-32dp"
                 android:fontFamily="@font/poppins_bold"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:paddingStart="32dp"
                 android:paddingEnd="32dp"
                 android:text="@string/disclaimer"
                 android:textAlignment="viewStart"
                 android:textAllCaps="false"
                 android:textColor="@color/bg_opp"
+                app:cornerRadius="0dp"
                 app:icon="@drawable/ic_round_info_24"
                 app:iconPadding="16dp"
                 app:iconSize="24dp" />
 
             <TextView
+                android:id="@+id/settingsInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:alpha="0.58"
                 android:ellipsize="end"
-                android:fontFamily="@font/poppins_thin"
                 android:maxLines="3"
                 android:text="@string/desc" />
 

@@ -6,23 +6,40 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import ani.saikou.BottomSheetDialogFragment
-import ani.saikou.databinding.BottomSheetSettingshBinding
-import ani.saikou.openLinkInBrowser
-import ani.saikou.setSafeOnClickListener
+import ani.saikou.*
+import ani.saikou.anilist.Anilist
+import ani.saikou.databinding.BottomSheetSettingsBinding
 
 
 class SettingsDialogFragment : BottomSheetDialogFragment() {
-    private var _binding: BottomSheetSettingshBinding? = null
+    private var _binding: BottomSheetSettingsBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = BottomSheetSettingshBinding.inflate(inflater, container, false)
+        _binding = BottomSheetSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if(Anilist.token!=null){
+            binding.settingsLogin.setText(R.string.logout)
+            binding.settingsLogin.setOnClickListener {
+
+                Anilist.removeSavedToken(it.context)
+                startMainActivity(requireActivity())
+            }
+            binding.settingsUsername.text = Anilist.username
+            binding.settingsUserAvatar.loadImage(Anilist.avatar)
+        }else{
+            binding.settingsUsername.visibility = View.GONE
+            binding.settingsLogin.setText(R.string.login)
+            binding.settingsLogin.setOnClickListener {
+                Anilist.loginIntent(requireActivity())
+            }
+        }
+
         binding.settingsSettings.setSafeOnClickListener {
             startActivity(Intent(activity, SettingsActivity::class.java))
         }
