@@ -93,7 +93,7 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
   
 - Multi Quality Download
 
-_ Bulk Download
+- Bulk Download
 
 - Novel Reader
 
