@@ -86,6 +86,8 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 
 - Accent Color Change (Hot Pink Supremacy.)
 
+- Subtitles Customization
+
 ## Help wanted for:
 - TV support
   
