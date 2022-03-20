@@ -165,7 +165,7 @@
     <string name="height">Height</string>
     <string name="width">Width</string>
     <string name="default_quality_info">Automatically uses the closest quality provided by default, ONLY applied for \"Multi Quality\" Servers.</string>
-    <string name="default_playback_speed">Default Playback Speed - %1$s x</string>
+    <string name="default_playback_speed">Default Playback Speed - %1$s</string>
 
     <string name="auto">Auto</string>
     <string name="auto_play_next_episode">Autoplay Next Episode</string>

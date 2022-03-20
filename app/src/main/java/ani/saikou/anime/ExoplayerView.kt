@@ -5,7 +5,6 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
@@ -20,11 +19,12 @@ import android.os.Looper
 import android.provider.Settings.System
 import android.util.TypedValue
 import android.view.*
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.math.MathUtils.clamp
 import androidx.core.view.WindowCompat
@@ -37,6 +37,7 @@ import ani.saikou.anime.source.HAnimeSources
 import ani.saikou.databinding.ActivityExoplayerBinding
 import ani.saikou.media.Media
 import ani.saikou.media.MediaDetailsViewModel
+import ani.saikou.settings.PlayerSettings
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
@@ -81,12 +82,15 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private lateinit var exoBrightnessCont: View
     private lateinit var exoVolumeCont: View
     private lateinit var animeTitle : TextView
-    private lateinit var episodeTitle : TextView
+    private lateinit var videoInfo : TextView
+    private lateinit var serverInfo : TextView
+    private lateinit var episodeTitle : AutoCompleteTextView
     private var orientationListener : OrientationEventListener? =null
 
     private lateinit var media: Media
     private lateinit var episode: Episode
     private lateinit var episodeArr: List<String>
+    private lateinit var episodeTitleArr: ArrayList<String>
     private var currentEpisodeIndex = 0
     private var epChanging = false
     private var progressDialog : AlertDialog.Builder?=null
@@ -99,6 +103,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private var isInitialized = false
     private var isPlayerPlaying = true
     private var changingServer = false
+
+    private var settings = PlayerSettings()
 
     val handler = Handler(Looper.getMainLooper())
     private val model: MediaDetailsViewModel by viewModels()
@@ -150,6 +156,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
     }
 
+    @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExoplayerBinding.inflate(layoutInflater)
@@ -158,6 +165,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //Initialize
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemBars()
+
+        settings = loadData("player_settings")?: PlayerSettings()
 
         playerView = findViewById(R.id.player_view)
         exoQuality = playerView.findViewById(R.id.exo_quality)
@@ -171,10 +180,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         exoBrightnessCont = playerView.findViewById(R.id.exo_brightness_cont)
         exoVolumeCont = playerView.findViewById(R.id.exo_volume_cont)
         animeTitle = playerView.findViewById(R.id.exo_anime_title)
-        episodeTitle = playerView.findViewById(R.id.exo_ep_title)
+        episodeTitle = playerView.findViewById(R.id.exo_episode_selector)
 
         playerView.controllerShowTimeoutMs = 5000
-        val audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager = applicationContext.getSystemService(AUDIO_SERVICE) as AudioManager
         if (System.getInt(contentResolver, System.ACCELEROMETER_ROTATION, 0) != 1) {
             var rotation = 0
             requestedOrientation = rotation
@@ -214,7 +223,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
 
         //Play Pause
-
         exoPlay.setOnClickListener {
             if (isInitialized) {
                 isPlayerPlaying = exoPlayer.isPlaying
@@ -229,32 +237,13 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             }
         }
 
-        //SliderLock
-        var sliderLocked = loadData<Boolean>("sliderLock",this)?:false
-        playerView.findViewById<ImageButton>(R.id.exo_slider_lock).setImageDrawable(AppCompatResources.getDrawable(this,if(sliderLocked) R.drawable.ic_round_piano_off_24 else R.drawable.ic_round_piano_24))
-        playerView.findViewById<ImageButton>(R.id.exo_slider_lock).setOnClickListener {
-            sliderLocked = if(sliderLocked){
-                (it as ImageButton).setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.ic_round_piano_24))
-                toastString("Turned On Volume & Brightness gestures.")
-                false
-            } else{
-                (it as ImageButton).setImageDrawable(AppCompatResources.getDrawable(this,R.drawable.ic_round_piano_off_24))
-                toastString("Turned Off Volume & Brightness gestures.")
-                true
-            }
-            saveData("sliderLock",sliderLocked,this)
-        }
-
-        //LockButton
-        var prevSliderLocked = sliderLocked
+        //Lock Button
         var locked = false
         val container = playerView.findViewById<View>(R.id.exo_controller_cont)
         val screen = playerView.findViewById<View>(R.id.exo_black_screen)
         val lockButton = playerView.findViewById<ImageButton>(R.id.exo_unlock)
         val timeline = playerView.findViewById<ExtendedTimeBar>(R.id.exo_progress)
         playerView.findViewById<ImageButton>(R.id.exo_lock).setOnClickListener{
-            prevSliderLocked = sliderLocked
-            sliderLocked = true
             locked = true
             screen.visibility = View.GONE
             container.visibility = View.GONE
@@ -262,7 +251,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             timeline.setForceDisabled(true)
         }
         lockButton.setOnClickListener {
-            sliderLocked = prevSliderLocked
             locked = false
             screen.visibility = View.VISIBLE
             container.visibility = View.VISIBLE
@@ -270,10 +258,15 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             timeline.setForceDisabled(false)
         }
 
-        //+85 Button
-        playerView.findViewById<View>(R.id.exo_skip).setOnClickListener {
-            if(isInitialized)
-                exoPlayer.seekTo(exoPlayer.currentPosition + 85000)
+        //Skip Time Button
+        if(settings.skipTime>0) {
+            playerView.findViewById<TextView>(R.id.exo_skip_time).text = settings.skipTime.toString()
+            playerView.findViewById<View>(R.id.exo_skip).setOnClickListener {
+                if (isInitialized)
+                    exoPlayer.seekTo(exoPlayer.currentPosition + settings.skipTime * 1000)
+            }
+        }else{
+            playerView.findViewById<View>(R.id.exo_skip).visibility = View.GONE
         }
 
         //Player UI Visibility Handler
@@ -312,104 +305,151 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             }
         }
 
-        //Brightness
-        var brightnessTimer = Timer()
-        exoBrightnessCont.visibility = View.GONE
+        val rewindText = playerView.findViewById<TextView>(R.id.exo_fast_rewind_anim)
+        rewindText.text = "-${settings.seekTime}"
+        val forwardText = playerView.findViewById<TextView>(R.id.exo_fast_forward_anim)
+        forwardText.text = "+${settings.seekTime}"
 
-        fun brightnessHide(){
-            brightnessTimer.cancel()
-            brightnessTimer.purge()
-            val timerTask: TimerTask = object : TimerTask() {
-                override fun run() {
-                    handler.post(brightnessRunnable)
-                }
-            }
-            brightnessTimer = Timer()
-            brightnessTimer.schedule(timerTask, 3000)
-        }
-        exoBrightness.value = clamp(System.getInt(contentResolver, System.SCREEN_BRIGHTNESS,127)/255f*10f,0f,10f)
-        exoBrightness.addOnChangeListener { _, value, _ ->
-            val lp = window.attributes
-            lp.screenBrightness = value / 10f
-            window.attributes = lp
-            brightnessHide()
-        }
-
-        //FastRewind (Left Panel)
+        val fastForwardCard = playerView.findViewById<View>(R.id.exo_fast_forward)
         val fastRewindCard = playerView.findViewById<View>(R.id.exo_fast_rewind)
-        val fastRewindDetector = GestureDetector(this, object : DoubleClickListener() {
-            override fun onDoubleClick(event: MotionEvent?) {
-                if(!locked && isInitialized) {
-                    exoPlayer.seekTo(exoPlayer.currentPosition - 10000)
-                    viewDoubleTapped(fastRewindCard,event,playerView.findViewById(R.id.exo_fast_rewind_anim))
+
+        if(settings.gestures || settings.doubleTap) {
+            //Brightness
+            var brightnessTimer = Timer()
+            exoBrightnessCont.visibility = View.GONE
+
+            fun brightnessHide() {
+                brightnessTimer.cancel()
+                brightnessTimer.purge()
+                val timerTask: TimerTask = object : TimerTask() {
+                    override fun run() {
+                        handler.post(brightnessRunnable)
+                    }
                 }
+                brightnessTimer = Timer()
+                brightnessTimer.schedule(timerTask, 3000)
+            }
+            exoBrightness.value = clamp(
+                System.getInt(contentResolver, System.SCREEN_BRIGHTNESS, 127) / 255f * 10f,
+                0f,
+                10f
+            )
+            exoBrightness.addOnChangeListener { _, value, _ ->
+                val lp = window.attributes
+                lp.screenBrightness = value / 10f
+                window.attributes = lp
+                brightnessHide()
             }
 
-            override fun onScrollYClick(y: Float) {
-                if(!sliderLocked) {
-                    exoBrightness.value = clamp(exoBrightness.value + y / 50, 0f, 10f)
-                    if(exoBrightnessCont.visibility != View.VISIBLE){
-                        exoBrightnessCont.visibility = View.VISIBLE
+            //FastRewind (Left Panel)
+
+            val fastRewindDetector = GestureDetector(this, object : DoubleClickListener() {
+                override fun onDoubleClick(event: MotionEvent?) {
+                    if (!locked && isInitialized && settings.doubleTap) {
+                        exoPlayer.seekTo(exoPlayer.currentPosition - settings.seekTime*1000)
+                        viewDoubleTapped(
+                            fastRewindCard,
+                            event,
+                            rewindText
+                        )
+                    }
+                }
+
+                override fun onScrollYClick(y: Float) {
+                    if (!locked && settings.gestures) {
+                        exoBrightness.value = clamp(exoBrightness.value + y / 50, 0f, 10f)
+                        if (exoBrightnessCont.visibility != View.VISIBLE) {
+                            exoBrightnessCont.visibility = View.VISIBLE
+                        }
                         exoBrightnessCont.alpha = 1f
                     }
                 }
+
+                override fun onSingleClick(event: MotionEvent?) = handleController()
+            })
+            val rewindArea = playerView.findViewById<View>(R.id.exo_rewind_area)
+            rewindArea.isClickable = true
+            rewindArea.setOnTouchListener { v, event ->
+                fastRewindDetector.onTouchEvent(event)
+                v.performClick()
+                true
             }
-            override fun onSingleClick(event: MotionEvent?) = handleController()
-        })
-        playerView.findViewById<View>(R.id.exo_rewind_area).setOnTouchListener { v, event ->
-            fastRewindDetector.onTouchEvent(event)
-            v.performClick()
-            true
-        }
 
-        //Volume
-        var volumeTimer = Timer()
-        exoVolumeCont.visibility = View.GONE
+            //Volume
+            var volumeTimer = Timer()
+            exoVolumeCont.visibility = View.GONE
 
-        val volumeMax = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-        exoVolume.value = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()/volumeMax*10
-        fun volumeHide(){
-            volumeTimer.cancel()
-            volumeTimer.purge()
-            val timerTask: TimerTask = object : TimerTask() {
-                override fun run() {
-                    handler.post(volumeRunnable)
+            val volumeMax = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            exoVolume.value =
+                audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() / volumeMax * 10
+            fun volumeHide() {
+                volumeTimer.cancel()
+                volumeTimer.purge()
+                val timerTask: TimerTask = object : TimerTask() {
+                    override fun run() {
+                        handler.post(volumeRunnable)
+                    }
                 }
+                volumeTimer = Timer()
+                volumeTimer.schedule(timerTask, 3000)
             }
-            volumeTimer = Timer()
-            volumeTimer.schedule(timerTask, 3000)
-        }
-        exoVolume.addOnChangeListener { _, value, _ ->
-            val volume = (value/10*volumeMax).roundToInt()
-            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,volume,0)
-            volumeHide()
-        }
+            exoVolume.addOnChangeListener { _, value, _ ->
+                val volume = (value / 10 * volumeMax).roundToInt()
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0)
+                volumeHide()
+            }
 
-        //FastForward (Right Panel)
-        val fastForwardCard = playerView.findViewById<View>(R.id.exo_fast_forward)
-        val fastForwardDetector = GestureDetector(this, object : DoubleClickListener() {
-            override fun onDoubleClick(event: MotionEvent?) {
-                if(!locked && isInitialized) {
-                    exoPlayer.seekTo(exoPlayer.currentPosition + 10000)
-                    viewDoubleTapped(fastForwardCard,event,playerView.findViewById(R.id.exo_fast_forward_anim))
+            //FastForward (Right Panel)
+
+            val fastForwardDetector = GestureDetector(this, object : DoubleClickListener() {
+                override fun onDoubleClick(event: MotionEvent?) {
+                    if (!locked && isInitialized && settings.doubleTap) {
+                        exoPlayer.seekTo(exoPlayer.currentPosition + settings.seekTime*1000)
+                        viewDoubleTapped(
+                            fastForwardCard,
+                            event,
+                            forwardText
+                        )
+                    }
                 }
-            }
-            override fun onScrollYClick(y: Float) {
-                if(!sliderLocked) {
-                    exoVolume.value = clamp(exoVolume.value+y/50,0f,10f)
-                    if(exoVolumeCont.visibility != View.VISIBLE){
-                        exoVolumeCont.visibility = View.VISIBLE
+
+                override fun onScrollYClick(y: Float) {
+                    if (!locked && settings.gestures) {
+                        exoVolume.value = clamp(exoVolume.value + y / 50, 0f, 10f)
+                        if (exoVolumeCont.visibility != View.VISIBLE) {
+                            exoVolumeCont.visibility = View.VISIBLE
+                        }
                         exoVolumeCont.alpha = 1f
                     }
                 }
-            }
 
-            override fun onSingleClick(event: MotionEvent?) = handleController()
-        })
-        playerView.findViewById<View>(R.id.exo_forward_area).setOnTouchListener { v, event ->
-            fastForwardDetector.onTouchEvent(event)
-            v.performClick()
-            true
+                override fun onSingleClick(event: MotionEvent?) = handleController()
+            })
+            val forwardArea = playerView.findViewById<View>(R.id.exo_forward_area)
+            forwardArea.isClickable = true
+            forwardArea.setOnTouchListener { v, event ->
+                fastForwardDetector.onTouchEvent(event)
+                v.performClick()
+                true
+            }
+        }
+
+        if(!settings.doubleTap){
+
+            playerView.findViewById<View>(R.id.exo_fast_forward_button_cont).visibility = View.VISIBLE
+            playerView.findViewById<View>(R.id.exo_fast_rewind_button_cont).visibility = View.VISIBLE
+            playerView.findViewById<ImageButton>(R.id.exo_fast_forward_button).setOnClickListener {
+                if(isInitialized) {
+                    exoPlayer.seekTo(exoPlayer.currentPosition + settings.seekTime * 1000)
+                    viewDoubleTapped(fastForwardCard,text = forwardText)
+                }
+            }
+            playerView.findViewById<ImageButton>(R.id.exo_fast_rewind_button).setOnClickListener {
+                if(isInitialized) {
+                    exoPlayer.seekTo(exoPlayer.currentPosition - settings.seekTime * 1000)
+                    viewDoubleTapped(fastRewindCard,text = rewindText)
+                }
+            }
         }
 
         //Handle Media
@@ -417,6 +457,15 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         model.setMedia(media)
 
         model.watchAnimeWatchSources = if(media.isAdult) HAnimeSources else AnimeSources
+
+        videoInfo = playerView.findViewById(R.id.exo_video_info)
+        serverInfo = playerView.findViewById(R.id.exo_server_info)
+
+        if(!settings.videoInfo) {
+            videoInfo.visibility = View.GONE
+            serverInfo.visibility = View.GONE
+        }
+        serverInfo.text = model.watchAnimeWatchSources!!.names[media.selected!!.source]
 
         model.epChanged.observe(this) {
             epChanging = !it
@@ -429,6 +478,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     media.selected = model.loadSelected(media)
                     model.setMedia(media)
                     currentEpisodeIndex = episodeArr.indexOf(it.number)
+                    episodeTitle.setText(episodeTitleArr[currentEpisodeIndex],false)
                     if (isInitialized) releasePlayer()
                     playbackPosition = loadData("${media.id}_${it.number}", this) ?: 0
                     initPlayer()
@@ -445,7 +495,13 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         episodeArr = media.anime!!.episodes!!.keys.toList()
         currentEpisodeIndex = episodeArr.indexOf(media.anime!!.selectedEpisode!!)
 
-        //Next Episode
+        episodeTitleArr = arrayListOf()
+        media.anime!!.episodes!!.forEach {
+            val episode = it.value
+            episodeTitleArr.add("${episode.number} ${if(episode.filler) "[Filler]" else ""} ${if(!episode.title.isNullOrEmpty() && episode.title!="null") " : "+episode.title else ""}")
+        }
+
+        //Episode Change
         fun change(index:Int){
             changingServer = false
             saveData("${media.id}_${media.anime!!.selectedEpisode}",exoPlayer.currentPosition,this)
@@ -458,6 +514,25 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 cancellable = false
             )
         }
+
+        //EpisodeSelector
+        episodeTitle.setText(episodeTitleArr[currentEpisodeIndex])
+        var wasPlaying = false
+        episodeTitle.setSafeOnClickListener {
+            if(isInitialized) {
+                wasPlaying = exoPlayer.isPlaying
+                exoPlayer.pause()
+            }
+        }
+        episodeTitle.setOnDismissListener {
+            if(isInitialized && wasPlaying) exoPlayer.play()
+        }
+        episodeTitle.setAdapter(ArrayAdapter(this,R.layout.item_dropdown,episodeTitleArr))
+        episodeTitle.setOnItemClickListener { _, _, i, _ ->
+            change(i)
+            episodeTitle.clearFocus()
+        }
+        //Next Episode
         playerView.findViewById<ImageButton>(R.id.exo_next_ep).setOnClickListener {
             if(episodeArr.size>currentEpisodeIndex+1 && isInitialized) {
                 progress { change(currentEpisodeIndex + 1) }
@@ -502,7 +577,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //Speed
         val speeds     = arrayOf( 0.25f , 0.33f , 0.5f , 0.66f , 0.75f , 1f , 1.25f , 1.33f , 1.5f , 1.66f , 1.75f , 2f )
         val speedsName = speeds.map { "${it}x" }.toTypedArray()
-        var curSpeed   = loadData("${media.id}_speed",this)?:5
+        var curSpeed   = loadData("${media.id}_speed",this)?:settings.defaultSpeed
 
         playbackParameters = PlaybackParameters(speeds[curSpeed])
         var speed: Float
@@ -537,9 +612,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     @SuppressLint("SetTextI18n")
     private fun initPlayer(){
         checkNotch()
-        //Title
-        episodeTitle.text = "Episode ${episode.number}${if(episode.title!="" && episode.title!=null && episode.title!="null") " : "+episode.title else ""}${if(episode.filler) "\n[Filler]" else ""}"
-        episodeTitle.isSelected = true
+
         saveData("${media.id}_current_ep",media.anime!!.selectedEpisode!!,this)
 
         val set = loadData<MutableSet<Int>>("continue_ANIME",this)?: mutableSetOf()
@@ -691,11 +764,13 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     private var wasPlaying = false
     override fun onWindowFocusChanged(hasFocus: Boolean) {
-        if(isInitialized && !hasFocus) wasPlaying = exoPlayer.isPlaying
-        if (hasFocus) {
-            if(isInitialized && wasPlaying) exoPlayer.play()
-        } else {
-            if(isInitialized) exoPlayer.pause()
+        if(settings.focusPause) {
+            if (isInitialized && !hasFocus) wasPlaying = exoPlayer.isPlaying
+            if (hasFocus) {
+                if (isInitialized && wasPlaying) exoPlayer.play()
+            } else {
+                if (isInitialized) exoPlayer.pause()
+            }
         }
         super.onWindowFocusChanged(hasFocus)
     }
@@ -717,7 +792,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val width = (exoPlayer.videoFormat?:return).width
         saveData("maxHeight",height)
         saveData("maxWidth",width)
-        playerView.findViewById<TextView>(R.id.exo_video_details).text = "$width x $height"
+        videoInfo.text = "${episode.selectedStream}\n$width x $height"
     }
 
     override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
@@ -740,7 +815,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
     }
 
-    var isBuffering = true
+    private var isBuffering = true
     override fun onPlaybackStateChanged(playbackState: Int) {
         if (playbackState == ExoPlayer.STATE_READY && episodeLength==0f) {
             episodeLength = exoPlayer.duration.toFloat()
@@ -815,7 +890,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val timerTask = object : TimerTask() {
             override fun run() {
                 handler.post {
-                    ObjectAnimator.ofFloat(v, "alpha", 1f, 0f).setDuration(150).start()
+                    ObjectAnimator.ofFloat(v, "alpha", v.alpha, 0f).setDuration(150).start()
                     ObjectAnimator.ofFloat(text, "alpha", 1f, 0f).setDuration(150).start()
                 }
             }
@@ -833,17 +908,21 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             t2.schedule(timerTask, 450)
         }
     }
-    private fun viewDoubleTapped(v:View,event:MotionEvent?,text:TextView){
-        playerView.hideController()
-        if(event!=null) v.circularReveal(event.x.toInt(), event.y.toInt(), 300)
-
-        ObjectAnimator.ofFloat(v,"alpha",1f,1f).setDuration(600).start()
-        ObjectAnimator.ofFloat(v,"alpha",0f,1f).setDuration(300).start()
+    private fun viewDoubleTapped(v:View,event:MotionEvent?=null,text:TextView){
         ObjectAnimator.ofFloat(text,"alpha",1f,1f).setDuration(600).start()
         ObjectAnimator.ofFloat(text,"alpha",0f,1f).setDuration(150).start()
 
-        val a = (text.compoundDrawables[1] as Animatable)
-        if(!a.isRunning) a.start()
+        (text.compoundDrawables[1] as Animatable).apply {
+            if(!isRunning) start()
+        }
+
+        if (event != null) {
+            playerView.hideController()
+            v.circularReveal(event.x.toInt(), event.y.toInt(), 300)
+            ObjectAnimator.ofFloat(v, "alpha", 1f, 1f).setDuration(600).start()
+            ObjectAnimator.ofFloat(v, "alpha", 0f, 1f).setDuration(300).start()
+        }
+
         v.postDelayed({
             hideLayer(v,text)
         },450)

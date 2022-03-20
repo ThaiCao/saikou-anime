@@ -39,10 +39,10 @@ class SettingsActivity : AppCompatActivity() {
 
         println(AnimeSources.names)
         binding.animeSource.setText(AnimeSources.names[loadData("settings_default_anime_source") ?: 0])
-        binding.animeSource.setAdapter(null)
         binding.animeSource.setAdapter(ArrayAdapter(this, R.layout.item_dropdown, AnimeSources.names))
         binding.animeSource.setOnItemClickListener { _, _, i, _ ->
             saveData("settings_default_anime_source",i)
+            binding.animeSource.clearFocus()
         }
 
         binding.settingsPlayer.setOnClickListener{
@@ -50,10 +50,10 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         binding.mangaSource.setText(MangaSources.names[loadData("settings_default_manga_source") ?: 0])
-        binding.mangaSource.setAdapter(null)
         binding.mangaSource.setAdapter(ArrayAdapter(this, R.layout.item_dropdown, MangaSources.names))
         binding.mangaSource.setOnItemClickListener { _, _, i, _ ->
             saveData("settings_default_manga_source",i)
+            binding.mangaSource.clearFocus()
         }
 
         binding.settingsReader.setOnClickListener{
