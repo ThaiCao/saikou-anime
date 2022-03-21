@@ -1,6 +1,8 @@
 package ani.saikou.media
 
 import android.app.Activity
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -121,19 +123,21 @@ class MediaDetailsViewModel:ViewModel() {
 
     val epChanged = MutableLiveData(true)
     fun onEpisodeClick(media: Media, i:String,manager:FragmentManager,launch:Boolean=true,cancellable:Boolean=true){
-        if(manager.findFragmentByTag("dialog")==null && !manager.isDestroyed) {
-            if (media.anime?.episodes?.get(i)!=null) {
-                media.anime.selectedEpisode = i
+        Handler(Looper.getMainLooper()).post{
+            if(manager.findFragmentByTag("dialog")==null && !manager.isDestroyed) {
+                if (media.anime?.episodes?.get(i)!=null) {
+                    media.anime.selectedEpisode = i
+                }
+                else {
+                    toastString("Couldn't find episode : $i")
+                    return@post
+                }
+                media.selected = this.loadSelected(media)
+                if (media.selected!!.stream != null)
+                    SelectorDialogFragment.newInstance(media.selected!!.stream, launch, cancellable).show(manager, "dialog")
+                else
+                    SelectorDialogFragment.newInstance(la = launch, ca = cancellable).show(manager, "dialog")
             }
-            else {
-                toastString("Couldn't find episode : $i")
-                return
-            }
-            media.selected = this.loadSelected(media)
-            if (media.selected!!.stream != null)
-                SelectorDialogFragment.newInstance(media.selected!!.stream, launch, cancellable).show(manager, "dialog")
-            else
-                SelectorDialogFragment.newInstance(la = launch, ca = cancellable).show(manager, "dialog")
         }
     }
 

@@ -72,9 +72,9 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
                         fun load() {
                             if (episode?.streamLinks?.containsKey(selected) == true) {
                                 if (episode!!.streamLinks[selected]!!.quality.size >= media!!.selected!!.quality) {
-                                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedStream =
+                                    media!!.anime!!.episodes?.get(media!!.anime!!.selectedEpisode!!)?.selectedStream =
                                         selected
-                                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedQuality =
+                                    media!!.anime!!.episodes?.get(media!!.anime!!.selectedEpisode!!)?.selectedQuality =
                                         media!!.selected!!.quality
                                     dismiss()
                                     startExoplayer(media!!)
@@ -105,7 +105,9 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
                         }
                         fun load() {
                             binding.selectorProgressBar.visibility = View.GONE
-                            media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode?:""] = episode!!
+                            media!!.anime?.episodes?.set(media!!.anime?.selectedEpisode?:"",
+                                episode!!
+                            )
                             binding.selectorRecyclerView.layoutManager = LinearLayoutManager(
                                 requireActivity(),
                                 LinearLayoutManager.VERTICAL,

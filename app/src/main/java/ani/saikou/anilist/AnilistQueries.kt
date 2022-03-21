@@ -463,7 +463,7 @@ class AnilistQueries{
         val response = executeQuery(""" { Page(page: 1, perPage:30) { pageInfo { total currentPage hasNextPage } recommendations(sort: RATING_DESC, onList: true) { rating userRating mediaRecommendation { id idMal isAdult mediaListEntry {progress score(format:POINT_100) status} chapters isFavourite episodes nextAiringEpisode {episode} meanScore isFavourite title {english romaji userPreferred } type status(version: 2) bannerImage coverImage { large } } } } } """)
         val responseArray = arrayListOf<Media>()
         val ids = arrayListOf<Int>()
-        if (response?.get("data")!=null && response["data"] !=JsonNull)
+        if (response?.get("data")!=null && response["data"] != JsonNull)
             response["data"]?.apply {  if(this==jsonObject) jsonObject["Page"]?.apply { if(this==jsonObject) jsonObject["recommendations"]?.apply { if(this==jsonArray) jsonArray.reversed().forEach{
                 val json = it.jsonObject["mediaRecommendation"]
                 if(json!=null && json!=JsonNull){
@@ -523,6 +523,7 @@ class AnilistQueries{
         val unsorted = mutableMapOf<String,ArrayList<Media>>()
         val all = arrayListOf<Media>()
         val collection = ((response?:return unsorted)["data"]?:return unsorted).jsonObject["MediaListCollection"]?:return unsorted
+        if(collection == JsonNull) return unsorted
         collection.jsonObject["lists"]?.jsonArray?.forEach { i ->
             val name = i.jsonObject["name"].toString().trim('"')
             unsorted[name] = arrayListOf()
@@ -609,10 +610,13 @@ class AnilistQueries{
             executeQuery("""{GenreCollection}""", force = true)?.get("data")?.apply {
                 if(this!=JsonNull){
                     genres = arrayListOf()
-                    this.jsonObject["GenreCollection"]!!.jsonArray.forEach { genre ->
-                        genres!!.add(genre.toString().trim('"'))
+                    this.jsonObject["GenreCollection"]!!.also {
+                        if(it!=jsonArray) return@also
+                        it.jsonArray.forEach { genre ->
+                            genres!!.add(genre.toString().trim('"'))
+                        }
+                        saveData("genres_list", genres!!)
                     }
-                    saveData("genres_list",genres!!)
                 }
             }
         }
@@ -620,11 +624,14 @@ class AnilistQueries{
             executeQuery("""{ MediaTagCollection { name isAdult } }""", force = true)?.get("data")?.apply {
                 if(this!=JsonNull){
                     tags = arrayListOf()
-                    this.jsonObject["MediaTagCollection"]!!.jsonArray.forEach{
-                        if(it.jsonObject["isAdult"].toString()=="true")
-                            tags!!.add(it.jsonObject["name"]!!.toString().trim('"'))
+                    this.jsonObject["MediaTagCollection"]!!.also {
+                        if(it!=jsonArray) return@also
+                        it.jsonArray.forEach{ i->
+                            if(i.jsonObject["isAdult"].toString()=="true")
+                                tags!!.add(i.jsonObject["name"]!!.toString().trim('"'))
+                        }
+                        saveData("tags_list",tags!!)
                     }
-                    saveData("tags_list",tags!!)
                 }
             }
         }

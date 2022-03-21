@@ -406,8 +406,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             exoVolumeCont.visibility = View.GONE
 
             val volumeMax = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-            exoVolume.value =
-                audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() / volumeMax * 10
+            exoVolume.value = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() / volumeMax * 10
             fun volumeHide() {
                 volumeTimer.cancel()
                 volumeTimer.purge()
