@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -48,18 +47,6 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = BottomSheetSelectorBinding.inflate(inflater, container, false)
         return binding.root
-    }
-
-    private fun onCheckboxClicked(view: View) {
-        if (view is CheckBox) {
-            val checked: Boolean = view.isChecked
-
-            when (view.id) {
-                R.id.selectorMakeDefault-> {
-                    makeDefault = checked
-                }
-            }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -110,9 +97,11 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
                         binding.selectorRecyclerView.updateLayoutParams<ViewGroup.MarginLayoutParams> { bottomMargin = navBarHeight }
                         binding.selectorRecyclerView.adapter = null
                         binding.selectorProgressBar.visibility = View.VISIBLE
-
+                        makeDefault = loadData("make_default")?:true
+                        binding.selectorMakeDefault.isChecked = makeDefault
                         binding.selectorMakeDefault.setOnClickListener {
-                            onCheckboxClicked(it)
+                            makeDefault = binding.selectorMakeDefault.isChecked
+                            saveData("make_default",makeDefault)
                         }
                         fun load() {
                             binding.selectorProgressBar.visibility = View.GONE

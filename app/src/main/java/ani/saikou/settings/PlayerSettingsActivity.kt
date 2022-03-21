@@ -25,7 +25,7 @@ class PlayerSettingsActivity : AppCompatActivity() {
             bottomMargin = navBarHeight
         }
 
-        val settings = loadData<PlayerSettings>(player)?: PlayerSettings()
+        val settings = loadData<PlayerSettings>(player)?: PlayerSettings().apply { saveData(player,this) }
 
         //Video
         binding.playerSettingsVideoInfo.isChecked = settings.videoInfo
@@ -59,7 +59,41 @@ class PlayerSettingsActivity : AppCompatActivity() {
             }.show()
         }
 
+        //Auto
+        binding.playerSettingsAutoPlay.isChecked = settings.autoPlay
+        binding.playerSettingsAutoPlay.setOnCheckedChangeListener { _, isChecked ->
+            settings.autoPlay = isChecked
+            saveData(player,settings)
+        }
+        binding.playerSettingsAutoSkip.isChecked = settings.autoSkipFiller
+        binding.playerSettingsAutoSkip.setOnCheckedChangeListener { _, isChecked ->
+            settings.autoSkipFiller = isChecked
+            saveData(player,settings)
+        }
+
+        //Update Progress
+        binding.playerSettingsAskUpdateProgress.isChecked = settings.askIndividual
+        binding.playerSettingsAskUpdateProgress.setOnCheckedChangeListener { _, isChecked ->
+            settings.askIndividual = isChecked
+            saveData(player,settings)
+        }
+        binding.playerSettingsAskUpdateHentai.isChecked = settings.updateForH
+        binding.playerSettingsAskUpdateHentai.setOnCheckedChangeListener { _, isChecked ->
+            settings.updateForH = isChecked
+            saveData(player,settings)
+        }
+        binding.playerSettingsCompletePercentage.value = settings.watchPercentage*100
+        binding.playerSettingsCompletePercentage.addOnChangeListener { _, value, _ ->
+            settings.watchPercentage = value/100
+            saveData(player,settings)
+        }
+
         //Behaviour
+        binding.playerSettingsAlwaysContinue.isChecked = settings.alwaysContinue
+        binding.playerSettingsAlwaysContinue.setOnCheckedChangeListener { _, isChecked ->
+            settings.alwaysContinue = isChecked
+            saveData(player,settings)
+        }
 
         binding.playerSettingsPauseVideo.isChecked = settings.focusPause
         binding.playerSettingsPauseVideo.setOnCheckedChangeListener { _, isChecked ->

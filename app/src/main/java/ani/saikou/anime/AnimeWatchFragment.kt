@@ -19,9 +19,12 @@ import ani.saikou.anime.source.HAnimeSources
 import ani.saikou.anime.source.WatchSources
 import ani.saikou.databinding.FragmentAnimeWatchBinding
 import ani.saikou.dp
+import ani.saikou.loadData
 import ani.saikou.media.Media
 import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.navBarHeight
+import ani.saikou.saveData
+import ani.saikou.settings.PlayerSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -52,6 +55,8 @@ open class AnimeWatchFragment : Fragment() {
     var continueEp: Boolean = false
     var loaded = false
 
+    lateinit var playerSettings : PlayerSettings
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -68,6 +73,8 @@ open class AnimeWatchFragment : Fragment() {
 
         var maxGridSize = (screenWidth / 100f).roundToInt()
         maxGridSize = max(4,maxGridSize-(maxGridSize%2))
+
+        playerSettings = loadData("player_settings")?:PlayerSettings().apply { saveData("player_settings",this) }
 
         val gridLayoutManager = GridLayoutManager(requireContext(), maxGridSize)
 

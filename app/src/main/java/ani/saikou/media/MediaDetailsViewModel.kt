@@ -82,21 +82,32 @@ class MediaDetailsViewModel:ViewModel() {
 
     private var episode: MutableLiveData<Episode?> = MutableLiveData<Episode?>(null)
     fun getEpisode() : LiveData<Episode?> = episode
-    fun loadEpisodeStreams(ep: Episode,i:Int){
-        episode.postValue(watchAnimeWatchSources?.get(i)?.getStreams(ep)?.apply {
-            this.allStreams = true
-        }?:ep)
-        MainScope().launch(Dispatchers.Main) {
-            episode.value = null
+    fun loadEpisodeStreams(ep: Episode,i:Int,post:Boolean=true){
+        if(!ep.allStreams || ep.streamLinks.isNullOrEmpty()) {
+            watchAnimeWatchSources?.get(i)?.getStreams(ep)?.apply {
+                this.allStreams = true
+            }
         }
-    }
-    fun loadEpisodeStream(ep: Episode,selected: Selected):Boolean{
-        return if(selected.stream!=null) {
-            episode.postValue(watchAnimeWatchSources?.get(selected.source)?.getStream(ep, selected.stream!!)?.apply {
-                this.allStreams = false
-            })
+        if(post) {
+            episode.postValue(ep)
             MainScope().launch(Dispatchers.Main) {
                 episode.value = null
+            }
+        }
+
+    }
+    fun loadEpisodeStream(ep: Episode,selected: Selected,post: Boolean=true):Boolean{
+        return if(selected.stream!=null) {
+            if(ep.streamLinks.isNullOrEmpty()) {
+                watchAnimeWatchSources?.get(selected.source)?.getStream(ep, selected.stream!!)?.apply {
+                    this.allStreams = false
+                }
+            }
+            if (post) {
+                episode.postValue(ep)
+                MainScope().launch(Dispatchers.Main) {
+                    episode.value = null
+                }
             }
             true
         } else false
