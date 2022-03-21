@@ -20,9 +20,11 @@ import android.text.InputFilter
 import android.text.Spanned
 import android.util.AttributeSet
 import android.view.*
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.animation.*
 import android.widget.AutoCompleteTextView
 import android.widget.DatePicker
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -30,6 +32,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.MutableLiveData
 import androidx.multidex.MultiDex
@@ -509,7 +512,7 @@ class ExtendedTimeBar(
 
 abstract class DoubleClickListener : GestureDetector.SimpleOnGestureListener() {
     private var timer: Timer? = null //at class level;
-    private val delay:Long = 400
+    private val delay:Long = 200
 
     override fun onSingleTapUp(e: MotionEvent?): Boolean {
         processSingleClickEvent(e)
@@ -534,29 +537,29 @@ abstract class DoubleClickListener : GestureDetector.SimpleOnGestureListener() {
     private fun processSingleClickEvent(e:MotionEvent?) {
         val handler = Handler(Looper.getMainLooper())
         val mRunnable = Runnable {
-            onSingleClick(e) //Do what ever u want on single click
+            onSingleClick(e)
         }
-        val timerTask: TimerTask = object : TimerTask() {
-            override fun run() {
-                handler.post(mRunnable)
-            }
+        timer = Timer().apply {
+            schedule(object : TimerTask() {
+                override fun run() {
+                    handler.post(mRunnable)
+                }
+            }, delay)
         }
-        timer = Timer()
-        timer!!.schedule(timerTask, delay)
     }
 
     private fun processDoubleClickEvent(e: MotionEvent?) {
-        if (timer != null) {
-            timer!!.cancel() //Cancels Running Tasks or Waiting Tasks.
-            timer!!.purge() //Frees Memory by erasing cancelled Tasks.
+        timer?.apply {
+            cancel()
+            purge()
         }
         onDoubleClick(e) //Do what ever u want on Double Click
     }
 
     private fun processLongClickEvent(e: MotionEvent?) {
-        if (timer != null) {
-            timer!!.cancel() //Cancels Running Tasks or Waiting Tasks.
-            timer!!.purge() //Frees Memory by erasing cancelled Tasks.
+        timer?.apply {
+            cancel()
+            purge()
         }
         onLongClick(e) //Do what ever u want on Double Click
     }
@@ -750,6 +753,10 @@ fun toastString(s: String?,activity: Activity?=null){
         (activity?:currActivity())?.apply{
             runOnUiThread {
                 val snackBar = Snackbar.make(window.decorView.findViewById(android.R.id.content), s, Snackbar.LENGTH_LONG)
+                snackBar.view.updateLayoutParams<FrameLayout.LayoutParams> {
+                    gravity = (Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM)
+                    width = WRAP_CONTENT
+                }
                 snackBar.view.translationY = -(navBarHeight.dp + 32f)
                 snackBar.view.setOnClickListener {
                     snackBar.dismiss()

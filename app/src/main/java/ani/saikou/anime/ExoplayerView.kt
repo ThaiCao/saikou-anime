@@ -5,6 +5,9 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
@@ -17,8 +20,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings.System
+import android.support.v4.media.session.MediaSessionCompat
 import android.util.TypedValue
 import android.view.*
+import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.ImageButton
@@ -30,6 +35,7 @@ import androidx.core.math.MathUtils.clamp
 import androidx.core.view.WindowCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import androidx.media.session.MediaButtonReceiver
 import ani.saikou.*
 import ani.saikou.anilist.Anilist
 import ani.saikou.anime.source.AnimeSources
@@ -40,6 +46,7 @@ import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.settings.PlayerSettings
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector
@@ -54,6 +61,7 @@ import com.google.android.exoplayer2.upstream.HttpDataSource
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.material.slider.Slider
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -300,14 +308,26 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 volumeRunnable.run()
             }
         }
+        val overshoot = AnimationUtils.loadInterpolator(this,R.anim.over_shoot)
         fun handleController(){
             if(playerView.isControllerFullyVisible){
-                playerView.hideController()
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",1f,0f).setDuration(200).start()
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=200;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=200;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",0f,-128f).apply { interpolator=overshoot;duration=200;start() }
+                playerView.postDelayed({ playerView.hideController() },200)
             }else{
                 checkNotch()
                 playerView.showController()
                 ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",0f,1f).setDuration(200).start()
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=200;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=200;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",-128f,0f).apply { interpolator=overshoot;duration=200;start() }
             }
+        }
+
+        playerView.findViewById<View>(R.id.exo_full_area).setOnClickListener {
+            handleController()
         }
 
         val rewindText = playerView.findViewById<TextView>(R.id.exo_fast_rewind_anim)
@@ -533,6 +553,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 exoPlayer.pause()
             }
         }
+        (episodeTitle.parent as? TextInputLayout)?.setEndIconOnClickListener {
+            if(isInitialized && wasPlaying) exoPlayer.play()
+        }
         episodeTitle.setOnDismissListener {
             if(isInitialized && wasPlaying) exoPlayer.play()
         }
@@ -576,13 +599,23 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 2 -> AspectRatioFrameLayout.RESIZE_MODE_FILL
                 else -> AspectRatioFrameLayout.RESIZE_MODE_FIT
             }
-            toastString("Stretch Mode set to " + when(isFullscreen) {
+            toastString(when(isFullscreen) {
                 0 -> "Original"
                 1 -> "Zoom"
                 2 -> "Stretch"
                 else -> "Original"
             })
             saveData("${media.id}_fullscreenInt",isFullscreen,this)
+        }
+
+        //Cast
+        if(settings.cast) {
+            playerView.findViewById<ImageButton>(R.id.exo_cast).apply {
+                visibility = View.VISIBLE
+                setSafeOnClickListener {
+                    cast()
+                }
+            }
         }
 
         //Speed
@@ -658,11 +691,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val dataSourceFactory = DataSource.Factory {
             val dataSource: HttpDataSource = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true).createDataSource()
             dataSource.setRequestProperty("User-Agent","Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36")
-            if(stream.headers!=null) {
-                stream.headers.forEach{
-                    dataSource.setRequestProperty(it.key,it.value)
+            if(stream.headers!=null)
+                stream.headers.forEach {
+                    dataSource.setRequestProperty(it.key, it.value)
                 }
-            }
             dataSource
         }
         cacheFactory = CacheDataSource.Factory().apply {
@@ -735,10 +767,17 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 this.playbackParameters = this@ExoplayerView.playbackParameters
                 setMediaItem(mediaItem)
                 prepare()
-                if(playbackPosition<duration)
-                    seekTo(playbackPosition)
+                seekTo(playbackPosition)
             }
         playerView.player = exoPlayer
+
+        val mediaButtonReceiver = ComponentName(this, MediaButtonReceiver::class.java)
+        MediaSessionCompat(this, "Player", mediaButtonReceiver, null).let { media ->
+            val mediaSessionConnector = MediaSessionConnector(media)
+            mediaSessionConnector.setPlayer(exoPlayer)
+            media.isActive = true
+        }
+
         exoPlayer.addListener(this)
         isInitialized = true
     }
@@ -826,6 +865,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         saveData("maxHeight",height)
         saveData("maxWidth",width)
         videoInfo.text = "${episode.selectedStream}\n$width x $height"
+
+        if(exoPlayer.duration<playbackPosition)
+            exoPlayer.seekTo(0)
     }
 
     private var preloading = false
@@ -998,5 +1040,31 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         v.postDelayed({
             hideLayer(v,text)
         },450)
+    }
+
+    private fun cast(){
+        val stream = episode.streamLinks[episode.selectedStream]?:return
+        val videoURL = stream.quality[episode.selectedQuality].url
+        val shareVideo = Intent(Intent.ACTION_VIEW)
+        shareVideo.setDataAndType(Uri.parse(videoURL), "video/*")
+        shareVideo.setPackage("com.instantbits.cast.webvideo")
+        if(stream.subtitles!=null) shareVideo.putExtra("subtitle", stream.subtitles["English"])
+        shareVideo.putExtra("title", media.userPreferredName +" : Ep "+ episodeTitleArr[currentEpisodeIndex])
+        shareVideo.putExtra("poster", episode.thumb?:media.cover)
+        val headers = Bundle()
+        stream.headers?.forEach {
+            headers.putString(it.key,it.value)
+        }
+        shareVideo.putExtra("android.media.intent.extra.HTTP_HEADERS", headers)
+        shareVideo.putExtra("headers", headers)
+        shareVideo.putExtra("secure_uri", true)
+        try {
+            startActivity(shareVideo)
+        } catch (ex: ActivityNotFoundException) {
+            val intent = Intent(Intent.ACTION_VIEW)
+            val uriString = "market://details?id=com.instantbits.cast.webvideo"
+            intent.data = Uri.parse(uriString)
+            startActivity(intent)
+        }
     }
 }

@@ -9,6 +9,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import ani.saikou.*
 import ani.saikou.databinding.ActivityPlayerSettingsBinding
+import kotlin.math.roundToInt
 
 
 class PlayerSettingsActivity : AppCompatActivity() {
@@ -26,6 +27,10 @@ class PlayerSettingsActivity : AppCompatActivity() {
         }
 
         val settings = loadData<PlayerSettings>(player)?: PlayerSettings().apply { saveData(player,this) }
+
+        binding.playerSettingsBack.setOnClickListener {
+            onBackPressed()
+        }
 
         //Video
         binding.playerSettingsVideoInfo.isChecked = settings.videoInfo
@@ -82,7 +87,7 @@ class PlayerSettingsActivity : AppCompatActivity() {
             settings.updateForH = isChecked
             saveData(player,settings)
         }
-        binding.playerSettingsCompletePercentage.value = settings.watchPercentage*100
+        binding.playerSettingsCompletePercentage.value = (settings.watchPercentage*100).roundToInt().toFloat()
         binding.playerSettingsCompletePercentage.addOnChangeListener { _, value, _ ->
             settings.watchPercentage = value/100
             saveData(player,settings)
@@ -138,7 +143,6 @@ class PlayerSettingsActivity : AppCompatActivity() {
             settings.cast = isChecked
             saveData(player,settings)
         }
-
 
     }
 }

@@ -55,6 +55,7 @@
     </com.google.android.exoplayer2.ui.SubtitleView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/exo_full_area"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
