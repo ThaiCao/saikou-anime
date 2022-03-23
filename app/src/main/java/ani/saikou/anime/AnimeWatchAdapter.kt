@@ -35,7 +35,7 @@ class AnimeWatchAdapter(private val media: Media, private val fragment: AnimeWat
         _binding = binding
 
         //Youtube
-        if (media.anime!!.youtube != null) {
+        if (media.anime!!.youtube != null && fragment.uiSettings.showYtButton) {
             binding.animeSourceYT.visibility = View.VISIBLE
             binding.animeSourceYT.setOnClickListener {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(media.anime.youtube))
@@ -66,14 +66,14 @@ class AnimeWatchAdapter(private val media: Media, private val fragment: AnimeWat
 
         //Icons
         var reversed = media.selected!!.recyclerReversed
-        var style = media.selected!!.recyclerStyle
+        var style = media.selected!!.recyclerStyle?:fragment.uiSettings.animeDefaultView
         binding.animeSourceTop.rotation = if (!reversed) 90f else -90f
         binding.animeSourceTop.setOnClickListener {
             binding.animeSourceTop.rotation = if (reversed) 90f else -90f
             reversed = !reversed
             fragment.onIconPressed(style,reversed)
         }
-        var selected = when (media.selected!!.recyclerStyle) {
+        var selected = when (style) {
             0 -> binding.animeSourceList
             1 -> binding.animeSourceGrid
             2 -> binding.animeSourceCompact

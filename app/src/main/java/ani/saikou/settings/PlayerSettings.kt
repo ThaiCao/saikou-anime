@@ -6,6 +6,7 @@ data class PlayerSettings(
     //Video
     var videoInfo:Boolean = true,
     var defaultSpeed:Int = 5,
+    var cursedSpeeds:Boolean = false,
 
     //Auto
     var autoPlay:Boolean = true,

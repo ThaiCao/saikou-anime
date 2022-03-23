@@ -24,6 +24,7 @@ import ani.saikou.databinding.FragmentHomeBinding
 import ani.saikou.media.Media
 import ani.saikou.media.MediaAdaptor
 import ani.saikou.settings.SettingsDialogFragment
+import ani.saikou.settings.UserInterfaceSettings
 import ani.saikou.user.ListActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,13 +50,15 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val scope = lifecycleScope
+        val uiSettings = loadData<UserInterfaceSettings>("ui_settings")?:UserInterfaceSettings()
         fun load(){
             if(activity!=null && _binding!=null) lifecycleScope.launch(Dispatchers.Main) {
                 binding.homeUserName.text = Anilist.username
                 binding.homeUserEpisodesWatched.text = Anilist.episodesWatched.toString()
                 binding.homeUserChaptersRead.text = Anilist.chapterRead.toString()
                 binding.homeUserAvatar.loadImage(Anilist.avatar)
-                binding.homeUserBg.loadImage(Anilist.bg)
+                if(!uiSettings.bannerAnimations) binding.homeUserBg.pause()
+                binding.homeUserBg.loadImage(Anilist.bg, scale = !uiSettings.bannerAnimations)
                 binding.homeUserAvatar.scaleType = ImageView.ScaleType.FIT_CENTER
                 binding.homeUserDataProgressBar.visibility = View.GONE
 
@@ -80,12 +83,12 @@ class HomeFragment : Fragment() {
                     )
                 }
 
-                binding.homeUserAvatarContainer.startAnimation(setSlideUp)
+                binding.homeUserAvatarContainer.startAnimation(setSlideUp(uiSettings.animationSpeed))
                 binding.homeUserDataContainer.visibility = View.VISIBLE
-                binding.homeUserDataContainer.layoutAnimation = LayoutAnimationController(setSlideUp, 0.25f)
+                binding.homeUserDataContainer.layoutAnimation = LayoutAnimationController(setSlideUp(uiSettings.animationSpeed), 0.25f)
                 binding.homeAnimeList.visibility = View.VISIBLE
                 binding.homeMangaList.visibility = View.VISIBLE
-                binding.homeListContainer.layoutAnimation = LayoutAnimationController(setSlideIn,0.25f)
+                binding.homeListContainer.layoutAnimation = LayoutAnimationController(setSlideIn(uiSettings.animationSpeed),0.25f)
             }
             else{
                 toastString("Please Reload.")
@@ -99,16 +102,17 @@ class HomeFragment : Fragment() {
         binding.homeUserBg.updateLayoutParams { height += statusBarHeight }
 
         var reached = false
+        val duration = (uiSettings.animationSpeed*200).toLong()
         binding.homeScroll.setOnScrollChangeListener { _, _, _, _, _ ->
             if (!binding.homeScroll.canScrollVertically(1)) {
                 reached = true
-                bottomBar.animate().translationZ(0f).setDuration(200).start()
-                ObjectAnimator.ofFloat(bottomBar, "elevation", 4f, 0f).setDuration(200).start()
+                bottomBar.animate().translationZ(0f).setDuration(duration).start()
+                ObjectAnimator.ofFloat(bottomBar, "elevation", 4f, 0f).setDuration(duration).start()
             }
             else{
                 if (reached){
-                    bottomBar.animate().translationZ(12f).setDuration(200).start()
-                    ObjectAnimator.ofFloat(bottomBar, "elevation", 0f, 4f).setDuration(200).start()
+                    bottomBar.animate().translationZ(12f).setDuration(duration).start()
+                    ObjectAnimator.ofFloat(bottomBar, "elevation", 0f, 4f).setDuration(duration).start()
                 }
             }
         }
@@ -160,13 +164,13 @@ class HomeFragment : Fragment() {
                             false
                         )
                         recyclerView.visibility = View.VISIBLE
-                        recyclerView.layoutAnimation = LayoutAnimationController(setSlideIn, 0.25f)
+                        recyclerView.layoutAnimation = LayoutAnimationController(setSlideIn(uiSettings.animationSpeed), 0.25f)
 
                     } else {
                         empty.visibility = View.VISIBLE
                     }
                     title.visibility = View.VISIBLE
-                    title.startAnimation(setSlideUp)
+                    title.startAnimation(setSlideUp(uiSettings.animationSpeed))
                     progress.visibility = View.GONE
                 }
             }
@@ -204,7 +208,7 @@ class HomeFragment : Fragment() {
             binding.homeRecommended
         )
 
-        binding.homeUserAvatarContainer.startAnimation(setSlideUp)
+        binding.homeUserAvatarContainer.startAnimation(setSlideUp(uiSettings.animationSpeed))
 
         val live = Refresh.activity.getOrPut(1) { MutableLiveData(false) }
         live.observe(viewLifecycleOwner) {

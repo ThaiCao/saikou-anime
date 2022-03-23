@@ -228,9 +228,30 @@
                 android:textAllCaps="false"
                 android:textColor="@color/bg_opp"
                 app:cornerRadius="0dp"
-                app:icon="@drawable/ic_round_speed_24"
+                app:icon="@drawable/ic_round_slow_motion_video_24"
                 app:iconPadding="16dp"
                 app:iconSize="24dp" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/playerSettingsCursedSpeeds"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:checked="true"
+                android:drawableStart="@drawable/ic_round_accessible_forward_24"
+                android:drawablePadding="16dp"
+                android:drawableTint="?attr/colorPrimary"
+                android:elegantTextHeight="false"
+                android:fontFamily="@font/poppins_bold"
+                android:minHeight="64dp"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:text="@string/cursed_speeds"
+                android:textAlignment="viewStart"
+                android:textColor="@color/bg_opp"
+                app:cornerRadius="0dp"
+                app:showText="false"
+                app:thumbTint="@color/button_switch_track" />
 
             <TextView
                 android:layout_width="match_parent"

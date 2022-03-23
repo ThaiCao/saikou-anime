@@ -26,7 +26,7 @@ class PlayerSettingsActivity : AppCompatActivity() {
             bottomMargin = navBarHeight
         }
 
-        val settings = loadData<PlayerSettings>(player)?: PlayerSettings().apply { saveData(player,this) }
+        val settings = loadData<PlayerSettings>(player, toast = false)?: PlayerSettings().apply { saveData(player,this) }
 
         binding.playerSettingsBack.setOnClickListener {
             onBackPressed()
@@ -39,20 +39,21 @@ class PlayerSettingsActivity : AppCompatActivity() {
             saveData(player,settings)
         }
 
-        binding.playerSettingsQualityHeight.setText((loadData<Int>("maxHeight")?:480).toString())
+        binding.playerSettingsQualityHeight.setText((loadData<Int>("maxHeight", toast = false)?:480).toString())
         binding.playerSettingsQualityHeight.addTextChangedListener {
             val height = binding.playerSettingsQualityHeight.text.toString().toIntOrNull()?:return@addTextChangedListener
             saveData("maxHeight",height)
         }
-        binding.playerSettingsQualityWidth.setText((loadData<Int>("maxWidth")?:720).toString())
+        binding.playerSettingsQualityWidth.setText((loadData<Int>("maxWidth", toast = false)?:720).toString())
         binding.playerSettingsQualityWidth.addTextChangedListener {
             val height = binding.playerSettingsQualityWidth.text.toString().toIntOrNull()?:return@addTextChangedListener
             saveData("maxWidth",height)
         }
 
-
-        val speeds     = arrayOf( 0.25f , 0.33f , 0.5f , 0.66f , 0.75f , 1f , 1.25f , 1.33f , 1.5f , 1.66f , 1.75f , 2f )
-        val speedsName = speeds.map { "${it}x" }.toTypedArray()
+        val speeds = arrayOf( 0.25f , 0.33f , 0.5f , 0.66f , 0.75f , 1f , 1.25f , 1.33f , 1.5f , 1.66f , 1.75f , 2f )
+        val cursedSpeeds = arrayOf(1f , 1.25f , 1.5f , 1.75f , 2f , 2.5f , 3f , 4f, 5f , 10f , 25f, 50f)
+        var curSpeedArr = if(settings.cursedSpeeds) cursedSpeeds else speeds
+        var speedsName = curSpeedArr.map { "${it}x" }.toTypedArray()
         binding.playerSettingsSpeed.text = getString(R.string.default_playback_speed,speedsName[settings.defaultSpeed])
         val speedDialog = AlertDialog.Builder(this,R.style.DialogTheme).setTitle("Default Speed")
         binding.playerSettingsSpeed.setOnClickListener{
@@ -62,6 +63,16 @@ class PlayerSettingsActivity : AppCompatActivity() {
                 saveData(player,settings)
                 dialog.dismiss()
             }.show()
+        }
+
+        binding.playerSettingsVideoInfo.isChecked = settings.cursedSpeeds
+        binding.playerSettingsCursedSpeeds.setOnCheckedChangeListener { _, isChecked ->
+            settings.cursedSpeeds = isChecked
+            curSpeedArr = if(settings.cursedSpeeds) cursedSpeeds else speeds
+            settings.defaultSpeed = if(settings.cursedSpeeds) 0 else 5
+            speedsName = curSpeedArr.map { "${it}x" }.toTypedArray()
+            binding.playerSettingsSpeed.text = getString(R.string.default_playback_speed,speedsName[settings.defaultSpeed])
+            saveData(player,settings)
         }
 
         //Auto

@@ -45,7 +45,7 @@ import ani.saikou.anime.Episode
 import ani.saikou.databinding.ItemCountDownBinding
 import ani.saikou.media.Media
 import ani.saikou.media.Source
-import ani.saikou.settings.UserInterface
+import ani.saikou.settings.UserInterfaceSettings
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
@@ -121,7 +121,7 @@ fun saveData(fileName:String,data:Any,activity: Activity?=null){
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> loadData(fileName:String,activity: Activity?=null): T? {
+fun <T> loadData(fileName:String,activity: Activity?=null,toast:Boolean=true): T? {
     val a = activity?: currActivity()
     try{
     if (a?.fileList() != null)
@@ -134,7 +134,7 @@ fun <T> loadData(fileName:String,activity: Activity?=null): T? {
             return data
         }
     }catch (e:Exception){
-        toastString("Error loading data $fileName")
+        if(toast) toastString("Error loading data $fileName")
     }
     return null
 }
@@ -142,7 +142,7 @@ fun <T> loadData(fileName:String,activity: Activity?=null): T? {
 fun initActivity(a: Activity) {
     val window = a.window
     WindowCompat.setDecorFitsSystemWindows(window, false)
-    val uiSettings = loadData<UserInterface>("settings_ui")?: UserInterface()
+    val uiSettings = loadData<UserInterfaceSettings>("ui_settings", toast = false)?: UserInterfaceSettings().apply { saveData("ui_settings",this) }
     uiSettings.darkMode.apply {
         AppCompatDelegate.setDefaultNightMode(when (this) {
             true -> AppCompatDelegate.MODE_NIGHT_YES
@@ -150,7 +150,7 @@ fun initActivity(a: Activity) {
             else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         })
     }
-    if ( uiSettings.immersiveMode)
+    if (uiSettings.immersiveMode)
         a.hideSystemBars()
     else
         if (statusBarHeight == 0) {
@@ -308,11 +308,11 @@ fun getMalMedia(media:Media) : Media{
     return media
 }
 
-class ZoomOutPageTransformer : ViewPager2.PageTransformer {
+class ZoomOutPageTransformer(private val speed: Float) : ViewPager2.PageTransformer {
     override fun transformPage(view: View, position: Float) {
         if (position == 0.0f) {
             setAnimation(view.context,view,300, floatArrayOf(1.3f,1f,1.3f,1f), 0.5f to 0f)
-            ObjectAnimator.ofFloat(view,"alpha",0f,1.0f).setDuration(200).start()
+            ObjectAnimator.ofFloat(view,"alpha",0f,1.0f).setDuration((200*speed).toLong()).start()
         }
     }
 }
@@ -409,11 +409,14 @@ fun String.findBetween(a:String,b:String):String?{
     return if(end!=-1) this.subSequence(start,end).removePrefix(a).removeSuffix(b).toString() else null
 }
 
-fun ImageView.loadImage(url:String?,size:Int=0,headers: MutableMap<String, String>?=null){
+fun ImageView.loadImage(url:String?,size:Int=0,headers: MutableMap<String, String>?=null,scale:Boolean=false){
     if(!url.isNullOrEmpty()) {
         try{
             val glideUrl = GlideUrl(url){ headers?: mutableMapOf() }
-            Glide.with(this).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.ALL).transition(withCrossFade()).override(size).into(this)
+            Glide.with(this).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.ALL).transition(withCrossFade()).override(size).let {
+                if(scale) scaleType = ImageView.ScaleType.FIT_XY
+                return@let if (scale) it.centerCrop() else it
+            }.into(this)
         }catch (e:Exception){
             logger(e.localizedMessage)
         }
@@ -700,9 +703,9 @@ fun MutableMap<String, Genre>.checkTime(genre:String):Boolean{
     return true
 }
 
-val setSlideIn = AnimationSet(false).apply {
+fun setSlideIn(speed: Float) = AnimationSet(false).apply {
     var animation: Animation = AlphaAnimation(0.0f, 1.0f)
-    animation.duration = 500
+    animation.duration = (500*speed).toLong()
     animation.interpolator = AccelerateDecelerateInterpolator()
     addAnimation(animation)
 
@@ -713,14 +716,14 @@ val setSlideIn = AnimationSet(false).apply {
         Animation.RELATIVE_TO_SELF, 0f
     )
 
-    animation.duration = 750
+    animation.duration = (750*speed).toLong()
     animation.interpolator = OvershootInterpolator(1.1f)
     addAnimation(animation)
 }
 
-val setSlideUp = AnimationSet(false).apply {
+fun setSlideUp(speed: Float) = AnimationSet(false).apply {
     var animation: Animation = AlphaAnimation(0.0f, 1.0f)
-    animation.duration = 500
+    animation.duration = (500*speed).toLong()
     animation.interpolator = AccelerateDecelerateInterpolator()
     addAnimation(animation)
 
@@ -731,7 +734,7 @@ val setSlideUp = AnimationSet(false).apply {
         Animation.RELATIVE_TO_SELF, 0f
     )
 
-    animation.duration = 750
+    animation.duration = (750*speed).toLong()
     animation.interpolator = OvershootInterpolator(1.1f)
     addAnimation(animation)
 }

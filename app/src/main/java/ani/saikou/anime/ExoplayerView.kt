@@ -44,6 +44,7 @@ import ani.saikou.databinding.ActivityExoplayerBinding
 import ani.saikou.media.Media
 import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.settings.PlayerSettings
+import ani.saikou.settings.UserInterfaceSettings
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -118,6 +119,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private var interacted = false
 
     private var settings = PlayerSettings()
+    private var uiSettings = UserInterfaceSettings()
 
     val handler = Handler(Looper.getMainLooper())
     private val model: MediaDetailsViewModel by viewModels()
@@ -180,6 +182,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         hideSystemBars()
 
         settings = loadData("player_settings")?: PlayerSettings().apply { saveData("player_settings",this) }
+        uiSettings = loadData("ui_settings")?: UserInterfaceSettings().apply { saveData("ui_settings",this) }
 
         playerView = findViewById(R.id.player_view)
         exoQuality = playerView.findViewById(R.id.exo_quality)
@@ -282,12 +285,13 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             playerView.findViewById<View>(R.id.exo_skip).visibility = View.GONE
         }
 
+        val gestureSpeed = (300*uiSettings.animationSpeed).toLong()
         //Player UI Visibility Handler
         val brightnessRunnable = Runnable {
             if(exoBrightnessCont.alpha==1f)
                 lifecycleScope.launch {
-                    ObjectAnimator.ofFloat(exoBrightnessCont, "alpha", 1f, 0f).setDuration(300).start()
-                    delay(300)
+                    ObjectAnimator.ofFloat(exoBrightnessCont, "alpha", 1f, 0f).setDuration(gestureSpeed).start()
+                    delay(gestureSpeed)
                     exoBrightnessCont.visibility = View.GONE
                     checkNotch()
                 }
@@ -295,8 +299,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val volumeRunnable = Runnable {
             if(exoVolumeCont.alpha==1f)
                 lifecycleScope.launch {
-                    ObjectAnimator.ofFloat(exoVolumeCont, "alpha", 1f, 0f).setDuration(300).start()
-                    delay(300)
+                    ObjectAnimator.ofFloat(exoVolumeCont, "alpha", 1f, 0f).setDuration(gestureSpeed).start()
+                    delay(gestureSpeed)
                     exoVolumeCont.visibility = View.GONE
                     checkNotch()
                 }
@@ -309,20 +313,21 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             }
         }
         val overshoot = AnimationUtils.loadInterpolator(this,R.anim.over_shoot)
+        val controllerDuration = (uiSettings.animationSpeed*200).toLong()
         fun handleController(){
             if(playerView.isControllerFullyVisible){
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",1f,0f).setDuration(200).start()
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=200;start() }
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=200;start() }
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",0f,-128f).apply { interpolator=overshoot;duration=200;start() }
-                playerView.postDelayed({ playerView.hideController() },200)
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",1f,0f).setDuration(controllerDuration).start()
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",0f,-128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                playerView.postDelayed({ playerView.hideController() },controllerDuration)
             }else{
                 checkNotch()
                 playerView.showController()
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",0f,1f).setDuration(200).start()
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=200;start() }
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=200;start() }
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",-128f,0f).apply { interpolator=overshoot;duration=200;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",0f,1f).setDuration(controllerDuration).start()
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",-128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
             }
         }
 
@@ -501,8 +506,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 hideSystemBars()
                 if (it != null && !epChanging) {
                     episode = it
-//                    preloading = false
-                    updateProgress()
                     media.selected = model.loadSelected(media)
                     model.setMedia(media)
                     currentEpisodeIndex = episodeArr.indexOf(it.number)
@@ -510,6 +513,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     if (isInitialized) releasePlayer()
                     playbackPosition = loadData("${media.id}_${it.number}", this) ?: 0
                     initPlayer()
+                    preloading = false
+                    updateProgress()
                 }
             }
         }
@@ -531,16 +536,23 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         //Episode Change
         fun change(index:Int){
-            changingServer = false
-            saveData("${media.id}_${media.anime!!.selectedEpisode}",exoPlayer.currentPosition,this)
-            media.anime!!.selectedEpisode = episodeArr[index]
-            model.setMedia(media)
-            model.epChanged.postValue(false)
-            model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!)
-            model.onEpisodeClick(media, media.anime!!.selectedEpisode!!,this.supportFragmentManager,
-                launch = false,
-                cancellable = false
-            )
+            if(isInitialized) {
+                changingServer = false
+                saveData(
+                    "${media.id}_${media.anime!!.selectedEpisode}",
+                    exoPlayer.currentPosition,
+                    this
+                )
+                media.anime!!.selectedEpisode = episodeArr[index]
+                model.setMedia(media)
+                model.epChanged.postValue(false)
+                model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!)
+                model.onEpisodeClick(
+                    media, media.anime!!.selectedEpisode!!, this.supportFragmentManager,
+                    launch = false,
+                    cancellable = false
+                )
+            }
         }
 
         //EpisodeSelector
@@ -618,7 +630,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
 
         //Speed
-        val speeds     = arrayOf( 0.25f , 0.33f , 0.5f , 0.66f , 0.75f , 1f , 1.25f , 1.33f , 1.5f , 1.66f , 1.75f , 2f )
+        val speeds     =  if(settings.cursedSpeeds) arrayOf(1f , 1.25f , 1.5f , 1.75f , 2f , 2.5f , 3f , 4f, 5f , 10f , 25f, 50f) else arrayOf( 0.25f , 0.33f , 0.5f , 0.66f , 0.75f , 1f , 1.25f , 1.33f , 1.5f , 1.66f , 1.75f , 2f )
         val speedsName = speeds.map { "${it}x" }.toTypedArray()
         var curSpeed   = loadData("${media.id}_speed",this)?:settings.defaultSpeed
 
@@ -851,7 +863,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             isPlayerPlaying = isPlaying
             playerView.keepScreenOn = isPlaying
             (exoPlay.drawable as Animatable?)?.start()
-            Glide.with(this).load(if (isPlaying) R.drawable.anim_play_to_pause else R.drawable.anim_pause_to_play).into(exoPlay)
+            if(!this.isDestroyed) Glide.with(this).load(if (isPlaying) R.drawable.anim_play_to_pause else R.drawable.anim_pause_to_play).into(exoPlay)
         }
     }
 
@@ -885,7 +897,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     }
                 }
             }
-
         }
         if(!preloading) handler.postDelayed({
             updateProgress()
@@ -959,8 +970,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             if (episodeArr.size > currentEpisodeIndex + i) {
                 isFiller = if (settings.autoSkipFiller) episodes[episodeArr[currentEpisodeIndex + i]]?.filler?:false else false
                 if (!isFiller) runnable.invoke(i)
+                i++
             }
-            i++
+            else isFiller = false
         }
         if (isFiller && toast)
             toastString("No next Episode Found!")

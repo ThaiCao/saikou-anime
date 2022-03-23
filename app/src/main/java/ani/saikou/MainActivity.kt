@@ -23,6 +23,7 @@ import ani.saikou.anilist.Anilist
 import ani.saikou.anilist.AnilistHomeViewModel
 import ani.saikou.databinding.ActivityMainBinding
 import ani.saikou.media.MediaDetailsActivity
+import ani.saikou.settings.UserInterfaceSettings
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,6 +35,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
     private val scope = lifecycleScope
     private var load = false
+
+    private var uiSettings = UserInterfaceSettings()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +68,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.root.doOnAttach {
             initActivity(this)
+            uiSettings = loadData("ui_settings")?:uiSettings
+            selectedOption = uiSettings.defaultStartUpTab
             binding.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = navBarHeight
         }
@@ -85,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                         val mainViewPager = binding.viewpager
                         mainViewPager.isUserInputEnabled = false
                         mainViewPager.adapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
-                        mainViewPager.setPageTransformer(ZoomOutPageTransformer())
+                        mainViewPager.setPageTransformer(ZoomOutPageTransformer(uiSettings.animationSpeed))
                         navbar.setOnTabSelectListener(object :
                             AnimatedBottomBar.OnTabSelectListener {
                             override fun onTabSelected(

@@ -26,10 +26,12 @@ import kotlinx.coroutines.launch
 
 class MediaDetailsViewModel:ViewModel() {
     fun saveSelected(id:Int,data:Selected,activity: Activity){
+        println(data)
         saveData("$id-select",data,activity)
     }
     fun loadSelected(media: Media):Selected{
-        return loadData<Selected>("${media.id}-select")?: Selected().let { it.source = if(media.isAdult) 0 else when(media.anime!=null) {
+        return loadData<Selected>("${media.id}-select")?: Selected().let {
+            it.source = if(media.isAdult) 0 else when(media.anime!=null) {
                 true-> loadData("settings_default_anime_source")?:0
                 else-> loadData("settings_default_manga_source")?:0
             }
@@ -42,10 +44,9 @@ class MediaDetailsViewModel:ViewModel() {
 
     private val media: MutableLiveData<Media> = MutableLiveData<Media>(null)
     fun getMedia(): LiveData<Media> = media
-    fun loadMedia(m:Media,who:String) {
+    fun loadMedia(m:Media) {
         if(!loading) {
             loading = true
-            println(who)
             media.postValue(Anilist.query.mediaDetails(m))
         }
         loading=false

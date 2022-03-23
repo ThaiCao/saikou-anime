@@ -119,7 +119,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:backgroundTint="#00FFFFFF"
-                        android:src="@drawable/ic_round_speed_24"
+                        android:src="@drawable/ic_round_slow_motion_video_24"
                         app:tint="#fff"
                         tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
