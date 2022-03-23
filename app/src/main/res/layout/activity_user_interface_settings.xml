@@ -91,7 +91,7 @@
                 android:checked="true"
                 android:drawableStart="@drawable/ic_round_fullscreen_24"
                 android:drawablePadding="16dp"
-                android:drawableTint="?attr/colorPrimary"
+                app:drawableTint="?attr/colorPrimary"
                 android:elegantTextHeight="true"
                 android:fontFamily="@font/poppins_bold"
                 android:minHeight="64dp"
@@ -102,8 +102,7 @@
                 android:textColor="@color/bg_opp"
                 app:cornerRadius="0dp"
                 app:showText="false"
-                app:thumbTint="@color/button_switch_track"
-                tools:targetApi="m">
+                app:thumbTint="@color/button_switch_track">
 
             </com.google.android.material.switchmaterial.SwitchMaterial>
 
@@ -232,7 +231,7 @@
                 android:checked="true"
                 android:drawableStart="@drawable/ic_round_photo_size_select_actual_24"
                 android:drawablePadding="16dp"
-                android:drawableTint="?attr/colorPrimary"
+                app:drawableTint="?attr/colorPrimary"
                 android:elegantTextHeight="true"
                 android:fontFamily="@font/poppins_bold"
                 android:minHeight="64dp"
@@ -243,13 +242,11 @@
                 android:textColor="@color/bg_opp"
                 app:cornerRadius="0dp"
                 app:showText="false"
-                app:thumbTint="@color/button_switch_track"
-                tools:targetApi="m">
+                app:thumbTint="@color/button_switch_track">
 
             </com.google.android.material.switchmaterial.SwitchMaterial>
 
             <TextView
-                android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-8dp"
@@ -269,7 +266,7 @@
                 android:checked="true"
                 android:drawableStart="@drawable/ic_round_art_track_24"
                 android:drawablePadding="16dp"
-                android:drawableTint="?attr/colorPrimary"
+                app:drawableTint="?attr/colorPrimary"
                 android:elegantTextHeight="true"
                 android:fontFamily="@font/poppins_bold"
                 android:minHeight="64dp"
@@ -280,13 +277,11 @@
                 android:textColor="@color/bg_opp"
                 app:cornerRadius="0dp"
                 app:showText="false"
-                app:thumbTint="@color/button_switch_track"
-                tools:targetApi="m">
+                app:thumbTint="@color/button_switch_track">
 
             </com.google.android.material.switchmaterial.SwitchMaterial>
 
             <TextView
-                android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-8dp"
@@ -328,7 +323,6 @@
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <TextView
-                android:id="@+id/textView4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-8dp"
