@@ -102,7 +102,8 @@
                 android:textColor="@color/bg_opp"
                 app:cornerRadius="0dp"
                 app:showText="false"
-                app:thumbTint="@color/button_switch_track">
+                app:thumbTint="@color/button_switch_track"
+                tools:targetApi="m">
 
             </com.google.android.material.switchmaterial.SwitchMaterial>
 
@@ -242,9 +243,23 @@
                 android:textColor="@color/bg_opp"
                 app:cornerRadius="0dp"
                 app:showText="false"
-                app:thumbTint="@color/button_switch_track">
+                app:thumbTint="@color/button_switch_track"
+                tools:targetApi="m">
 
             </com.google.android.material.switchmaterial.SwitchMaterial>
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-8dp"
+                android:layout_marginBottom="8dp"
+                android:alpha="0.58"
+                android:fontFamily="@font/poppins_family"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:text="@string/immersive_mode_info"
+                android:textSize="14sp" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/uiSettingsLayoutAnimation"
@@ -265,9 +280,23 @@
                 android:textColor="@color/bg_opp"
                 app:cornerRadius="0dp"
                 app:showText="false"
-                app:thumbTint="@color/button_switch_track">
+                app:thumbTint="@color/button_switch_track"
+                tools:targetApi="m">
 
             </com.google.android.material.switchmaterial.SwitchMaterial>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-8dp"
+                android:layout_marginBottom="8dp"
+                android:alpha="0.58"
+                android:fontFamily="@font/poppins_family"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:text="@string/immersive_mode_info"
+                android:textSize="14sp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -297,6 +326,19 @@
                 app:tickColorInactive="?attr/colorSecondary"
                 app:trackColorActive="?attr/colorSecondary"
                 tools:ignore="SpeakableTextPresentCheck" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-8dp"
+                android:layout_marginBottom="8dp"
+                android:alpha="0.58"
+                android:fontFamily="@font/poppins_family"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:text="@string/immersive_mode_info"
+                android:textSize="14sp" />
 
         </LinearLayout>
     </LinearLayout>

@@ -187,27 +187,30 @@ open class BottomSheetDialogFragment : BottomSheetDialogFragment() {
 fun isOnline(context: Context): Boolean {
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     try{
-    val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-    if (capabilities != null) {
-        when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                logger("Device on Cellular")
-                return true
-            }
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                logger("Device on Wifi")
-                return true
-            }
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-                logger("Device on Ethernet, TF man?")
-                return true
-            }
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ->{
-                logger("Device on VPN")
-                return true
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        if (capabilities != null) {
+            when {
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                    logger("Device on Cellular")
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                    logger("Device on Wifi")
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                    logger("Device on Ethernet, TF man?")
+                    return true
+                }
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ->{
+                    logger("Device on VPN")
+                    return true
+                }
             }
         }
     }
+    else return true
     }catch (e:Exception){
         toastString(e.toString())
     }
