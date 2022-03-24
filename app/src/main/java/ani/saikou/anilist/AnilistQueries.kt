@@ -860,7 +860,7 @@ Page(page:1,perPage:50) {
             }
         }
         addMedia(loadData("recently_list_only")?:false)
-        if(responseArray.isEmpty()) addMedia(false)
+//        if(responseArray.isEmpty()) addMedia(false)
         return responseArray
     }
 

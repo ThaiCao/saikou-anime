@@ -33,7 +33,7 @@ class MangaChapterAdapter(
     inner class ChapterCompactViewHolder(val binding: ItemEpisodeCompactBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
             itemView.setOnClickListener {
-                if( 0<bindingAdapterPosition && bindingAdapterPosition<arr.size)
+                if( 0<=bindingAdapterPosition && bindingAdapterPosition<arr.size)
                     fragment.onMangaChapterClick(arr[bindingAdapterPosition].number)
             }
         }
@@ -42,7 +42,7 @@ class MangaChapterAdapter(
     inner class ChapterListViewHolder(val binding: ItemChapterListBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
             itemView.setOnClickListener {
-                if( 0<bindingAdapterPosition && bindingAdapterPosition<arr.size)
+                if( 0<=bindingAdapterPosition && bindingAdapterPosition<arr.size)
                 fragment.onMangaChapterClick(arr[bindingAdapterPosition].number)
             }
         }

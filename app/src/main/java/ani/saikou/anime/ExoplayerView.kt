@@ -24,10 +24,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.util.TypedValue
 import android.view.*
 import android.view.animation.AnimationUtils
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -62,7 +59,6 @@ import com.google.android.exoplayer2.upstream.HttpDataSource
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.material.slider.Slider
-import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -96,7 +92,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private lateinit var animeTitle : TextView
     private lateinit var videoInfo : TextView
     private lateinit var serverInfo : TextView
-    private lateinit var episodeTitle : AutoCompleteTextView
+    private lateinit var episodeTitle : Spinner
     private var orientationListener : OrientationEventListener? =null
 
     private lateinit var media: Media
@@ -196,7 +192,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         exoBrightnessCont = playerView.findViewById(R.id.exo_brightness_cont)
         exoVolumeCont = playerView.findViewById(R.id.exo_volume_cont)
         animeTitle = playerView.findViewById(R.id.exo_anime_title)
-        episodeTitle = playerView.findViewById(R.id.exo_episode_selector)
+        episodeTitle = playerView.findViewById(R.id.exo_ep_sel)
 
         playerView.controllerShowTimeoutMs = 5000
         val audioManager = applicationContext.getSystemService(AUDIO_SERVICE) as AudioManager
@@ -501,24 +497,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         model.epChanged.observe(this) {
             epChanging = !it
         }
-        val episodeObserverRunnable = Runnable {
-            model.getEpisode().observe(this) {
-                hideSystemBars()
-                if (it != null && !epChanging) {
-                    episode = it
-                    media.selected = model.loadSelected(media)
-                    model.setMedia(media)
-                    currentEpisodeIndex = episodeArr.indexOf(it.number)
-                    episodeTitle.setText(episodeTitleArr[currentEpisodeIndex],false)
-                    if (isInitialized) releasePlayer()
-                    playbackPosition = loadData("${media.id}_${it.number}", this) ?: 0
-                    initPlayer()
-                    preloading = false
-                    updateProgress()
-                }
-            }
-        }
-        episodeObserverRunnable.run()
+
         //Anime Title
         animeTitle.text = media.userPreferredName
 
@@ -531,7 +510,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         episodeTitleArr = arrayListOf()
         episodes.forEach {
             val episode = it.value
-            episodeTitleArr.add("${episode.number}${if(episode.filler) "[Filler]" else ""}${if(!episode.title.isNullOrEmpty() && episode.title!="null") " : "+episode.title else ""}")
+            episodeTitleArr.add("${episode.number}${if(episode.filler) " [Filler]" else ""}${if(!episode.title.isNullOrEmpty() && episode.title!="null") " : "+episode.title else ""}")
         }
 
         //Episode Change
@@ -556,25 +535,15 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
 
         //EpisodeSelector
-        episodeTitle.setText(episodeTitleArr[currentEpisodeIndex])
-        var wasPlaying = false
-        episodeTitle.setSafeOnClickListener {
-            if(isInitialized) {
-                wasPlaying = exoPlayer.isPlaying
-                exoPlayer.pause()
+        episodeTitle.adapter = ArrayAdapter(this,R.layout.item_dropdown,episodeTitleArr)
+        episodeTitle.setSelection(currentEpisodeIndex)
+        val listener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                change(position)
             }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
         }
-        (episodeTitle.parent as? TextInputLayout)?.setEndIconOnClickListener {
-            if(isInitialized && wasPlaying) exoPlayer.play()
-        }
-        episodeTitle.setOnDismissListener {
-            if(isInitialized && wasPlaying) exoPlayer.play()
-        }
-        episodeTitle.setAdapter(ArrayAdapter(this,R.layout.item_dropdown,episodeTitleArr))
-        episodeTitle.setOnItemClickListener { _, _, i, _ ->
-            change(i)
-            episodeTitle.clearFocus()
-        }
+        episodeTitle.onItemSelectedListener = listener
 
         //Next Episode
         exoNext = playerView.findViewById(R.id.exo_next_ep)
@@ -592,6 +561,25 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             else
                 toastString("This is the 1st Episode!")
         }
+
+        val episodeObserverRunnable = Runnable {
+            model.getEpisode().observe(this) {
+                hideSystemBars()
+                if (it != null && !epChanging) {
+                    episode = it
+                    media.selected = model.loadSelected(media)
+                    model.setMedia(media)
+                    currentEpisodeIndex = episodeArr.indexOf(it.number)
+                    episodeTitle.setSelection(currentEpisodeIndex)
+                    if (isInitialized) releasePlayer()
+                    playbackPosition = loadData("${media.id}_${it.number}", this) ?: 0
+                    initPlayer()
+                    preloading = false
+                    updateProgress()
+                }
+            }
+        }
+        episodeObserverRunnable.run()
 
         //FullScreen
         isFullscreen = loadData("${media.id}_fullscreenInt",this)?:isFullscreen

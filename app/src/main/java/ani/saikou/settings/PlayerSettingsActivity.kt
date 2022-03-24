@@ -65,7 +65,7 @@ class PlayerSettingsActivity : AppCompatActivity() {
             }.show()
         }
 
-        binding.playerSettingsVideoInfo.isChecked = settings.cursedSpeeds
+        binding.playerSettingsCursedSpeeds.isChecked = settings.cursedSpeeds
         binding.playerSettingsCursedSpeeds.setOnCheckedChangeListener { _, isChecked ->
             settings.cursedSpeeds = isChecked
             curSpeedArr = if(settings.cursedSpeeds) cursedSpeeds else speeds
