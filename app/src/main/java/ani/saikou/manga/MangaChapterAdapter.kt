@@ -52,7 +52,7 @@ class MangaChapterAdapter(
         when (holder) {
             is ChapterCompactViewHolder -> {
                 val binding = holder.binding
-                setAnimation(fragment.requireContext(),holder.binding.root)
+                setAnimation(fragment.requireContext(),holder.binding.root,fragment.uiSettings)
                 val ep = arr[position]
                 binding.itemEpisodeNumber.text = ep.number
                 if (media.userProgress!=null) {
@@ -70,7 +70,7 @@ class MangaChapterAdapter(
             is ChapterListViewHolder -> {
                 val binding = holder.binding
                 val ep = arr[position]
-                setAnimation(fragment.requireContext(),holder.binding.root)
+                setAnimation(fragment.requireContext(),holder.binding.root,fragment.uiSettings)
                 binding.itemChapterNumber.text = ep.number
                 binding.itemChapterTitle.text = ep.title
                 if (media.userProgress!=null) {

@@ -216,4 +216,8 @@
     <string name="banner_animations">Banner Animations</string>
     <string name="layout_animations">Layout Animations</string>
     <string name="animation_speed">Overall Speed</string>
+    <string name="empty_fav">Looks like you don\'t like anything,\nTry Hearting a show to keep it here.</string>
+    <string name="fav_anime">Favourite Anime</string>
+    <string name="fav_manga">Favourite Manga</string>
+    <string name="restart_app">Restart the app?</string>
 </resources>

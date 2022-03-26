@@ -201,6 +201,7 @@ open class AnimeWatchFragment : Fragment() {
         reload()
         val selected = model.loadSelected(media)
         selected.source = i
+        selected.stream = null
         model.saveSelected(media.id, selected, requireActivity())
         media.selected = selected
         return watchSources[i]!!
@@ -211,11 +212,11 @@ open class AnimeWatchFragment : Fragment() {
     }
 
     fun onIconPressed(viewType: Int, rev: Boolean) {
-        media.selected!!.recyclerStyle = viewType
-        media.selected!!.recyclerReversed = reverse
-        model.saveSelected(media.id, media.selected!!, requireActivity())
         style = viewType
         reverse = rev
+        media.selected!!.recyclerStyle = style
+        media.selected!!.recyclerReversed = reverse
+        model.saveSelected(media.id, media.selected!!, requireActivity())
         reload()
     }
 

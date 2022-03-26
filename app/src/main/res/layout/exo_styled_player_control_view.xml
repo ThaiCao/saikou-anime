@@ -265,7 +265,6 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginTop="6dp"
-                    android:layout_marginEnd="-8dp"
                     android:backgroundTint="#00FFFFFF"
                     android:src="@drawable/ic_round_arrow_back_ios_new_24"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -286,7 +285,7 @@
                         android:layout_marginBottom="-10dp"
                         android:backgroundTint="#fff"
                         android:backgroundTintMode="src_atop"
-                        android:padding="8dp" />
+                        tools:ignore="SpeakableTextPresentCheck" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -327,7 +326,6 @@
                         android:id="@+id/exo_anime_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
                         android:alpha="0.66"
                         android:fontFamily="@font/poppins"
                         android:singleLine="false"

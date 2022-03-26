@@ -311,7 +311,7 @@ class MediaInfoFragment : Fragment() {
                     )
                     bind.itemTitle.setText(R.string.characters)
                     bind.itemRecycler.adapter =
-                        CharacterAdapter(media.characters!!, requireActivity())
+                        CharacterAdapter(media.characters!!)
                     bind.itemRecycler.layoutManager = LinearLayoutManager(
                         requireContext(),
                         LinearLayoutManager.HORIZONTAL,

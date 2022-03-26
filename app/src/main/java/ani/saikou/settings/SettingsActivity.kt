@@ -180,7 +180,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         binding.settingsDev.setOnClickListener{
-            toastString("Warks in Porgassss",this)
+            DevelopersDialogFragment().show(supportFragmentManager,"dialog")
         }
         binding.settingsDisclaimer.setOnClickListener {
             AlertDialog.Builder(this,R.style.DialogTheme).apply {

@@ -64,10 +64,10 @@ class MangaReadAdapter(private val media: Media, private val fragment: MangaRead
         binding.animeSourceGrid.visibility = View.GONE
         var reversed = media.selected!!.recyclerReversed
         var style = media.selected!!.recyclerStyle?:fragment.uiSettings.mangaDefaultView
-        binding.animeSourceTop.rotation = if (!reversed) 90f else -90f
+        binding.animeSourceTop.rotation = if (reversed) -90f else 90f
         binding.animeSourceTop.setOnClickListener {
-            binding.animeSourceTop.rotation = if (reversed) 90f else -90f
             reversed = !reversed
+            binding.animeSourceTop.rotation = if (reversed) -90f else 90f
             fragment.onIconPressed(style,reversed)
         }
         var selected = when (style) {

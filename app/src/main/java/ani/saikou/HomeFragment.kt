@@ -2,6 +2,7 @@ package ani.saikou
 
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.graphics.drawable.Animatable
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -50,7 +51,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val scope = lifecycleScope
-        val uiSettings = loadData<UserInterfaceSettings>("ui_settings")?:UserInterfaceSettings()
+        var uiSettings = loadData<UserInterfaceSettings>("ui_settings")?:UserInterfaceSettings()
         fun load(){
             if(activity!=null && _binding!=null) lifecycleScope.launch(Dispatchers.Main) {
                 binding.homeUserName.text = Anilist.username
@@ -61,10 +62,6 @@ class HomeFragment : Fragment() {
                 binding.homeUserBg.loadImage(Anilist.bg, scale = !uiSettings.bannerAnimations)
                 binding.homeUserAvatar.scaleType = ImageView.ScaleType.FIT_CENTER
                 binding.homeUserDataProgressBar.visibility = View.GONE
-
-                binding.homeUserAvatarContainer.setSafeOnClickListener {
-                    SettingsDialogFragment().show(parentFragmentManager, "dialog")
-                }
 
                 binding.homeAnimeList.setOnClickListener {
                     ContextCompat.startActivity(
@@ -95,6 +92,9 @@ class HomeFragment : Fragment() {
             }
         }
 
+        binding.homeUserAvatarContainer.setSafeOnClickListener {
+            SettingsDialogFragment().show(parentFragmentManager, "dialog")
+        }
 
         binding.homeContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = navBarHeight
@@ -103,16 +103,18 @@ class HomeFragment : Fragment() {
 
         var reached = false
         val duration = (uiSettings.animationSpeed*200).toLong()
-        binding.homeScroll.setOnScrollChangeListener { _, _, _, _, _ ->
-            if (!binding.homeScroll.canScrollVertically(1)) {
-                reached = true
-                bottomBar.animate().translationZ(0f).setDuration(duration).start()
-                ObjectAnimator.ofFloat(bottomBar, "elevation", 4f, 0f).setDuration(duration).start()
-            }
-            else{
-                if (reached){
-                    bottomBar.animate().translationZ(12f).setDuration(duration).start()
-                    ObjectAnimator.ofFloat(bottomBar, "elevation", 0f, 4f).setDuration(duration).start()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            binding.homeScroll.setOnScrollChangeListener { _, _, _, _, _ ->
+                if (!binding.homeScroll.canScrollVertically(1)) {
+                    reached = true
+                    bottomBar.animate().translationZ(0f).setDuration(duration).start()
+                    ObjectAnimator.ofFloat(bottomBar, "elevation", 4f, 0f).setDuration(duration).start()
+                }
+                else{
+                    if (reached){
+                        bottomBar.animate().translationZ(12f).setDuration(duration).start()
+                        ObjectAnimator.ofFloat(bottomBar, "elevation", 0f, 4f).setDuration(duration).start()
+                    }
                 }
             }
         }
@@ -146,7 +148,8 @@ class HomeFragment : Fragment() {
         }
 
         //Function For Recycler Views
-        fun initRecyclerView(mode: LiveData<ArrayList<Media>>, recyclerView: RecyclerView, progress: View, empty: View, title:View) {
+        fun initRecyclerView(mode: LiveData<ArrayList<Media>>,container: View, recyclerView: RecyclerView, progress: View, empty: View, title:View) {
+            container.visibility = View.VISIBLE
             progress.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
             empty.visibility = View.GONE
@@ -180,6 +183,7 @@ class HomeFragment : Fragment() {
         // Recycler Views
         initRecyclerView(
             model.getAnimeContinue(),
+            binding.homeContinueWatchingContainer,
             binding.homeWatchingRecyclerView,
             binding.homeWatchingProgressBar,
             binding.homeWatchingEmpty,
@@ -190,7 +194,17 @@ class HomeFragment : Fragment() {
         }
 
         initRecyclerView(
+            model.getAnimeFav(),
+            binding.homeFavAnimeContainer,
+            binding.homeFavAnimeRecyclerView,
+            binding.homeFavAnimeProgressBar,
+            binding.homeFavAnimeEmpty,
+            binding.homeFavAnime
+        )
+
+        initRecyclerView(
             model.getMangaContinue(),
+            binding.homeContinueReadingContainer,
             binding.homeReadingRecyclerView,
             binding.homeReadingProgressBar,
             binding.homeReadingEmpty,
@@ -201,7 +215,17 @@ class HomeFragment : Fragment() {
         }
 
         initRecyclerView(
+            model.getMangaFav(),
+            binding.homeFavMangaContainer,
+            binding.homeFavMangaRecyclerView,
+            binding.homeFavMangaProgressBar,
+            binding.homeFavMangaEmpty,
+            binding.homeFavManga
+        )
+
+        initRecyclerView(
             model.getRecommendation(),
+            binding.homeRecommendedContainer,
             binding.homeRecommendedRecyclerView,
             binding.homeRecommendedProgressBar,
             binding.homeRecommendedEmpty,
@@ -210,10 +234,36 @@ class HomeFragment : Fragment() {
 
         binding.homeUserAvatarContainer.startAnimation(setSlideUp(uiSettings.animationSpeed))
 
+        model.empty.observe(viewLifecycleOwner){
+            binding.homeSaikouContainer.visibility = if(it==true) View.VISIBLE else View.GONE
+            (binding.homeSaikouIcon.drawable as Animatable).start()
+            binding.homeSaikouContainer.startAnimation(setSlideUp(uiSettings.animationSpeed))
+            binding.homeSaikouIcon.setSafeOnClickListener {
+                (binding.homeSaikouIcon.drawable as Animatable).start()
+            }
+        }
+
+        val array = arrayOf(
+            Runnable { model.setAnimeContinue() },
+            Runnable { model.setAnimeFav() },
+            Runnable { model.setMangaContinue() },
+            Runnable { model.setMangaFav() },
+            Runnable { model.setRecommendation() }
+        )
+
+        val containers = arrayOf(
+            binding.homeContinueWatchingContainer,
+            binding.homeFavAnimeContainer,
+            binding.homeContinueReadingContainer,
+            binding.homeFavMangaContainer,
+            binding.homeRecommendedContainer
+        )
+
         val live = Refresh.activity.getOrPut(1) { MutableLiveData(false) }
         live.observe(viewLifecycleOwner) {
             if (it) {
                 scope.launch {
+                    uiSettings = loadData<UserInterfaceSettings>("ui_settings")?:UserInterfaceSettings()
                     withContext(Dispatchers.IO) {
                         //Get userData First
                         if (Anilist.userid == null)
@@ -221,9 +271,17 @@ class HomeFragment : Fragment() {
                         else load()
                         model.loaded = true
                         model.setListImages()
-                        model.setAnimeContinue()
-                        model.setMangaContinue()
-                        model.setRecommendation()
+                        var empty = true
+                        (array.indices).forEach { i->
+                            if(uiSettings.homeLayoutShow[i]) {
+                                array[i].run()
+                                empty = false
+                            }
+                            else withContext(Dispatchers.Main){
+                                containers[i].visibility = View.GONE
+                            }
+                        }
+                        model.empty.postValue(empty)
                     }
                     live.postValue(false)
                     _binding?.homeRefresh?.isRefreshing = false

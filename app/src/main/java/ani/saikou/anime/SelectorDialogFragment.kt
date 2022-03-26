@@ -31,6 +31,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
     private var scope: CoroutineScope = lifecycleScope
     private var media: Media? = null
     private var episode: Episode? = null
+    private var prevEpisode: Episode? = null
     private var makeDefault = false
     private var selected:String?=null
     private var launch:Boolean?=null
@@ -40,7 +41,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
         arguments?.let {
             selected = it.getString("server")
             launch = it.getBoolean("launch",true)
-//            isCancelable = it.getBoolean("cancellable",true)
+            prevEpisode = it.getSerializable("prev") as? Episode
         }
     }
 
@@ -143,7 +144,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
             startActivity(intent)
         }
         else{
-            model.setEpisode(media.anime!!.episodes!![media.anime.selectedEpisode!!]!!)
+            model.setEpisode(media.anime!!.episodes!![media.anime.selectedEpisode!!]!!,"startExo no launch")
         }
     }
 
@@ -209,15 +210,17 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
     }
 
     companion object {
-        fun newInstance(server:String?=null,la:Boolean=true,ca:Boolean=true): SelectorDialogFragment =
+        fun newInstance(server:String?=null,la:Boolean=true,prev:Episode?=null): SelectorDialogFragment =
             SelectorDialogFragment().apply {
                 arguments = Bundle().apply {
                     putString("server",server)
                     putBoolean("launch",la)
-                    putBoolean("cancellable",ca)
+                    putSerializable("prev",prev)
                 }
             }
     }
+
+    override fun onSaveInstanceState(outState: Bundle) {}
 
     override fun onDismiss(dialog: DialogInterface) {
         if(launch == false){
@@ -229,6 +232,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             )
+            if(prevEpisode!=null) model.setEpisode(prevEpisode,"prevEp")
         }
         super.onDismiss(dialog)
     }

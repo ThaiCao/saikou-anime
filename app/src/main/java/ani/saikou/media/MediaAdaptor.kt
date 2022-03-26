@@ -51,7 +51,7 @@ class MediaAdaptor(
         when (type){
             0->{
                 val b = (holder as MediaViewHolder).binding
-                setAnimation(activity,b.root)
+                setAnimation(activity,b.root,uiSettings)
                 val media = mediaList?.get(position)
                 if(media!=null) {
                     b.itemCompactImage.loadImage(media.cover)
@@ -78,7 +78,7 @@ class MediaAdaptor(
             }
             1->{
                 val b = (holder as MediaLargeViewHolder).binding
-                setAnimation(activity,b.root)
+                setAnimation(activity,b.root,uiSettings)
                 val media = mediaList?.get(position)
                 if(media!=null) {
                     b.itemCompactImage.loadImage(media.cover)

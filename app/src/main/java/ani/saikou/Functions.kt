@@ -22,10 +22,7 @@ import android.util.AttributeSet
 import android.view.*
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.animation.*
-import android.widget.AutoCompleteTextView
-import android.widget.DatePicker
-import android.widget.FrameLayout
-import android.widget.ImageView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat.getSystemService
@@ -74,7 +71,7 @@ const val STATE_RESUME_WINDOW = "resumeWindow"
 const val STATE_RESUME_POSITION = "resumePosition"
 const val STATE_PLAYER_FULLSCREEN = "playerFullscreen"
 const val STATE_PLAYER_PLAYING = "playerOnPlay"
-const val buildDebug = true
+const val buildDebug = false
 
 var statusBarHeight  = 0
 var navBarHeight = 0
@@ -235,10 +232,17 @@ data class FuzzyDate(
         val cal = Calendar.getInstance()
         return FuzzyDate(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1,cal.get(Calendar.DAY_OF_MONTH))
     }
-    fun getEpoch():Long{
-        val cal = Calendar.getInstance()
-        cal.set(year?:cal.get(Calendar.YEAR),month?:cal.get(Calendar.MONTH),day?:cal.get(Calendar.DAY_OF_MONTH))
-        return cal.timeInMillis
+//    fun getEpoch():Long{
+//        val cal = Calendar.getInstance()
+//        cal.set(year?:cal.get(Calendar.YEAR),month?:cal.get(Calendar.MONTH),day?:cal.get(Calendar.DAY_OF_MONTH))
+//        return cal.timeInMillis
+//    }
+    fun toVariableString():String{
+        return ("{"
+            + (if(year!=null) "year:$year" else "")
+            + (if(month!=null) ",month:$month" else "")
+            + (if(day!=null) ",day:$day" else "")
+        + "}")
     }
 }
 
@@ -311,20 +315,22 @@ fun getMalMedia(media:Media) : Media{
     return media
 }
 
-class ZoomOutPageTransformer(private val speed: Float) : ViewPager2.PageTransformer {
+class ZoomOutPageTransformer(private val uiSettings: UserInterfaceSettings) : ViewPager2.PageTransformer {
     override fun transformPage(view: View, position: Float) {
         if (position == 0.0f) {
-            setAnimation(view.context,view,300, floatArrayOf(1.3f,1f,1.3f,1f), 0.5f to 0f)
-            ObjectAnimator.ofFloat(view,"alpha",0f,1.0f).setDuration((200*speed).toLong()).start()
+            setAnimation(view.context,view,uiSettings,300, floatArrayOf(1.3f,1f,1.3f,1f), 0.5f to 0f)
+            ObjectAnimator.ofFloat(view,"alpha",0f,1.0f).setDuration((200*uiSettings.animationSpeed).toLong()).start()
         }
     }
 }
 
-fun setAnimation(context: Context,viewToAnimate: View, duration:Long=150,list: FloatArray= floatArrayOf(0.0f, 1.0f, 0.0f, 1.0f),pivot:Pair<Float,Float> = 0.5f to 0.5f) {
-    val anim = ScaleAnimation(list[0], list[1], list[2], list[3], Animation.RELATIVE_TO_SELF, pivot.first, Animation.RELATIVE_TO_SELF, pivot.second)
-    anim.duration = duration
-    anim.setInterpolator(context,R.anim.over_shoot)
-    viewToAnimate.startAnimation(anim)
+fun setAnimation(context: Context,viewToAnimate: View, uiSettings: UserInterfaceSettings, duration:Long=150,list: FloatArray= floatArrayOf(0.0f, 1.0f, 0.0f, 1.0f),pivot:Pair<Float,Float> = 0.5f to 0.5f) {
+    if(uiSettings.layoutAnimations) {
+        val anim = ScaleAnimation(list[0], list[1], list[2], list[3], Animation.RELATIVE_TO_SELF, pivot.first, Animation.RELATIVE_TO_SELF, pivot.second)
+        anim.duration = (duration*uiSettings.animationSpeed).toLong()
+        anim.setInterpolator(context,R.anim.over_shoot)
+        viewToAnimate.startAnimation(anim)
+    }
 }
 
 
@@ -775,5 +781,13 @@ fun toastString(s: String?,activity: Activity?=null){
             }
         }
         logger(s)
+    }
+}
+
+open class NoPaddingArrayAdapter<T>(context: Context, layoutId: Int, items: List<T>) : ArrayAdapter<T>(context, layoutId, items) {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view = super.getView(position, convertView, parent)
+        view.setPadding(0,view.paddingTop,view.paddingRight,view.paddingBottom)
+        return view
     }
 }

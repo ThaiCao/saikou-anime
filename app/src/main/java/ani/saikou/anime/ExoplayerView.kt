@@ -24,7 +24,10 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.util.TypedValue
 import android.view.*
 import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ImageButton
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -218,7 +221,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             orientationListener?.enable()
         }
 
-        playerView.subtitleView?.setStyle(CaptionStyleCompat(Color.WHITE,Color.TRANSPARENT,Color.TRANSPARENT,EDGE_TYPE_OUTLINE,Color.DKGRAY, ResourcesCompat.getFont(this, R.font.poppins_bold)))
+        playerView.subtitleView?.setStyle(CaptionStyleCompat(Color.WHITE,Color.TRANSPARENT,Color.TRANSPARENT,EDGE_TYPE_OUTLINE,Color.BLACK, ResourcesCompat.getFont(this, R.font.poppins_bold)))
         playerView.subtitleView?.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
 
         if (savedInstanceState != null) {
@@ -502,7 +505,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         animeTitle.text = media.userPreferredName
 
         //Set Episode, to invoke getEpisode() at Start
-        model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!)
+        model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!,"invoke")
 
         episodeArr = episodes.keys.toList()
         currentEpisodeIndex = episodeArr.indexOf(media.anime!!.selectedEpisode!!)
@@ -518,32 +521,30 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             if(isInitialized) {
                 changingServer = false
                 saveData(
-                    "${media.id}_${media.anime!!.selectedEpisode}",
+                    "${media.id}_${episodeArr[currentEpisodeIndex]}",
                     exoPlayer.currentPosition,
                     this
                 )
                 media.anime!!.selectedEpisode = episodeArr[index]
                 model.setMedia(media)
                 model.epChanged.postValue(false)
-                model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!)
+                model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!,"change")
                 model.onEpisodeClick(
                     media, media.anime!!.selectedEpisode!!, this.supportFragmentManager,
-                    launch = false,
-                    cancellable = false
+                    false
                 )
             }
         }
 
         //EpisodeSelector
-        episodeTitle.adapter = ArrayAdapter(this,R.layout.item_dropdown,episodeTitleArr)
+        episodeTitle.adapter = NoPaddingArrayAdapter(this,R.layout.item_dropdown,episodeTitleArr)
         episodeTitle.setSelection(currentEpisodeIndex)
-        val listener = object : AdapterView.OnItemSelectedListener {
+        episodeTitle.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                change(position)
+                if(position!=currentEpisodeIndex) change(position)
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
-        episodeTitle.onItemSelectedListener = listener
 
         //Next Episode
         exoNext = playerView.findViewById(R.id.exo_next_ep)
@@ -804,8 +805,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         saveData("${media.id}_${media.anime!!.selectedEpisode}", exoPlayer.currentPosition, this)
         model.saveSelected(media.id,media.selected!!,this)
         model.onEpisodeClick(media,episode.number,this.supportFragmentManager,
-            launch = false,
-            cancellable = true
+            launch = false
         )
     }
 

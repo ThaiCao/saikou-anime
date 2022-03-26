@@ -26,7 +26,6 @@ import kotlinx.coroutines.launch
 
 class MediaDetailsViewModel:ViewModel() {
     fun saveSelected(id:Int,data:Selected,activity: Activity){
-        println(data)
         saveData("$id-select",data,activity)
     }
     fun loadSelected(media: Media):Selected{
@@ -115,7 +114,8 @@ class MediaDetailsViewModel:ViewModel() {
             true
         } else false
     }
-    fun setEpisode(ep: Episode?){
+    fun setEpisode(ep: Episode?,who:String){
+        logger("set episode - $who",false)
         episode.postValue(ep)
         MainScope().launch(Dispatchers.Main) {
             episode.value = null
@@ -123,7 +123,7 @@ class MediaDetailsViewModel:ViewModel() {
     }
 
     val epChanged = MutableLiveData(true)
-    fun onEpisodeClick(media: Media, i:String,manager:FragmentManager,launch:Boolean=true,cancellable:Boolean=true){
+    fun onEpisodeClick(media: Media, i:String,manager:FragmentManager,launch:Boolean=true){
         Handler(Looper.getMainLooper()).post{
             if(manager.findFragmentByTag("dialog")==null && !manager.isDestroyed) {
                 if (media.anime?.episodes?.get(i)!=null) {
@@ -134,10 +134,12 @@ class MediaDetailsViewModel:ViewModel() {
                     return@post
                 }
                 media.selected = this.loadSelected(media)
-                if (media.selected!!.stream != null)
-                    SelectorDialogFragment.newInstance(media.selected!!.stream, launch, cancellable).show(manager, "dialog")
-                else
-                    SelectorDialogFragment.newInstance(la = launch, ca = cancellable).show(manager, "dialog")
+                val selector = if (media.selected!!.stream != null)
+                    SelectorDialogFragment.newInstance(media.selected!!.stream, launch)
+                else {
+                    SelectorDialogFragment.newInstance(null,launch)
+                }
+                selector.show(manager, "dialog")
             }
         }
     }
