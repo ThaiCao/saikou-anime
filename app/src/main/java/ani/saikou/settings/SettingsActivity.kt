@@ -78,6 +78,7 @@ class SettingsActivity : AppCompatActivity() {
             current.alpha = 1f
             uiSettings.darkMode = mode
             saveData("ui_settings",uiSettings)
+            Refresh.all()
             finish()
             startActivity(Intent(this,SettingsActivity::class.java))
             initActivity(this)
