@@ -27,6 +27,8 @@ class SettingsActivity : AppCompatActivity() {
 
         initActivity(this)
 
+        binding.settingsVersion.text = getString(R.string.version_current,BuildConfig.VERSION_NAME)
+
         binding.settingsContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = statusBarHeight
             bottomMargin = navBarHeight

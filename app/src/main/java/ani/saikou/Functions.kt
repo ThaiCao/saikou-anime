@@ -102,7 +102,7 @@ fun logger(e:Any?,print:Boolean=true){
         println(e)
 }
 
-fun saveData(fileName:String,data:Any,activity: Activity?=null){
+fun saveData(fileName:String,data:Any?,activity: Activity?=null){
     try{
         val a = activity?: currActivity()
         if (a!=null) {
