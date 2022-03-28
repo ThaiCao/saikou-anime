@@ -689,7 +689,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         val simpleCache = VideoCache.getInstance(this)
         val dataSourceFactory = DataSource.Factory {
-            val dataSource: HttpDataSource = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true).createDataSource()
+            val dataSource: HttpDataSource = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true).setAllowCrossProtocolRedirects(true)
+                .createDataSource()
             dataSource.setRequestProperty("User-Agent","Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36")
             if(stream.headers!=null)
                 stream.headers.forEach {
