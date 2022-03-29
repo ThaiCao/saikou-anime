@@ -32,6 +32,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.MutableLiveData
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
@@ -58,11 +59,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import nl.joery.animatedbottombar.AnimatedBottomBar
+import okhttp3.OkHttpClient
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import java.io.*
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.text.DateFormatSymbols
 import java.util.*
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -196,6 +203,12 @@ open class BottomSheetDialogFragment : BottomSheetDialogFragment() {
             val behavior = BottomSheetBehavior.from(requireView().parent as View)
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
+    }
+
+    override fun show(manager: FragmentManager, tag: String?) {
+        val ft = manager.beginTransaction()
+        ft.add(this, tag)
+        ft.commitAllowingStateLoss()
     }
 }
 
@@ -812,19 +825,19 @@ open class NoPaddingArrayAdapter<T>(context: Context, layoutId: Int, items: List
     }
 }
 
-@SuppressLint("AppCompatCustomView,ClickableViewAccessibility")
-class SpinnerNoSwipe : Spinner {
+@SuppressLint("ClickableViewAccessibility")
+class SpinnerNoSwipe : androidx.appcompat.widget.AppCompatSpinner {
     private var mGestureDetector: GestureDetector? = null
 
-    constructor(context: Context?) : super(context) {
+    constructor(context: Context) : super(context) {
         setup()
     }
 
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         setup()
     }
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         setup()
     }
 
@@ -840,4 +853,22 @@ class SpinnerNoSwipe : Spinner {
         mGestureDetector!!.onTouchEvent(event)
         return true
     }
+}
+
+fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
+    val naiveTrustManager = @SuppressLint("CustomX509TrustManager")
+    object : X509TrustManager {
+        override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+        override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) = Unit
+        override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) = Unit
+    }
+
+    val insecureSocketFactory = SSLContext.getInstance("TLSv1.2").apply {
+        val trustAllCerts = arrayOf<TrustManager>(naiveTrustManager)
+        init(null, trustAllCerts, SecureRandom())
+    }.socketFactory
+
+    sslSocketFactory(insecureSocketFactory, naiveTrustManager)
+    hostnameVerifier { _, _ -> true }
+    return this
 }

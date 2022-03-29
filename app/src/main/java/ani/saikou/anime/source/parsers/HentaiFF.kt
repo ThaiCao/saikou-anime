@@ -15,16 +15,15 @@ class HentaiFF(override val name: String = "HentaiFF"): AnimeParser() {
 
     private val host = "https://hentaiff.com"
 
-//    private fun getCdnViewLink(name:String, link:String):Episode.StreamLinks?{
-//        return try{
-//            val a = Jsoup.connect(link).get().select("source").attr("abs:src")
-//            Episode.StreamLinks(name, arrayListOf(Episode.Quality(a,"Multi Quality",null)),
-//                mutableMapOf("User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36"))
-//        }catch (e:Exception){
-//            toastString(e.toString())
-//            null
-//        }
-//    }
+    private fun getCdnViewLink(name:String, link:String):Episode.StreamLinks?{
+        return try{
+            val a = Jsoup.connect(link).get().select("source").attr("abs:src")
+            Episode.StreamLinks(name, arrayListOf(Episode.Quality(a,"Multi Quality",null)),null)
+        }catch (e:Exception){
+            toastString(e.toString())
+            null
+        }
+    }
 
     override fun getStream(episode: Episode, server: String): Episode {
         try{
@@ -34,7 +33,7 @@ class HentaiFF(override val name: String = "HentaiFF"): AnimeParser() {
                 if(!link.isNullOrEmpty() && server==it.text()){
                     val a = when{
                         link.contains("amhentai") -> FPlayer(true).getStreamLinks(it.text(),link)
-//                        link.contains("cdnview") -> getCdnViewLink(it.text(),link)
+                        link.contains("cdnview") -> getCdnViewLink(it.text(),link)
                         else -> null
                     }
                     if(a!=null) episode.streamLinks[it.text()] = a
@@ -54,7 +53,7 @@ class HentaiFF(override val name: String = "HentaiFF"): AnimeParser() {
                     launch {
                         val a = when{
                             link.contains("amhentai")-> FPlayer(true).getStreamLinks(it.text(),link)
-//                            link.contains("cdnview") -> getCdnViewLink(it.text(),link)
+                            link.contains("cdnview") -> getCdnViewLink(it.text(),link)
                             else -> null
                         }
                         if(a!=null) episode.streamLinks[it.text()] = a
