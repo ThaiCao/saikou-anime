@@ -658,9 +658,9 @@ class AnilistQueries{
             executeQuery("""{ MediaTagCollection { name isAdult } }""", force = true)?.get("data")?.apply {
                 if(this!=JsonNull){
                     tags = arrayListOf()
-                    this.jsonObject["MediaTagCollection"]?.jsonArray?.forEach{ i->
-                        if(i.jsonObject["isAdult"].toString()=="true")
-                            tags!!.add(i.jsonObject["name"]!!.toString().trim('"'))
+                    this.jsonObject["MediaTagCollection"]?.jsonArray?.forEach{ node ->
+                        if(node.jsonObject["isAdult"].toString()=="true")
+                            tags!!.add(node.jsonObject["name"]!!.toString().trim('"'))
                     }
                     saveData("tags_list",tags!!)
                 }

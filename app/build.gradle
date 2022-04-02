@@ -14,11 +14,16 @@ android {
         targetSdk 31
         versionCode 34
         versionName "1.1.1"
+        signingConfig signingConfigs.debug
     }
 
     buildTypes {
+        debug{
+            applicationIdSuffix ".debug"
+        }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
