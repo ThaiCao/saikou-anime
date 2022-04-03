@@ -79,7 +79,7 @@ const val STATE_RESUME_WINDOW = "resumeWindow"
 const val STATE_RESUME_POSITION = "resumePosition"
 const val STATE_PLAYER_FULLSCREEN = "playerFullscreen"
 const val STATE_PLAYER_PLAYING = "playerOnPlay"
-const val buildDebug = false
+const val buildDebug = true
 
 var statusBarHeight  = 0
 var navBarHeight = 0

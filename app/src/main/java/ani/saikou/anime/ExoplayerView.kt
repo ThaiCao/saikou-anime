@@ -526,13 +526,15 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     exoPlayer.currentPosition,
                     this
                 )
+                val prev = episodeArr[currentEpisodeIndex]
                 media.anime!!.selectedEpisode = episodeArr[index]
                 model.setMedia(media)
                 model.epChanged.postValue(false)
                 model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!,"change")
                 model.onEpisodeClick(
                     media, media.anime!!.selectedEpisode!!, this.supportFragmentManager,
-                    false
+                    false,
+                    prev
                 )
             }
         }
@@ -567,6 +569,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val episodeObserverRunnable = Runnable {
             model.getEpisode().observe(this) {
                 hideSystemBars()
+
                 if (it != null && !epChanging) {
                     episode = it
                     media.selected = model.loadSelected(media)
@@ -968,10 +971,11 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 if (!isFiller) runnable.invoke(i)
                 i++
             }
-            else isFiller = false
+            else {
+                if (toast) toastString("No next Episode Found!")
+                isFiller = false
+            }
         }
-        if (isFiller && toast)
-            toastString("No next Episode Found!")
     }
 
     override fun onBackPressed() {

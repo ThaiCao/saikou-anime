@@ -27,7 +27,7 @@ fun executeQuery(query:String, variables:String="",force:Boolean=false,useToken:
         if (Anilist.token!=null || force) {
             if (Anilist.token!=null && useToken) set.header("Authorization", "Bearer ${Anilist.token}")
             val json = set.method(Connection.Method.POST).execute().body().toString()
-            if(show) println("JSON : $json")
+            if(show) logger("JSON : $json")
             val js = Json.decodeFromString<JsonObject>(json)
             if(js["data"]!=JsonNull)
                 return js
