@@ -22,11 +22,12 @@ fun executeQuery(query:String, variables:String="",force:Boolean=false,useToken:
             .header("Content-Type", "application/json")
             .header("Accept", "application/json")
             .requestBody("""{"query":"$query","variables": "$variables"}""")
+            .maxBodySize(0)
             .ignoreContentType(true).ignoreHttpErrors(true)
         if (Anilist.token!=null || force) {
             if (Anilist.token!=null && useToken) set.header("Authorization", "Bearer ${Anilist.token}")
             val json = set.method(Connection.Method.POST).execute().body().toString()
-            if(show) logger("JSON : $json")
+            if(show) println("JSON : $json")
             val js = Json.decodeFromString<JsonObject>(json)
             if(js["data"]!=JsonNull)
                 return js
@@ -559,6 +560,7 @@ class AnilistQueries{
         val sorted = mutableMapOf<String,ArrayList<Media>>()
         val unsorted = mutableMapOf<String,ArrayList<Media>>()
         val all = arrayListOf<Media>()
+        val allIds = arrayListOf<Int>()
         val collection = ((response?:return unsorted)["data"]?:return unsorted).jsonObject["MediaListCollection"]?:return unsorted
         if(collection == JsonNull) return unsorted
         collection.jsonObject["lists"]?.jsonArray?.forEach { i ->
@@ -584,7 +586,10 @@ class AnilistQueries{
                     anime = if(anime) Anime(totalEpisodes = if(it.jsonObject["media"]!!.jsonObject["episodes"] != JsonNull) it.jsonObject["media"]!!.jsonObject["episodes"].toString().toInt() else null, nextAiringEpisode = if (it.jsonObject["media"]!!.jsonObject["nextAiringEpisode"] != JsonNull) it.jsonObject["media"]!!.jsonObject["nextAiringEpisode"]!!.jsonObject["episode"].toString().toInt()-1 else null) else null
                 )
                 unsorted[name]!!.add(a)
-                all.add(a)
+                if(!allIds.contains(a.id)) {
+                    allIds.add(a.id)
+                    all.add(a)
+                }
             }
         }
 
