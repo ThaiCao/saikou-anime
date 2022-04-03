@@ -527,6 +527,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     this
                 )
                 val prev = episodeArr[currentEpisodeIndex]
+                episodeLength= 0f
                 media.anime!!.selectedEpisode = episodeArr[index]
                 model.setMedia(media)
                 model.epChanged.postValue(false)
@@ -770,7 +771,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             .setMediaSourceFactory(DefaultMediaSourceFactory(cacheFactory))
             .setTrackSelector(trackSelector)
             .build().apply {
-                playWhenReady = isPlayerPlaying
+                playWhenReady = true
                 this.playbackParameters = this@ExoplayerView.playbackParameters
                 setMediaItem(mediaItem)
                 prepare()
@@ -806,9 +807,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         super.onSaveInstanceState(outState)
     }
 
-    private fun sourceClick(){
+    private fun sourceClick(saveStreams:Boolean = true){
         changingServer = true
-        media.selected!!.stream = null
+
+        if(saveStreams) media.selected!!.stream = null
         saveData("${media.id}_${media.anime!!.selectedEpisode}", exoPlayer.currentPosition, this)
         model.saveSelected(media.id,media.selected!!,this)
         model.onEpisodeClick(media,episode.number,this.supportFragmentManager,
@@ -916,7 +918,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         when (error.errorCode) {
             PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS -> {
                 toastString("Source Exception : ${error.message}")
-                if(isInitialized) exoSource.performClick()
+                isPlayerPlaying = true
+                if(isInitialized) sourceClick(episode.saveStreams)
             }
             else -> toastString("Player Error ${error.errorCode} (${error.errorCodeName}) : ${error.message}")
         }
@@ -924,8 +927,11 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     private var isBuffering = true
     override fun onPlaybackStateChanged(playbackState: Int) {
-        if (playbackState == ExoPlayer.STATE_READY && episodeLength==0f) {
-            episodeLength = exoPlayer.duration.toFloat()
+        if (playbackState == ExoPlayer.STATE_READY) {
+            exoPlayer.play()
+            if (episodeLength == 0f) {
+                episodeLength = exoPlayer.duration.toFloat()
+            }
         }
         isBuffering = playbackState == Player.STATE_BUFFERING
         if(playbackState == Player.STATE_ENDED && settings.autoPlay){

@@ -51,9 +51,12 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        var loaded = false
         model.getMedia().observe(viewLifecycleOwner) { m ->
             media = m
-            if (media != null) {
+            if (media != null && !loaded) {
+                loaded = true
+                println(media?.id)
                 episode = media?.anime?.episodes?.get(media?.anime?.selectedEpisode)
                 if(episode!=null){
                     if (selected != null) {
@@ -81,7 +84,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
                                 } else fail()
                             } else fail()
                         }
-                        if (episode?.streamLinks?.isEmpty() == true) {
+                        if (episode?.streamLinks?.isEmpty() == true || episode?.saveStreams==false) {
                             model.getEpisode().observe(this) {
                                 if (it != null) {
                                     episode = it
@@ -115,7 +118,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment(){
                             )
                             binding.selectorRecyclerView.adapter = StreamAdapter()
                         }
-                        if (episode!!.streamLinks.isEmpty() || !episode!!.allStreams) {
+                        if (episode!!.streamLinks.isEmpty() || !episode!!.allStreams || episode?.saveStreams==false) {
                             model.getEpisode().observe(this) {
                                 if (it != null) {
                                     episode = it

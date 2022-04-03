@@ -85,7 +85,8 @@ class MediaDetailsViewModel:ViewModel() {
     private var episode: MutableLiveData<Episode?> = MutableLiveData<Episode?>(null)
     fun getEpisode() : LiveData<Episode?> = episode
     fun loadEpisodeStreams(ep: Episode,i:Int,post:Boolean=true){
-        if(!ep.allStreams || ep.streamLinks.isNullOrEmpty()) {
+        println("load Streams")
+        if(!ep.allStreams || ep.streamLinks.isNullOrEmpty() || !ep.saveStreams) {
             watchAnimeWatchSources?.get(i)?.getStreams(ep)?.apply {
                 this.allStreams = true
             }
@@ -100,7 +101,8 @@ class MediaDetailsViewModel:ViewModel() {
     }
     fun loadEpisodeStream(ep: Episode,selected: Selected,post: Boolean=true):Boolean{
         return if(selected.stream!=null) {
-            if(ep.streamLinks.isNullOrEmpty()) {
+            println("load Stream")
+            if(ep.streamLinks.isNullOrEmpty() || !ep.saveStreams) {
                 watchAnimeWatchSources?.get(selected.source)?.getStream(ep, selected.stream!!)?.apply {
                     this.allStreams = false
                 }
