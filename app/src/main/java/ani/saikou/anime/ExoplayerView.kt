@@ -483,9 +483,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
 
         //Handle Media
-        media = intent.getSerializableExtra("media")!! as Media
+        media = (intent.getSerializableExtra("media") as? Media)?:return
         model.setMedia(media)
-        episodes = media.anime!!.episodes!!
+        episodes = media.anime?.episodes?:return
 
         model.watchAnimeWatchSources = if(media.isAdult) HAnimeSources else AnimeSources
 
