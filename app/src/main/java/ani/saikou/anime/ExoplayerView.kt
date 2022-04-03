@@ -541,7 +541,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         episodeTitle.adapter = NoPaddingArrayAdapter(this,R.layout.item_dropdown,episodeTitleArr)
         episodeTitle.setSelection(currentEpisodeIndex)
         episodeTitle.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
                 if(position!=currentEpisodeIndex) change(position)
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }

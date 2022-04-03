@@ -1,10 +1,13 @@
 package ani.saikou.manga.source.parsers
 
-import ani.saikou.*
+import ani.saikou.loadData
+import ani.saikou.logger
 import ani.saikou.manga.MangaChapter
 import ani.saikou.manga.source.MangaParser
 import ani.saikou.media.Media
 import ani.saikou.media.Source
+import ani.saikou.saveData
+import ani.saikou.toastString
 import org.jsoup.Jsoup
 
 class MangaKakaLot(override val name: String="MangaKakaLot") :MangaParser() {
@@ -32,8 +35,7 @@ class MangaKakaLot(override val name: String="MangaKakaLot") :MangaParser() {
     override fun getChapter(chapter: MangaChapter): MangaChapter {
         chapter.images = arrayListOf()
         try {
-            val arr = Jsoup.connect(chapter.link!!).get().select(".container-chapter-reader > img")
-            arr?.forEach {
+            Jsoup.connect(chapter.link!!).get().select(".container-chapter-reader > img").forEach {
                 chapter.images!!.add(it.attr("src"))
             }
             chapter.headers = mutableMapOf("referer" to host)

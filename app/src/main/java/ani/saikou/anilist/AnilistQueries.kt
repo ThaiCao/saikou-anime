@@ -382,10 +382,10 @@ class AnilistQueries{
                         }
                         media.shareLink = it.jsonObject["siteUrl"]!!.toString().trim('"')
                     }
-                    if (response["data"]?.jsonObject?.get("Media") != JsonNull) parse() else {
+                    if (response["data"]?.jsonObject?.get("Media").let{it != JsonNull && it!=null} ) parse() else {
                         toastString("Adult Stuff? ( ͡° ͜ʖ ͡°)")
                         response = executeQuery(query, force = true, useToken = false)
-                        parse()
+                        if (response?.get("data")?.jsonObject?.get("Media").let{it != JsonNull && it!=null}) parse() else toastString("What did you even open?")
                     }
                 }
                 else{
