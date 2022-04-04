@@ -21,7 +21,7 @@ object AppUpdater {
                 ).execute().body?.string()?.substringAfter("versionName \"")?.substringBefore('"') ?: return
             }
             val dontShow = loadData("dont_ask_for_update_$version")?:false
-            if(version!= BuildConfig.VERSION_NAME && !dontShow) activity.runOnUiThread {
+            if(version!= BuildConfig.VERSION_NAME && !dontShow && !activity.isDestroyed) activity.runOnUiThread {
                 AlertDialog.Builder(activity, R.style.DialogTheme)
                     .setTitle("A new update is available, do you want to check it out?").apply {
                     setMultiChoiceItems(

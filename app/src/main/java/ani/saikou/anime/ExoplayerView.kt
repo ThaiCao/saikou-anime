@@ -483,7 +483,12 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
 
         //Handle Media
-        media = (intent.getSerializableExtra("media") as? Media)?:return
+        try{
+            media = (intent.getSerializableExtra("media") as? Media)?:return
+        }catch (e:Exception){
+            toastString(e.toString())
+            return
+        }
         model.setMedia(media)
         episodes = media.anime?.episodes?:return
 
