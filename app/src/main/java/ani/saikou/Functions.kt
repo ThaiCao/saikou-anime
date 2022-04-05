@@ -685,8 +685,8 @@ class MediaPageTransformer : ViewPager2.PageTransformer {
 
         val bannerContainer = view.findViewById<View>(R.id.itemCompactBanner)
         parallax(bannerContainer,position,0.8f)
-        val titleContainer = view.findViewById<View>(R.id.itemCompactTitleContainer)
-        parallax(titleContainer,position,0.5f)
+//        val titleContainer = view.findViewById<View>(R.id.itemCompactTitleContainer)
+//        parallax(titleContainer,position,0.5f)
     }
 }
 
