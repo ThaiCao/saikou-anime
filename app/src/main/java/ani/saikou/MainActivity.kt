@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     else {
                         binding.mainProgressBar.visibility = View.GONE
-                        toastString("Error Loading Tags & Genres.")
+//                        toastString("Error Loading Tags & Genres.")
                     }
                 }
             }
@@ -140,8 +140,8 @@ class MainActivity : AppCompatActivity() {
             if (!load) {
                 Anilist.getSavedToken(this)
                 scope.launch(Dispatchers.IO) {
-                    model.genres.postValue(Anilist.query.getGenresAndTags())
                     AppUpdater.check(this@MainActivity)
+                    model.genres.postValue(Anilist.query.getGenresAndTags(this@MainActivity))
                 }
                 load = true
             }

@@ -11,7 +11,7 @@ object AppUpdater {
     fun check(activity: Activity){
         try{
             val version =
-            if(!buildDebug)
+            if(!BuildConfig.DEBUG)
                 OkHttpClient().newCall(Request.Builder().url("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/stable.txt").build()).execute().body?.string()?.replace("\n","")?:return
             else {
                 OkHttpClient().newCall(
@@ -33,7 +33,7 @@ object AppUpdater {
                         }
                     }
                     setPositiveButton("Let's Go") { _: DialogInterface, _: Int ->
-                        openLinkInBrowser(if(!buildDebug) "https://github.com/saikou-app/saikou/releases" else "https://discord.com/channels/902174389351620629/946852010198728704")
+                        openLinkInBrowser(if(!BuildConfig.DEBUG) "https://github.com/saikou-app/saikou/releases/v$version" else "https://discord.com/channels/902174389351620629/946852010198728704")
                     }
                     setNegativeButton("Cope") { dialogInterface: DialogInterface, _: Int ->
                         dialogInterface.dismiss()

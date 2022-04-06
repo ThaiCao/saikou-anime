@@ -74,13 +74,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-
-const val STATE_RESUME_WINDOW = "resumeWindow"
-const val STATE_RESUME_POSITION = "resumePosition"
-const val STATE_PLAYER_FULLSCREEN = "playerFullscreen"
-const val STATE_PLAYER_PLAYING = "playerOnPlay"
-const val buildDebug = true
-
 var statusBarHeight  = 0
 var navBarHeight = 0
 val Int.dp: Float get() = (this / getSystem().displayMetrics.density)
@@ -106,7 +99,7 @@ var loadMedia:Int?=null
 var loadIsMAL=false
 
 fun logger(e:Any?,print:Boolean=true){
-    if(buildDebug && print)
+    if(print)
         println(e)
 }
 
@@ -692,10 +685,10 @@ class MediaPageTransformer : ViewPager2.PageTransformer {
 
 class NoGestureSubsamplingImageView(context: Context?, attr: AttributeSet?) :
     SubsamplingScaleImageView(context, attr) {
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        return false
-    }
+//    @SuppressLint("ClickableViewAccessibility")
+//    override fun onTouchEvent(event: MotionEvent): Boolean {
+//        return false
+//    }
 }
 
 fun copyToClipboard(string: String,toast:Boolean=true){

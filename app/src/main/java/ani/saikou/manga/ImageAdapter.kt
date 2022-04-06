@@ -32,7 +32,9 @@ private val transformation: Transformation<File>?=null
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         val binding = holder.binding
+//        binding.imgProgImage.isZoomEnabled = false
         binding.imgProgImage.recycle()
+
         binding.imgProgProgress.visibility= View.VISIBLE
         Glide.with(binding.imgProgImage)
             .download(GlideUrl(arr[position]){headers?: mutableMapOf()}).override(Target.SIZE_ORIGINAL).apply{
@@ -49,6 +51,7 @@ private val transformation: Transformation<File>?=null
                     transform(File("").javaClass, transformation).into(target)
                 else
                     into(target)
+                binding.imgProgImage.resetScaleAndCenter()
             }
 
     }
