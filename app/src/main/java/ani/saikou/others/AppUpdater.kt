@@ -45,10 +45,11 @@ object AppUpdater {
                     setPositiveButton("Let's Go") { _: DialogInterface, _: Int ->
                         if(!BuildConfig.DEBUG) {
                             MainScope().launch(Dispatchers.IO){
-                                OkHttpClient().newCall(Request.Builder().url("https://api.github.com/repos/saikou-app/saikou/releases/tags/v$version").build()).execute().body?.string()
-                                ?.substringAfter("\"browser_download_url\":\"")
-                                ?.substringBefore('"')?.apply {
-                                    activity.downloadUpdate(this)
+                                OkHttpClient().newCall(Request.Builder().url("https://api.github.com/repos/saikou-app/saikou/releases/tags/v$version").build()).execute().body?.string()?.apply {
+                                    substringAfter("\"browser_download_url\":\"").substringBefore('"').apply {
+                                        if (endsWith("apk")) activity.downloadUpdate(this)
+                                        else openLinkInBrowser("https://github.com/saikou-app/saikou/releases/")
+                                    }
                                 }
                             }
                         }
