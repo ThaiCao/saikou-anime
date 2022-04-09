@@ -55,7 +55,7 @@ class EpisodeAdapter(
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val ep = arr[position]
-        val title = "${if(!ep.title.isNullOrEmpty() && ep.title!="null") "" else "Chapter "}${ep.number}${if(!ep.title.isNullOrEmpty() && ep.title!="null") " : "+ep.title else ""}"
+        val title = "${if(!ep.title.isNullOrEmpty() && ep.title!="null") "" else "Episode "}${if(!ep.title.isNullOrEmpty() && ep.title!="null") ep.title else ep.number}"
 
         when (holder) {
             is EpisodeListViewHolder  -> {

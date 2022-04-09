@@ -53,6 +53,5 @@ class GenreActivity : AppCompatActivity() {
                 }
             }
         }
-        throw Exception()
     }
 }

@@ -32,8 +32,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="8dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="110dp"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="vertical"
@@ -142,8 +142,8 @@
                     android:maxLines="3"
                     android:textSize="16dp"
                     android:transitionName="mediaTitle"
-                    tools:text="@string/slogan"
-                    tools:ignore="SpUsage" />
+                    tools:ignore="SpUsage"
+                    tools:text="@string/slogan" />
 
                 <TextView
                     android:id="@+id/itemCompactStatus"
@@ -180,8 +180,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="14dp"
-                    tools:text="100"
-                    tools:ignore="SpUsage" />
+                    tools:ignore="SpUsage"
+                    tools:text="100" />
 
                 <TextView
                     android:id="@+id/itemTotal"
@@ -208,8 +208,8 @@
                 android:textAlignment="viewEnd"
                 android:textSize="14dp"
                 android:transitionName="mediaTitle"
-                tools:text="@string/genres"
-                tools:ignore="SpUsage" />
+                tools:ignore="SpUsage"
+                tools:text="@string/genres" />
         </LinearLayout>
 
     </LinearLayout>

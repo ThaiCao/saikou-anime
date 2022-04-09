@@ -45,19 +45,12 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:srcCompat="@drawable/linear_gradient_black"
-                tools:ignore="ContentDescription,ImageContrastCheck" />
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:srcCompat="@drawable/linear_gradient_black"
+                app:srcCompat="@drawable/rounded_top_nav"
                 tools:ignore="ContentDescription,ImageContrastCheck" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="16dp"
                 android:orientation="horizontal"
                 android:padding="8dp">
 
@@ -140,6 +133,7 @@
                 tools:ignore="ContentDescription" />
 
             <LinearLayout
+                android:id="@+id/mangaReaderTopLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
@@ -174,7 +168,7 @@
                             android:layout_height="48dp"
                             android:layout_marginEnd="0dp"
                             android:layout_marginBottom="-10dp"
-                            android:background="@drawable/spinner_icon"
+                            android:background="@drawable/spinner_icon_manga"
                             android:backgroundTint="#fff"
                             android:backgroundTintMode="src_atop"
                             android:entries="@array/tips"

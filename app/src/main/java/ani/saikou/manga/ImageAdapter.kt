@@ -16,6 +16,7 @@ import ani.saikou.settings.UserInterfaceSettings
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.request.target.CustomViewTarget
+import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -52,7 +53,7 @@ private val uiSettings: UserInterfaceSettings
             imageView.visibility= View.VISIBLE
 
             Glide.with(imageView).download(GlideUrl(images[position]){chapter.headers?: mutableMapOf()})
-            .override(0)
+            .override(Target.SIZE_ORIGINAL)
             .apply{
                 val target = object : CustomViewTarget<SubsamplingScaleImageView, File>(imageView) {
                     override fun onLoadFailed(errorDrawable: Drawable?) {
