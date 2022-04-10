@@ -652,16 +652,19 @@ fun download(activity: Activity, episode:Episode, animeTitle:String){
     }
 }
 
-fun updateAnilistProgress(id:Int,number:String){
+fun updateAnilistProgress(media:Media,number:String){
     if(Anilist.userid!=null) {
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             val a = number.toFloatOrNull()?.roundToInt()
-            Anilist.mutation.editList(id, a, status = "CURRENT")
-            toastString("Setting progress to $a")
+            if (a!=media.userProgress) {
+                Anilist.mutation.editList(media.id, a, status = if(media.userStatus=="REPEATING") media.userStatus else "CURRENT")
+                toast("Setting progress to $a")
+            }
+            media.userProgress = a
             Refresh.all()
         }
     }else{
-        toastString("Please Login into anilist account!")
+        toast("Please Login into anilist account!")
     }
 }
 
@@ -780,6 +783,17 @@ class EmptyAdapter(private val count:Int):RecyclerView.Adapter<RecyclerView.View
     override fun getItemCount(): Int = count
 
     inner class EmptyViewHolder(view: View):RecyclerView.ViewHolder(view)
+}
+
+fun toast(string: String?,activity: Activity?=null){
+    if(string!=null) {
+        (activity?:currActivity())?.apply{
+            runOnUiThread {
+                Toast.makeText(this, string, Toast.LENGTH_SHORT).show()
+            }
+        }
+        logger(string)
+    }
 }
 
 fun toastString(s: String?,activity: Activity?=null){

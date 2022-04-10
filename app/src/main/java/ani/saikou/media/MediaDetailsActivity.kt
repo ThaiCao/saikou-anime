@@ -181,6 +181,11 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                 }
                 else toastString("Please Login with Anilist!")
             }
+            binding.mediaAddToList.setOnLongClickListener {
+                saveData("${media.id}_progressDialog", false)
+                toastString("Auto Update Progress has now been Reset-ed ")
+                true
+            }
         }
         progress()
 
