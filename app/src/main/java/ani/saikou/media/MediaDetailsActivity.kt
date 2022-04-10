@@ -20,7 +20,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.color
 import androidx.core.view.updateLayoutParams
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
@@ -72,8 +71,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         binding.mediaBannerNoKen.updateLayoutParams{ height += statusBarHeight }
         binding.mediaClose.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
         binding.mediaCollapsing.minimumHeight = statusBarHeight
-        binding.mediaTab.updateLayoutParams<ViewGroup.MarginLayoutParams> { bottomMargin = navBarHeight }
-        binding.mediaTab.updatePadding(bottom = 0)
 
         binding.mediaTitle.isSelected = true
 

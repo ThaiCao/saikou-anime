@@ -50,8 +50,10 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.exoplayer2.ui.DefaultTimeBar
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.internal.ViewUtils
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -875,4 +877,22 @@ fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
     sslSocketFactory(insecureSocketFactory, naiveTrustManager)
     hostnameVerifier { _, _ -> true }
     return this
+}
+
+@Suppress("DEPRECATION")
+@SuppressLint("RestrictedApi")
+class CustomBottomNavBar @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null
+) : BottomNavigationView(context, attrs){
+    init {
+        ViewUtils.doOnApplyWindowInsets(
+            this
+        ) { view, insets, initialPadding -> // Apply the bottom, start, and end padding for a BottomNavigationView
+            // to dodge the system navigation bar
+            initialPadding.bottom = 0
+            updateLayoutParams<MarginLayoutParams> { bottomMargin=insets.systemWindowInsetBottom }
+            initialPadding.applyToView(view)
+            insets
+        }
+    }
 }

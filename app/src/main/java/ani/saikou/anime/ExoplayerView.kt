@@ -342,19 +342,22 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val overshoot = AnimationUtils.loadInterpolator(this,R.anim.over_shoot)
         val controllerDuration = (uiSettings.animationSpeed*200).toLong()
         fun handleController(){
-            if(playerView.isControllerFullyVisible){
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",1f,0f).setDuration(controllerDuration).start()
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",0f,-128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
-                playerView.postDelayed({ playerView.hideController() },controllerDuration)
-            }else{
-                checkNotch()
-                playerView.showController()
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",0f,1f).setDuration(controllerDuration).start()
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
-                ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",-128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+            if(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) !isInPictureInPictureMode else true)
+            {
+                if(playerView.isControllerFullyVisible){
+                    ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",1f,0f).setDuration(controllerDuration).start()
+                    ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                    ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",0f,128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                    ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",0f,-128f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                    playerView.postDelayed({ playerView.hideController() },controllerDuration)
+                }else{
+                    checkNotch()
+                    playerView.showController()
+                    ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_controller),"alpha",0f,1f).setDuration(controllerDuration).start()
+                    ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_bottom_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                    ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_timeline_cont),"translationY",128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                    ObjectAnimator.ofFloat(playerView.findViewById(R.id.exo_top_cont),"translationY",-128f,0f).apply { interpolator=overshoot;duration=controllerDuration;start() }
+                }
             }
         }
 
@@ -699,7 +702,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         var showProgressDialog = if(settings.askIndividual) loadData<Boolean>("${media.id}_progressDialog") != true else false
         if(showProgressDialog && Anilist.userid!=null && if(media.isAdult) settings.updateForH else true)
             AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Auto Update progress on Anilist?").apply {
-                setMultiChoiceItems(arrayOf("Don't ask again for ${media.userPreferredName}"), booleanArrayOf(false)) { _, _, isChecked ->
+                setMultiChoiceItems(arrayOf("Don't ask again for ${media.userPreferredName}"), booleanArrayOf(true)) { _, _, isChecked ->
                     if (isChecked) {
                         saveData("${media.id}_progressDialog", isChecked)
                     }

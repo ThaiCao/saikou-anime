@@ -27,5 +27,5 @@ data class PlayerSettings(
     var cast:Boolean = false,
 
     var pip:Boolean = true,
-    var alwaysMinimize:Boolean = true,
+    var alwaysMinimize:Boolean = false,
 ):Serializable
