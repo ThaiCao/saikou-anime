@@ -26,6 +26,7 @@ import android.view.animation.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat.getExternalFilesDirs
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -39,6 +40,7 @@ import androidx.multidex.MultiDexApplication
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import ani.saikou.anilist.Anilist
+import ani.saikou.anilist.BannerImage
 import ani.saikou.anilist.Genre
 import ani.saikou.anime.Episode
 import ani.saikou.databinding.ItemCountDownBinding
@@ -74,7 +76,6 @@ import javax.net.ssl.X509TrustManager
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import ani.saikou.anilist.BannerImage
 
 var statusBarHeight  = 0
 var navBarHeight = 0
@@ -630,27 +631,32 @@ fun download(activity: Activity, episode:Episode, animeTitle:String){
             request.addRequestHeader(it.key,it.value)
         }
     }
+    val title = "Episode ${episode.number}${if (episode.title != null) " - ${episode.title}" else ""}".replace(regex,"")
+
     CoroutineScope(Dispatchers.IO).launch {
         try{
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        val direct = File(Environment.DIRECTORY_DOWNLOADS + "/Saikou/${aTitle}/")
-        if (!direct.exists()) direct.mkdirs()
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
 
-        var title = "Episode ${episode.number} ${if (episode.title != null) " - ${episode.title}" else ""}"
-        title = title.replace(regex,"")
-
-        request.setDestinationInExternalPublicDir(
-            Environment.DIRECTORY_DOWNLOADS,
-            "/Saikou/${aTitle}/$title (${stream.quality[episode.selectedQuality].quality}).mp4"
-        )
-        request.setTitle("$title : $aTitle")
-        manager.enqueue(request)
-        toastString("Started Downloading\n$title : $aTitle")
+            val arrayOfFiles = getExternalFilesDirs(activity,Environment.DIRECTORY_DOWNLOADS)
+            if (arrayOfFiles.size > 1 && arrayOfFiles[0] != null && arrayOfFiles[1] != null) {
+                val parentDirectory = arrayOfFiles[1].toString() + "/Anime/${aTitle}/".also { println("external $it") }
+                val direct = File(parentDirectory)
+                if (!direct.exists()) direct.mkdirs()
+                request.setDestinationUri(Uri.fromFile(File("$parentDirectory$title (${stream.quality[episode.selectedQuality].quality}).mp4")))
+            }
+            else {
+                val direct = File(Environment.DIRECTORY_DOWNLOADS + "/Saikou/Anime/${aTitle}/")
+                if (!direct.exists()) direct.mkdirs()
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "/Saikou/Anime/${aTitle}/$title (${stream.quality[episode.selectedQuality].quality}).mp4")
+            }
+            request.setTitle("$title:$aTitle")
+            manager.enqueue(request)
+            toast("Started Downloading\n$title : $aTitle")
         } catch (e:SecurityException){
-            toastString("Please give permission to access Media from Settings, & Try again.")
+            toast("Please give permission to access Files & Folders from Settings, & Try again.")
         }
         catch (e:Exception){
-            toastString(e.toString())
+            toast(e.toString())
         }
     }
 }
@@ -738,7 +744,7 @@ fun MutableMap<String, Genre>.checkGenreTime(genre:String):Boolean{
 
 fun MutableMap<String, BannerImage>.checkBannerTime(type:String):Boolean{
     if(containsKey(type))
-        return (System.currentTimeMillis()-get(type)!!.time) >= (1000*60*60*24*7)
+        return (System.currentTimeMillis()-get(type)!!.time) >= (1000*60*60*6)
     return true
 }
 
@@ -886,7 +892,6 @@ fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
     return this
 }
 
-@Suppress("DEPRECATION")
 @SuppressLint("RestrictedApi")
 class CustomBottomNavBar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -894,10 +899,9 @@ class CustomBottomNavBar @JvmOverloads constructor(
     init {
         ViewUtils.doOnApplyWindowInsets(
             this
-        ) { view, insets, initialPadding -> // Apply the bottom, start, and end padding for a BottomNavigationView
-            // to dodge the system navigation bar
+        ) { view, insets, initialPadding ->
             initialPadding.bottom = 0
-            updateLayoutParams<MarginLayoutParams> { bottomMargin=insets.systemWindowInsetBottom }
+            updateLayoutParams<MarginLayoutParams> { bottomMargin = navBarHeight }
             initialPadding.applyToView(view)
             insets
         }

@@ -469,20 +469,20 @@ class AnilistQueries{
     private fun bannerImage(type: String): String? {
         val image = loadData<MutableMap<String,BannerImage>>(type)?: mutableMapOf()
         if(image.checkBannerTime(type)){
-            val response = executeQuery("""{ MediaListCollection(userId: ${Anilist.userid}, type: $type, chunk:1,perChunk:25) { lists { entries{ media { bannerImage } } } } } """)
+            val response = executeQuery("""{ MediaListCollection(userId: ${Anilist.userid}, type: $type, chunk:1,perChunk:25, sort: [SCORE_DESC,UPDATED_TIME_DESC]) { lists { entries{ media { bannerImage } } } } } """)
             val data = if (response!=null) response["data"] else null
             if(data!=null && data!=JsonNull) {
                 val mediaListCollection = if(data.jsonObject["MediaListCollection"]!=JsonNull) data.jsonObject["MediaListCollection"] else null
                 val list = mediaListCollection?.jsonObject?.get("lists")?.jsonArray
                 if (list != null && list.isNotEmpty()) {
-                    val entriesList = list[Random.nextInt(0, list.size-1)].jsonObject["entries"]
-                    val imageUrl = entriesList?.jsonArray?.get(Random.nextInt(0, entriesList.jsonArray.size-1))?.jsonObject?.get("media")?.jsonObject?.get("bannerImage")?.toString()?.trim('"')
+                    val entriesList = list[Random.nextInt(0, list.size)].jsonObject["entries"]
+                    val imageUrl = entriesList?.jsonArray?.get(Random.nextInt(0, entriesList.jsonArray.size))?.jsonObject?.get("media")?.jsonObject?.get("bannerImage")?.toString()?.trim('"')?:return null
                     image[type] = BannerImage(
-                        imageUrl.toString(),
+                        imageUrl,
                         System.currentTimeMillis()
                     )
                     saveData(type,image)
-                    return if (imageUrl != null && imageUrl != "null") imageUrl else null
+                    return if (imageUrl != "null") imageUrl else null
                 }
             }
         }else{
@@ -592,7 +592,7 @@ class AnilistQueries{
         var tags:ArrayList<String>? = loadData("tags_list",activity)
 
         if (genres==null) {
-            executeQuery("""{GenreCollection}""", force = true, useToken = false, show = true)?.get("data")?.apply {
+            executeQuery("""{GenreCollection}""", force = true, useToken = false)?.get("data")?.apply {
 //                toastString(this.toString())
                 if(this!=JsonNull){
                     genres = arrayListOf()
