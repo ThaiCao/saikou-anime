@@ -226,6 +226,7 @@ class AnilistQueries{
                                     }
                                 }
                             }
+                            media.relations!!.sortBy { it.popularity }
                         }
                         if (it.jsonObject["recommendations"] != JsonNull) {
                             media.recommendations = arrayListOf()
