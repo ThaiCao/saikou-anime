@@ -883,6 +883,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     override fun onStop() {
         playerView.player?.pause()
+        releasePlayer()
         super.onStop()
     }
 
