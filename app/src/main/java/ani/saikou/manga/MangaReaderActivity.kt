@@ -287,8 +287,19 @@ class MangaReaderActivity : AppCompatActivity() {
 
                         adapter = ImageAdapter(chapter,settings.default,uiSettings)
                         binding.mangaReaderRecycler.adapter = adapter
-                        binding.mangaReaderPageSlider.value = currentChapterPage.toFloat()
-                        binding.mangaReaderPageSlider.valueTo = maxChapterPage.toFloat()
+
+                        if(chapImages.size>1) {
+                            binding.mangaReaderOnePage.visibility = View.GONE
+                            binding.mangaReaderPageSlider.apply {
+                                visibility = View.VISIBLE
+                                value = currentChapterPage.toFloat()
+                                valueTo = maxChapterPage.toFloat()
+                            }
+                        }
+                        else{
+                            binding.mangaReaderOnePage.visibility = View.VISIBLE
+                            binding.mangaReaderPageSlider.visibility = View.GONE
+                        }
                         binding.mangaReaderPageNumber.text = "${currentChapterPage}/$maxChapterPage"
 
                         binding.mangaReaderRecycler.scrollToPosition(currentChapterPage.toInt()-1)
