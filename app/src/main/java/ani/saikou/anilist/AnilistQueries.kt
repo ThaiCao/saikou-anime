@@ -52,7 +52,6 @@ fun executeQuery(
         if (Anilist.token != null || force) {
             if (Anilist.token != null && useToken) request.header("Authorization", "Bearer ${Anilist.token}")
             val json = httpClient.newCall(request.build()).execute().body?.string() ?: return null
-            println("JSON : $json")
             if (show) toastString("JSON : $json")
 
             return mapper.readValue<Query>(json).data
