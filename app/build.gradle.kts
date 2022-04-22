@@ -1,8 +1,8 @@
 plugins {
     id("com.android.application")
-    kotlin("android")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    kotlin("android")
     kotlin("kapt")
 }
 
@@ -53,8 +53,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
-    // split notation to avoid IDE warning about updating to 1.6.0
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.6.0-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt")
 
     implementation("com.github.bumptech.glide:glide:4.13.0")
     kapt("com.github.bumptech.glide:compiler:4.13.0")
