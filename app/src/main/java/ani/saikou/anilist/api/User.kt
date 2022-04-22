@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class User(
     // The id of the user
-    var id: Int?,
+    var id: Int,
 
     // The name of the user
     var name: String?,
@@ -102,10 +102,11 @@ data class UserOptions(
     // var disabledListActivity: List<ListActivityOption>?,
 )
 
-data class UserAvatar( // The avatar of user at its largest size
+data class UserAvatar(
+    // The avatar of user at its largest size
     var large: String?,
 
-// The avatar of user at medium size
+    // The avatar of user at medium size
     var medium: String?,
 )
 
@@ -115,7 +116,8 @@ data class UserStatisticTypes(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class UserStatistics( //
+data class UserStatistics(
+    //
     var count: Int?,
     var meanScore: Float?,
     var standardDeviation: Float?,
@@ -184,4 +186,8 @@ data class MediaListTypeOptions(
 
     // If advanced scoring is enabled
     var advancedScoringEnabled: Boolean?,
+)
+
+data class Viewer(
+    var user: User?
 )

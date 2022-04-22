@@ -2,7 +2,6 @@ package ani.saikou.anime.source.parsers
 
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import ani.saikou.anilist.httpClient
 import ani.saikou.anime.Episode
 import ani.saikou.anime.source.AnimeParser
@@ -13,21 +12,17 @@ import ani.saikou.media.Media
 import ani.saikou.media.Source
 import ani.saikou.toastString
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Request
 import org.jsoup.Jsoup
 import java.util.*
-import kotlin.collections.ArrayList
 
-class NineAnime(private val dub: Boolean = false, override val name: String = "9Anime Scraper - 9Anime.to") : AnimeParser() {
+class NineAnime(private val dub: Boolean = false, override val name: String = "9Anime.me") : AnimeParser() {
     private val key = "0wMrYU+ixjJ4QdzgfN2HlyIVAt3sBOZnCT9Lm7uFDovkb/EaKpRWhqXS5168ePcG"
-    private val host = listOf(
-        "https://9anime.to",
-        "https://9anime.id",
-        "https://9anime.pl",
-    )
 
-//    Special thanks to the contributors of Aniyomi: https://github.com/jmir1 and https://github.com/silverwolf-waltz for most of the decoding code of 9anime!
+    //    Special thanks to the contributors of Aniyomi: https://github.com/jmir1 and https://github.com/silverwolf-waltz for most of the decoding code of 9anime!
     override fun getStream(episode: Episode, server: String): Episode {
         val streams = mutableMapOf<String, Episode.StreamLinks?>()
         val body = httpClient.newCall(
@@ -41,16 +36,15 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
         var realLink = ""
         Jsoup.parse(replacedHtml).body().select(".tabs span").forEach {
             val name = it.text()
-            if (name == server){
-                val encodedStreamBody = shitCallThatFailsOften(dataSources[it.attr("data-id")].toString())
-                    ?: shitCallThatFailsOften(dataSources[it.attr("data-id")].toString())!!
+            if (name == server) {
+                val encodedStreamBody = shitCallThatFailsOften(dataSources[it.attr("data-id")].toString())!!
                 val encodedStreamUrl = Json.decodeFromString<JsonObject>(encodedStreamBody)["url"]!!.jsonPrimitive.content
                 realLink = getLink(encodedStreamUrl)
             }
         }
         when (server) {
-            "Vidstream" -> streams[server] = (VizCloud("${host[0]}/").getStreamLinks(name, realLink))
-            "MyCloud"   -> streams[server] = (VizCloud("${host[0]}/").getStreamLinks(name, realLink))
+            "Vidstream" -> streams[server] = (VizCloud("${host()}/").getStreamLinks(name, realLink))
+            "MyCloud"   -> streams[server] = (VizCloud("${host()}/").getStreamLinks(name, realLink))
         }
         episode.streamLinks = streams
         return episode
@@ -70,13 +64,12 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
             )
             Jsoup.parse(replacedHtml).body().select(".tabs span").forEach {
                 val name = it.text()
-                val encodedStreamBody = shitCallThatFailsOften(dataSources[it.attr("data-id")].toString())
-                    ?: shitCallThatFailsOften(dataSources[it.attr("data-id")].toString())!!
+                val encodedStreamBody = shitCallThatFailsOften(dataSources[it.attr("data-id")].toString())!!
                 val encodedStreamUrl = Json.decodeFromString<JsonObject>(encodedStreamBody)["url"]!!.jsonPrimitive.content
                 val realLink = getLink(encodedStreamUrl)
                 when (name) {
-                    "Vidstream" -> streams[name] = (VizCloud("${host[0]}/").getStreamLinks(name, realLink))
-                    "MyCloud"   -> streams[name] = (VizCloud("${host[0]}/").getStreamLinks(name, realLink))
+                    "Vidstream" -> streams[name] = (VizCloud("${host()}/").getStreamLinks(name, realLink))
+                    "MyCloud"   -> streams[name] = (VizCloud("${host()}/").getStreamLinks(name, realLink))
                 }
 
             }
@@ -89,7 +82,7 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
 
     private fun shitCallThatFailsOften(source: String): String? {
         val call = httpClient.newCall(
-            Request.Builder().url("${host[0]}/ajax/anime/episode?id=${source.replace("\"", "")}").build()
+            Request.Builder().url("${host()}/ajax/anime/episode?id=${source.replace("\"", "")}").build()
         ).execute()
         return if (call.code == 200) call.body!!.string() else null
     }
@@ -129,7 +122,7 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
         val responseArray = arrayListOf<Source>()
         val vrf = getVrf(string)
         try {
-            Jsoup.connect("${host[0]}/search?keyword=${encode(string)}&vrf=${encode(vrf)}&page=1").get()
+            Jsoup.connect("${host()}/search?keyword=${encode(string)}&vrf=${encode(vrf)}&page=1").get()
                 .select("ul.anime-list li").forEach {
                     val link = it.select("a.name").attr("href")
                     val title = it.select("a.name").text()
@@ -148,15 +141,15 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
         val vrf = encode(getVrf(animeId))
         try {
             val body = httpClient.newCall(
-                Request.Builder().url("${host[0]}/ajax/anime/servers?id=$animeId&vrf=$vrf").build()
+                Request.Builder().url("${host()}/ajax/anime/servers?id=$animeId&vrf=$vrf").build()
             ).execute().body!!.string()
             val bodyJson = Json.decodeFromString<JsonObject>(body)
             val html = Jsoup.parse(bodyJson["html"].toString())
-            val replacedHtml = shittyReplaceBecauseOfWeirdEncodingShit(html.toString().replace("\\&quot;", "\""))
+            val replacedHtml = shittyReplaceBecauseOfWeirdEncodingShit(html.toString())
             Jsoup.parse(replacedHtml).body().select("ul.episodes li a").forEach {
                 val num = it.attr("data-base")
                 responseArray[num] =
-                    Episode(number = num, link = "${host[0]}/ajax/anime/servers?id=$animeId&vrf=$vrf&episode=$num")
+                    Episode(number = num, link = "${host()}/ajax/anime/servers?id=$animeId&vrf=$vrf&episode=$num")
             }
         } catch (e: Exception) {
             toastString(e.toString())
@@ -176,14 +169,14 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
     }
 
     private fun shittyReplaceBecauseOfWeirdEncodingShit(encodedHtml: String): String {
-        val html = encodedHtml
+        return encodedHtml
+            .replace("\\&quot;", "\"")
             .replace("\"\"", "\"")
             .replace("\n", "")
             .replace(" \" ", " ")
             .replace("\\n", "")
             .replace("\"\"", "\"")
             .replace("\\\"", "\"")
-        return html
     }
 
     private fun makeJsonJsonAgain(notJson: String): JsonObject {
@@ -192,7 +185,7 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
             .replace(",", "\",\"")
             .replace(":", "\":\"")
 
-        return Json.decodeFromString<JsonObject>(json)
+        return Json.decodeFromString(json)
     }
 
     private fun ue(input: String): String {
@@ -246,8 +239,9 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
     }
 
     private fun da(a: String) {
-        val e = "4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCUIE5vIHJld29yaz8g4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCUCuKggOKjnuKiveKiquKio+Kio+Kio+Kiq+KhuuKhteKjneKhruKjl+Kit+KiveKiveKiveKjruKht+KhveKjnOKjnOKiruKiuuKjnOKit+KiveKineKhveKjnQrioLjiobjioJzioJXioJXioIHiooHioofioo/ior3iorrio6riobPioZ3io47io4/ioq/iop7iob/io5/io7fio7Pioq/iobfio73ior3ioq/io7Pio6vioIcK4qCA4qCA4qKA4qKA4qKE4qKs4qKq4qGq4qGO4qOG4qGI4qCa4qCc4qCV4qCH4qCX4qCd4qKV4qKv4qKr4qOe4qOv4qO/4qO74qG94qOP4qKX4qOX4qCP4qCACuKggOKgquKhquKhquKjquKiquKiuuKiuOKiouKik+KihuKipOKigOKggOKggOKggOKggOKgiOKiiuKinuKhvuKjv+Khr+Kjj+KiruKgt+KggeKggOKggArioIDioIDioIDioIjioIrioIbioYPioJXiopXioofioofioofioofioofioo/ioo7ioo7ioobiooTioIDiopHio73io7/iop3ioLLioInioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qCA4qG/4qCC4qCg4qCA4qGH4qKH4qCV4qKI4qOA4qCA4qCB4qCh4qCj4qGj4qGr4qOC4qO/4qCv4qKq4qCw4qCC4qCA4qCA4qCA4qCACuKggOKggOKggOKggOKhpuKhmeKhguKigOKipOKio+Kgo+KhiOKjvuKhg+KgoOKghOKggOKhhOKiseKjjOKjtuKij+KiiuKgguKggOKggOKggOKggOKggOKggArioIDioIDioIDioIDiop3iobLio5zioa7ioY/ioo7iooziooLioJnioKLioJDiooDiopjiorXio73io7/iob/ioIHioIHioIDioIDioIDioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qCo4qO64qG64qGV4qGV4qGx4qGR4qGG4qGV4qGF4qGV4qGc4qG84qK94qG74qCP4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCACuKggOKggOKggOKggOKjvOKjs+Kjq+KjvuKjteKjl+KhteKhseKhoeKio+KikeKileKinOKileKhneKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggArioIDioIDioIDio7Tio7/io77io7/io7/io7/iob/iob3ioZHioozioKrioaLioaPio6PioZ/ioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIAK4qCA4qCA4qCA4qGf4qG+4qO/4qK/4qK/4qK14qO94qO+4qO84qOY4qK44qK44qOe4qGf4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCACuKggOKggOKggOKggOKggeKgh+KgoeKgqeKhq+Kiv+KjneKhu+KhruKjkuKiveKgi+KggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggArigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJQ="
-        val f = a+e
+        val e =
+            "4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCUIE5vIHJld29yaz8g4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCU4oCUCuKggOKjnuKiveKiquKio+Kio+Kio+Kiq+KhuuKhteKjneKhruKjl+Kit+KiveKiveKiveKjruKht+KhveKjnOKjnOKiruKiuuKjnOKit+KiveKineKhveKjnQrioLjiobjioJzioJXioJXioIHiooHioofioo/ior3iorrio6riobPioZ3io47io4/ioq/iop7iob/io5/io7fio7Pioq/iobfio73ior3ioq/io7Pio6vioIcK4qCA4qCA4qKA4qKA4qKE4qKs4qKq4qGq4qGO4qOG4qGI4qCa4qCc4qCV4qCH4qCX4qCd4qKV4qKv4qKr4qOe4qOv4qO/4qO74qG94qOP4qKX4qOX4qCP4qCACuKggOKgquKhquKhquKjquKiquKiuuKiuOKiouKik+KihuKipOKigOKggOKggOKggOKggOKgiOKiiuKinuKhvuKjv+Khr+Kjj+KiruKgt+KggeKggOKggArioIDioIDioIDioIjioIrioIbioYPioJXiopXioofioofioofioofioofioo/ioo7ioo7ioobiooTioIDiopHio73io7/iop3ioLLioInioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qCA4qG/4qCC4qCg4qCA4qGH4qKH4qCV4qKI4qOA4qCA4qCB4qCh4qCj4qGj4qGr4qOC4qO/4qCv4qKq4qCw4qCC4qCA4qCA4qCA4qCACuKggOKggOKggOKggOKhpuKhmeKhguKigOKipOKio+Kgo+KhiOKjvuKhg+KgoOKghOKggOKhhOKiseKjjOKjtuKij+KiiuKgguKggOKggOKggOKggOKggOKggArioIDioIDioIDioIDiop3iobLio5zioa7ioY/ioo7iooziooLioJnioKLioJDiooDiopjiorXio73io7/iob/ioIHioIHioIDioIDioIDioIDioIDioIDioIAK4qCA4qCA4qCA4qCA4qCo4qO64qG64qGV4qGV4qGx4qGR4qGG4qGV4qGF4qGV4qGc4qG84qK94qG74qCP4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCACuKggOKggOKggOKggOKjvOKjs+Kjq+KjvuKjteKjl+KhteKhseKhoeKio+KikeKileKinOKileKhneKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggArioIDioIDioIDio7Tio7/io77io7/io7/io7/iob/iob3ioZHioozioKrioaLioaPio6PioZ/ioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIDioIAK4qCA4qCA4qCA4qGf4qG+4qO/4qK/4qK/4qK14qO94qO+4qO84qOY4qK44qK44qOe4qGf4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCA4qCACuKggOKggOKggOKggOKggeKgh+KgoeKgqeKhq+Kiv+KjneKhu+KhruKjkuKiveKgi+KggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggOKggArigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJTigJQ="
+        val f = a + e
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             logger(String(Base64.getDecoder().decode(f)))
         }
@@ -291,4 +285,16 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
     private fun encode(input: String): String = java.net.URLEncoder.encode(input, "utf-8").replace("+", "%20")
 
     private fun decode(input: String): String = java.net.URLDecoder.decode(input, "utf-8")
+
+    companion object {
+        private var host: String? = null
+        fun host(): String {
+            val liveHost = if (host != null) host ?: "9anime.pl" else httpClient.newCall(
+                Request.Builder()
+                    .url("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/nine.txt")
+                    .build()
+            ).execute().body?.string()?.replace("\n", "") ?: "9anime.pl"
+            return "https://$liveHost"
+        }
+    }
 }

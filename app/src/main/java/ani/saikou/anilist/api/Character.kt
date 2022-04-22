@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 data class Character(
     // The id of the character
-    var id: Int?,
+    var id: Int,
 
     // The names of the character
     var name: CharacterName?,
@@ -82,7 +82,7 @@ data class CharacterEdge(
     var favouriteOrder: Int?,
 )
 
-enum class CharacterRole() {
+enum class CharacterRole {
     MAIN, SUPPORTING, BACKGROUND;
 
     override fun toString(): String {

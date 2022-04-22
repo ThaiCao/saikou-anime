@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Media(
     // The id of the media
-    var id: Int?,
+    var id: Int,
 
     // The mal id of the media
     var idMal: Int?,
@@ -186,7 +186,7 @@ data class MediaTitle(
     var userPreferred: String?,
 )
 
-enum class MediaType() {
+enum class MediaType {
     ANIME, MANGA;
 
     override fun toString(): String {
@@ -194,7 +194,7 @@ enum class MediaType() {
     }
 }
 
-enum class MediaStatus() {
+enum class MediaStatus {
     FINISHED, RELEASING, NOT_YET_RELEASED, CANCELLED, HIATUS;
 
     override fun toString(): String {
@@ -297,7 +297,7 @@ data class MediaList(
     var user: User?
 )
 
-enum class MediaListStatus() {
+enum class MediaListStatus {
     CURRENT, PLANNING, COMPLETED, DROPPED, PAUSED, REPEATING;
 
     override fun toString(): String {
@@ -305,15 +305,15 @@ enum class MediaListStatus() {
     }
 }
 
-enum class MediaSource() {
-    ORIGINAL, MANGA, LIGHT_NOVEL, VISUAL_NOVEL, VIDEO_GAME, OTHER, NOVEL, DOUHINSHI, ANIME, WEB_NOVEL, LIVE_ACTION, GAME,  COMIC, MULTIMEDIA_PROJECT, PICTURE_BOOK;
+enum class MediaSource {
+    ORIGINAL, MANGA, LIGHT_NOVEL, VISUAL_NOVEL, VIDEO_GAME, OTHER, NOVEL, DOUJINSHI, ANIME, WEB_NOVEL, LIVE_ACTION, GAME, COMIC, MULTIMEDIA_PROJECT, PICTURE_BOOK;
 
     override fun toString(): String {
         return super.toString().replace("_", " ")
     }
 }
 
-enum class MediaFormat() {
+enum class MediaFormat {
     TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA, MUSIC, MANGA, NOVEL, ONE_SHOT;
 
     override fun toString(): String {
@@ -330,6 +330,10 @@ data class MediaTrailer(
 
     // The url for the thumbnail image of the video
     var thumbnail: String?,
+)
+
+data class MediaTagCollection(
+    var tags : List<MediaTag>?
 )
 
 data class MediaTag(
@@ -413,7 +417,7 @@ data class MediaEdge(
     var favouriteOrder: Int?,
 )
 
-enum class MediaRelation() {
+enum class MediaRelation {
     ADAPTATION, PREQUEL, SEQUEL, PARENT, SIDE_STORY, CHARACTER, SUMMARY, ALTERNATIVE, SPIN_OFF, OTHER, SOURCE, COMPILATION, CONTAINS;
 
     override fun toString(): String {
@@ -421,7 +425,7 @@ enum class MediaRelation() {
     }
 }
 
-enum class MediaSeason() {
+enum class MediaSeason {
     WINTER, SPRING, SUMMER, FALL;
 
     override fun toString(): String {
@@ -437,7 +441,7 @@ data class MediaExternalLink(
     var url: String?,
 
     // The links website site name
-    var site: String?,
+    var site: String,
 
     // The links website site id
     var siteId: Int?,
@@ -456,7 +460,7 @@ data class MediaExternalLink(
     var notes: String?,
 )
 
-enum class ExternalLinkType() {
+enum class ExternalLinkType {
     INFO, STREAMING, SOCIAL;
 
     override fun toString(): String {
@@ -474,7 +478,7 @@ data class MediaListCollection(
     // If there is another chunk
     var hasNextChunk: Boolean?,
 
-)
+    )
 
 data class MediaListGroup(
     // Media list entries
@@ -487,4 +491,8 @@ data class MediaListGroup(
     var isSplitCompletedList: Boolean?,
 
     var status: MediaListStatus?,
+)
+
+data class QueryMedia(
+    var media: Media?
 )

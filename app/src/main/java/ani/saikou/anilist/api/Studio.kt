@@ -2,7 +2,7 @@ package ani.saikou.anilist.api
 
 data class Studio(
     // The id of the studio
-    var id: Int?,
+    var id: Int,
 
     // The name of the studio
     // Originally non-nullable, needs to be nullable due to it not being always queried

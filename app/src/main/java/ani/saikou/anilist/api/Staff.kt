@@ -2,7 +2,7 @@ package ani.saikou.anilist.api
 
 data class Staff(
     // The id of the staff member
-    var id: Int?,
+    var id: Int,
 
     // The names of the staff member
     // var name: StaffName?,
@@ -74,6 +74,7 @@ data class Staff(
     // Notes for site moderators
     var modNotes: String?,
 )
+
 data class StaffConnection(
     // var edges: List<StaffEdge>?,
 
