@@ -16,7 +16,11 @@ class VizCloud(val referer: String) : Extractor() {
         data class Media(val sources: List<Sources>)
         data class Response(val success: Boolean, val media: Media)
 
-        val response = httpClient.get(url, referer = referer, params = mapOf("skey" to skey)).parsed<Response>()
+        val response = httpClient.get(
+            url.replace("/embed/", "/info/").replace("/e/", "/info/"),
+            referer = referer,
+            params = mapOf("skey" to skey)
+        ).parsed<Response>()
 
         val mediaSources = response.media.sources[0].file
         return Episode.StreamLinks(
