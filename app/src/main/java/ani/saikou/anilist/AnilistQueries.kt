@@ -4,26 +4,16 @@ import android.app.Activity
 import ani.saikou.*
 import ani.saikou.anilist.api.Data
 import ani.saikou.anilist.api.FuzzyDate
-import ani.saikou.anilist.api.Query
 import ani.saikou.anilist.api.User
 import ani.saikou.media.Character
 import ani.saikou.media.Media
 import ani.saikou.media.Studio
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.lagradost.nicehttp.Requests
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
 import java.io.Serializable
-import java.net.UnknownHostException
-
-
-val httpClient = OkHttpClient()
-val mapper = jacksonObjectMapper()
 
 fun executeQuery(
     query: String,
@@ -32,34 +22,29 @@ fun executeQuery(
     useToken: Boolean = true,
     show: Boolean = false
 ): Data? {
-    try {
-        val formBody: RequestBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("query", query)
-            .addFormDataPart("variables", variables)
-            .build()
-
-        val request = Request.Builder()
-            .url("https://graphql.anilist.co/")
-            .addHeader("Content-Type", "application/json")
-            .addHeader("Accept", "application/json")
-            .addHeader(
-                "user-agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36"
-            )
-            .post(formBody)
+//    try {
+        val data = mapOf(
+            "query" to query,
+            "variables" to variables
+        )
+        val headers = mutableMapOf(
+            "Content-Type" to "application/json",
+            "Accept" to "application/json",
+            "user-agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebkit/537.36 (KHTML, Like Gecko) Chrome/100.0.4896.75 Safari/537.36"
+        )
 
         if (Anilist.token != null || force) {
-            if (Anilist.token != null && useToken) request.header("Authorization", "Bearer ${Anilist.token}")
-            val json = httpClient.newCall(request.build()).execute().body?.string() ?: return null
-            if (show) toastString("JSON : $json")
+            toastString("Query : $query")
+            if (Anilist.token != null && useToken) headers["Authorization"]= "Bearer ${Anilist.token}"
+            val json = httpClient.post("https://graphql.anilist.co/", headers, data = data)
+            if(show) toastString("Response : ${json.text}")
 
-            return mapper.readValue<Query>(json).data
+            return Requests.mapper.readValue(json.text)
         }
-    } catch (e: Exception) {
-        if (e is UnknownHostException) toastString("Network error, please Retry.")
-        else toastString("$e")
-    }
+//    } catch (e: Exception) {
+//        if (e is UnknownHostException) toastString("Network error, please Retry.")
+//        else toastString("$e")
+//    }
     return null
 }
 
