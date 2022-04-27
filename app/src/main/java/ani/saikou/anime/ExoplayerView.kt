@@ -771,6 +771,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }.build()
         val dataSourceFactory = DataSource.Factory {
             val dataSource: HttpDataSource = OkHttpDataSource.Factory(httpClient).createDataSource()
+            defaultHeaders.forEach{
+                dataSource.setRequestProperty(it.key,it.value)
+            }
             if (stream.headers != null)
                 stream.headers.forEach {
                     dataSource.setRequestProperty(it.key, it.value)
