@@ -7,6 +7,7 @@ import ani.saikou.anime.source.AnimeParser
 import ani.saikou.anime.source.Extractor
 import ani.saikou.anime.source.extractors.RapidCloud
 import ani.saikou.anime.source.extractors.StreamSB
+import ani.saikou.anime.source.extractors.StreamTape
 import ani.saikou.media.Media
 import ani.saikou.media.Source
 import ani.saikou.others.MalSyncBackup
@@ -24,6 +25,7 @@ class Zoro(override val name: String = "Zoro", override val saveStreams: Boolean
         val extractor: Extractor? = when {
             "rapid" in domain -> RapidCloud()
             "sb" in domain    -> StreamSB()
+            "streamta" in domain -> StreamTape()
             else              -> null
         }
         val a = extractor?.getStreamLinks(name, url)

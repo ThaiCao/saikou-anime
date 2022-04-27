@@ -484,7 +484,7 @@ fun View.setSafeOnClickListener(onSafeClick: (View) -> Unit) {
 
 suspend fun getSize(url: String, headers: MutableMap<String, String>? = null): Double? {
     return try {
-        httpClient.head(url,headers?: mapOf(), timeout = 1000).also { println(it.headers) }.size?.toDouble()?.div(1048576)
+        httpClient.head(url,headers?: mapOf(), timeout = 1000).size?.toDouble()?.div(1048576)
     } catch (e: Exception) {
         logger(e)
         null

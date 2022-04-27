@@ -4,6 +4,7 @@ package ani.saikou.anime.source.parsers
 import ani.saikou.*
 import ani.saikou.anime.Episode
 import ani.saikou.anime.source.AnimeParser
+import ani.saikou.anime.source.extractors.StreamTape
 import ani.saikou.anime.source.extractors.VizCloud
 import ani.saikou.media.Media
 import ani.saikou.media.Source
@@ -29,6 +30,7 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
                     when (server) {
                         "Vidstream" -> streams[server] = (VizCloud("${host()}/").getStreamLinks(name, realLink))
                         "MyCloud"   -> streams[server] = (VizCloud("${host()}/").getStreamLinks(name, realLink))
+                        "Streamtape" -> streams[server] = StreamTape().getStreamLinks(name,realLink)
                     }
                     episode.streamLinks = streams
                     return episode
@@ -55,6 +57,7 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
                 when (name) {
                     "Vidstream" -> streams[name] = (VizCloud("${host()}/").getStreamLinks(name, realLink))
                     "MyCloud"   -> streams[name] = (VizCloud("${host()}/").getStreamLinks(name, realLink))
+                    "Streamtape" -> streams[name] = StreamTape().getStreamLinks(name,realLink)
                 }
             }
         } catch (e: Exception) {
@@ -156,7 +159,7 @@ class NineAnime(private val dub: Boolean = false, override val name: String = "9
             host =
                 if (host != null) host ?: defaultHost
                 else {
-                    httpClient.get("https://9anime.me/").document.select("ol > li > a").last()?.text() ?: defaultHost
+                    httpClient.get("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/nine.txt").text.replace("\n","")
                 }
             return "https://$host"
         }
