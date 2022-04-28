@@ -54,7 +54,7 @@ object AppUpdater {
                                             }
                                         }
                                     } catch (e: Exception) {
-                                        toastString(e.toString())
+                                        logError(e)
                                     }
                                 }
                             } else openLinkInBrowser("https://discord.com/channels/902174389351620629/946852010198728704")
@@ -65,7 +65,7 @@ object AppUpdater {
                     }.show()
             }
         } catch (e: Exception) {
-            toastString(e.toString())
+            logError(e)
         }
     }
 
@@ -96,7 +96,7 @@ object AppUpdater {
         val id = try {
             downloadManager.enqueue(request)
         } catch (e: Exception) {
-            toastString(e.toString())
+            logError(e)
             -1
         }
         if (id == -1L) return true
@@ -126,7 +126,7 @@ object AppUpdater {
                             }
                         }
                     } catch (e: Exception) {
-                        toastString(e.toString())
+                        logError(e)
                     }
                 }
             }, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
@@ -151,7 +151,7 @@ object AppUpdater {
                 context.startActivity(installIntent)
             }
         } catch (e: Exception) {
-            toastString(e.toString())
+            logError(e)
         }
     }
 }
