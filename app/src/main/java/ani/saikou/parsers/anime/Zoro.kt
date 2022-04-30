@@ -1,7 +1,6 @@
 package ani.saikou.parsers.anime
 
 import android.net.Uri
-import ani.saikou.anime.source.parsers.Zoro
 import ani.saikou.httpClient
 import ani.saikou.others.asyncEach
 import ani.saikou.parsers.*
@@ -40,7 +39,7 @@ class Zoro : AnimeParser() {
         val element = Jsoup.parse(res.html?:return list)
         element.select("div.server-item").asyncEach {
             val serverName = "${it.attr("data-type").uppercase()} - ${it.text()}"
-            val link = httpClient.get("$hostUrl/ajax/v2/episode/sources?id=${it.attr("data-id")}").parsed<Zoro.SourceResponse>().link
+            val link = httpClient.get("$hostUrl/ajax/v2/episode/sources?id=${it.attr("data-id")}").parsed<SourceResponse>().link
             list.add(VideoServer(serverName, FileUrl(link)))
         }
         return list
@@ -75,6 +74,10 @@ class Zoro : AnimeParser() {
 
         return list
     }
+
+    data class SourceResponse (
+        val link: String
+    )
 
     private data class HtmlResponse(
         val status: Boolean,
