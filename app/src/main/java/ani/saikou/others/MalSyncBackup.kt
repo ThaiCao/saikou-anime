@@ -1,7 +1,7 @@
 package ani.saikou.others
 
 import ani.saikou.httpClient
-import ani.saikou.media.Source
+import ani.saikou.parsers.ShowResponse
 import com.fasterxml.jackson.annotation.JsonProperty
 
 object MalSyncBackup {
@@ -18,7 +18,7 @@ object MalSyncBackup {
         val active: Boolean? = null,
     )
 
-    suspend fun get(id: Int, name: String, dub: Boolean = false): Source? {
+    suspend fun get(id: Int, name: String, dub: Boolean = false): ShowResponse? {
         try {
             val json =
                 httpClient.get("https://raw.githubusercontent.com/MALSync/MAL-Sync-Backup/master/data/anilist/anime/$id.json")
@@ -31,7 +31,7 @@ object MalSyncBackup {
                         } else null
                     else page.identifier
                     if(slug!=null && page.active==true){
-                        return Source(slug,page.title,page.image?:"")
+                        return ShowResponse(page.title,slug,page.image?:"")
                     }
                 }
         } catch (e: Exception) {

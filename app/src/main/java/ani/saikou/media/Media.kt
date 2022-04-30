@@ -17,8 +17,10 @@ data class Media(
     var idMAL: Int? = null,
     var typeMAL: String? = null,
 
-    val name: String,
+    val name: String?,
     val nameRomaji: String,
+    val userPreferredName: String,
+
     var cover: String? = null,
     val banner: String? = null,
     var relation: String? = null,
@@ -27,7 +29,6 @@ data class Media(
     var isAdult: Boolean,
     var isFav: Boolean = false,
     var notify: Boolean = false,
-    val userPreferredName: String,
 
     var userListId: Int? = null,
     var userProgress: Int? = null,
@@ -69,9 +70,9 @@ data class Media(
         id = apiMedia.id,
         idMAL = apiMedia.idMal,
         popularity = apiMedia.popularity,
-        name = apiMedia.title!!.english.toString(),
-        nameRomaji = apiMedia.title!!.romaji.toString(),
-        userPreferredName = apiMedia.title!!.userPreferred.toString(),
+        name = apiMedia.title.english,
+        nameRomaji = apiMedia.title.romaji,
+        userPreferredName = apiMedia.title.userPreferred,
         cover = apiMedia.coverImage?.large,
         banner = apiMedia.bannerImage,
         status = apiMedia.status.toString(),
@@ -99,6 +100,6 @@ data class Media(
         this.relation = mediaEdge.relationType.toString()
     }
 
-    fun getMainName() = if (name != "null") name else nameRomaji
-    fun getMangaName() = if (countryOfOrigin != "JP") getMainName() else nameRomaji
+    val mainName by lazy { name ?: nameRomaji }
+    val mangaName by lazy { if (countryOfOrigin != "JP") mainName else nameRomaji }
 }

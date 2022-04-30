@@ -11,7 +11,7 @@ data class Media(
     var idMal: Int?,
 
     // The official titles of the media in various languages
-    var title: MediaTitle?,
+    var title: MediaTitle,
 
     // The type of the media; anime or manga
     var type: MediaType?,
@@ -174,7 +174,7 @@ data class Media(
 
 data class MediaTitle(
     // The romanization of the native language title
-    var romaji: String?,
+    var romaji: String,
 
     // The official english title
     var english: String?,
@@ -183,7 +183,7 @@ data class MediaTitle(
     var native: String?,
 
     // The currently authenticated users preferred title language. Default romaji for non-authenticated
-    var userPreferred: String?,
+    var userPreferred: String,
 )
 
 enum class MediaType {

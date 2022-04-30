@@ -44,8 +44,9 @@ import ani.saikou.anilist.api.FuzzyDate
 import ani.saikou.anime.Episode
 import ani.saikou.databinding.ItemCountDownBinding
 import ani.saikou.media.Media
-import ani.saikou.media.Source
 import ani.saikou.others.logError
+import ani.saikou.parsers.FileUrl
+import ani.saikou.parsers.ShowResponse
 import ani.saikou.settings.UserInterfaceSettings
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
@@ -424,7 +425,7 @@ fun levenshtein(lhs: CharSequence, rhs: CharSequence): Int {
     return cost[lhsLength - 1]
 }
 
-fun ArrayList<Source>.sortByTitle(string: String) {
+fun MutableList<ShowResponse>.sortByTitle(string: String) {
     val temp: MutableMap<Int, Int> = mutableMapOf()
     for (i in 0 until this.size) {
         temp[i] = levenshtein(string.lowercase(), this[i].name.lowercase())
@@ -435,8 +436,7 @@ fun ArrayList<Source>.sortByTitle(string: String) {
     for (i in b.indices.reversed()) {
         if (b[i] > 18 && i < a.size) a.removeAt(i)
     }
-    val temp2 = arrayListOf<Source>()
-    temp2.addAll(this)
+    val temp2 = this.toMutableList()
     this.clear()
     for (i in a.indices) {
         this.add(temp2[a[i]])
@@ -483,13 +483,17 @@ fun View.setSafeOnClickListener(onSafeClick: (View) -> Unit) {
     setOnClickListener(safeClickListener)
 }
 
-suspend fun getSize(url: String, headers: MutableMap<String, String>? = null): Double? {
+suspend fun getSize(file:FileUrl): Long? {
     return try {
-        httpClient.head(url,headers?: mapOf(), timeout = 1000).size?.toDouble()?.div(1048576)
+        httpClient.head(file.url,file.headers, timeout = 1000).size
     } catch (e: Exception) {
         logger(e)
         null
     }
+}
+
+suspend fun getSize(file:String) : Long?{
+    return getSize(FileUrl(file))
 }
 
 
