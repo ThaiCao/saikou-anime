@@ -1,9 +1,9 @@
 package ani.saikou.parsers
 
+import ani.saikou.asyncMap
 import ani.saikou.loadData
 import ani.saikou.others.MalSyncBackup
-import ani.saikou.others.asyncEach
-import ani.saikou.others.logError
+import ani.saikou.tryForNetwork
 import kotlin.properties.Delegates
 
 /**
@@ -60,14 +60,12 @@ abstract class AnimeParser : BaseParser() {
      * Doesn't need to be overridden, if the parser is following the norm.
      * **/
     open suspend fun loadVideoServers(episodeUrl: String, callback: (VideoExtractor) -> Unit) {
-        loadVideoServers(episodeUrl).asyncEach {
-            try {
+        loadVideoServers(episodeUrl).asyncMap {
+            tryForNetwork {
                 getVideoExtractor(it)?.apply {
                     extract()
                     callback.invoke(this)
                 }
-            } catch (e: Exception) {
-                logError(e)
             }
         }
     }
@@ -78,18 +76,16 @@ abstract class AnimeParser : BaseParser() {
      * Doesn't need to be overridden, if the parser is following the norm.
      * **/
     open suspend fun loadSingleVideoServer(serverName: String, episodeUrl: String): VideoExtractor? {
-        try {
+        return tryForNetwork {
             loadVideoServers(episodeUrl).apply {
                 find { it.name == serverName }?.also {
-                    return getVideoExtractor(it)?.apply {
+                    return@tryForNetwork getVideoExtractor(it)?.apply {
                         extract()
                     }
                 }
             }
-        } catch (e: Exception) {
-            logError(e)
+            null
         }
-        return null
     }
 
 

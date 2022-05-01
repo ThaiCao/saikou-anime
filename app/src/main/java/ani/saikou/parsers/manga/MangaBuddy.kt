@@ -1,7 +1,7 @@
 package ani.saikou.parsers.manga
 
+import ani.saikou.client
 import ani.saikou.findBetween
-import ani.saikou.httpClient
 import ani.saikou.parsers.*
 
 class MangaBuddy : MangaParser() {
@@ -14,12 +14,10 @@ class MangaBuddy : MangaParser() {
 
     override suspend fun loadChapters(mangaLink: String): List<MangaChapter> {
 
-        val list = mutableListOf<MangaChapter>()
-
-        val res = httpClient.get("$hostUrl/api/manga${mangaLink}/chapters?source=detail")
+        val res = client.get("$hostUrl/api/manga${mangaLink}/chapters?source=detail")
             .document.select("#chapter-list>li").reversed()
 
-        res.forEach {
+        return res.mapNotNull {
             if (it.select("strong").text().contains("Chapter")) {
                 val chap = Regex("(Chapter ([A-Za-z0-9.]+))( ?: ?)?( ?(.+))?").find(it.select("strong").text())?.destructured
                 val number: String
@@ -31,46 +29,38 @@ class MangaBuddy : MangaParser() {
                 } else {
                     number = it.select("strong").text()
                 }
-                list.add(MangaChapter(number, link, title))
-            }
+                MangaChapter(number, link, title)
+            } else null
         }
-
-        return list
     }
 
     override suspend fun loadImages(chapterLink: String): List<MangaImage> {
 
-        val list = mutableListOf<MangaImage>()
-
-        val res = httpClient.get(chapterLink).text
+        val res = client.get(chapterLink).text
         val cdn = res.findBetween("var mainServer = \"", "\";")
         val arr = res.findBetween("var chapImages = ", "\n")?.trim('\'')?.split(",")
-        arr?.forEach {
-            val link = FileUrl("https:$cdn$it", headers)
-            list.add(MangaImage(link))
-        }
 
-        return list
+        return (arr ?: return emptyList()).map {
+            val link = FileUrl("https:$cdn$it", headers)
+            MangaImage(link)
+        }
     }
 
     override suspend fun search(query: String): List<ShowResponse> {
 
-        val list = mutableListOf<ShowResponse>()
+        val doc = client.get("$hostUrl/search?status=all&sort=views&q=$query")
+            .document.select(".list > .book-item > .book-detailed-item > .thumb > a")
 
-        val doc = httpClient.get("$hostUrl/search?status=all&sort=views&q=$query").document
-        doc.select(".list > .book-item > .book-detailed-item > .thumb > a").forEach {
+        return doc.mapNotNull {
             if (it.attr("title") != "") {
-                list.add(
-                    ShowResponse(
-                        it.attr("title"),
-                        it.attr("href"),
-                        FileUrl(it.select("img").attr("data-src"), headers)
-                    )
+                ShowResponse(
+                    it.attr("title"),
+                    it.attr("href"),
+                    FileUrl(it.select("img").attr("data-src"), headers)
                 )
             }
+            else null
         }
-
-        return list
     }
 
 }

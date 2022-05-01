@@ -1,7 +1,7 @@
 package ani.saikou.parsers.manga
 
+import ani.saikou.client
 import ani.saikou.findBetween
-import ani.saikou.httpClient
 import ani.saikou.parsers.MangaChapter
 import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaParser
@@ -19,56 +19,40 @@ class MangaSee : MangaParser() {
 
     override suspend fun loadChapters(mangaLink: String): List<MangaChapter> {
 
-        val list = mutableListOf<MangaChapter>()
+        val json = client.get("$hostUrl/manga/$mangaLink").document.select("script")
+            .lastOrNull()?.toString()?.findBetween("vm.Chapters = ", ";")?: return emptyList()
 
-        val json = httpClient.get("$hostUrl/manga/$mangaLink").document.select("script")
-            .lastOrNull()?.toString()?.findBetween("vm.Chapters = ", ";")?: return list
-
-        Requests.mapper.readValue<List<MangaResponse>>(json).forEach {
+        return Requests.mapper.readValue<List<MangaResponse>>(json).map {
             val chap = it.chapter
             val num = chapChop(chap, 3)
             val link = hostUrl + "/read-online/$mangaLink-chapter-" + chapChop(chap, 1) + chapChop(chap, 2) + chapChop(chap, 0) + ".html"
-            list.add(
-                MangaChapter(
-                    num,
-                    link,
-                    it.chapterName
-                )
-            )
+            MangaChapter(num, link, it.chapterName)
         }
-
-        return list
     }
 
     override suspend fun loadImages(chapterLink: String): List<MangaImage> {
-
-        val list = mutableListOf<MangaImage>()
-
-        val a = httpClient.get(chapterLink).document.select("script").lastOrNull()
-        val str = (a ?: return list).toString()
-        val server = (str.findBetween("vm.CurPathName = ", ";") ?: return list).trim('"')
-        val slug = (str.findBetween("vm.IndexName = ", ";") ?: return list).trim('"')
-        val json = Requests.mapper
-            .readValue<ChapterResponse>(str.findBetween("vm.CurChapter = ", ";") ?: return list)
+        val res = client.get(chapterLink).document.select("script").lastOrNull()
+        val str = res?.toString() ?: return emptyList()
+        val server = str.findBetween("vm.CurPathName = ", ";")?.trim('"') ?: return emptyList()
+        val slug = str.findBetween("vm.IndexName = ", ";")?.trim('"') ?: return emptyList()
+        val json = Requests.mapper.readValue<ChapterResponse>(
+            str.findBetween("vm.CurChapter = ", ";") ?: return emptyList()
+        )
         val id = json.chapter
         val chap = chapChop(id, 1) + chapChop(id, 2) + chapChop(id, 0)
         val pages = json.page.toInt()
 
-        for (i in 1..pages) {
-            val link = "https://$server/manga/$slug/$chap-${"000$i".takeLast(3)}.png"
-            list.add(MangaImage(link))
-        }
+        val a = (1..pages)
 
-        return list
+        return a.map {
+            val link = "https://$server/manga/$slug/$chap-${"000$it".takeLast(3)}.png"
+            MangaImage(link)
+        }
     }
 
     override suspend fun search(query: String): List<ShowResponse> {
-
-        val list = mutableListOf<ShowResponse>()
-
-        list.addAll(getSearchData())
+        val list = getSearchData().toMutableList()
         list.sortByTitle(query)
-
         return list
     }
 
@@ -76,9 +60,9 @@ class MangaSee : MangaParser() {
         const val host = "https://mangasee123.com"
         private var response: List<ShowResponse>? = null
         suspend fun getSearchData(): List<ShowResponse> {
-            response = if (response != null) response ?: listOf()
+            response = if (response != null) response ?: emptyList()
             else {
-                val json = httpClient.get("$host/search/").document.select("script").last().toString()
+                val json = client.get("$host/search/").document.select("script").last().toString()
                     .findBetween("vm.Directory = ", "\n")!!.replace(";", "")
                 Requests.mapper.readValue<List<SearchResponse>>(json).map {
                     ShowResponse(
@@ -88,7 +72,7 @@ class MangaSee : MangaParser() {
                     )
                 }
             }
-            return response ?: listOf()
+            return response ?: emptyList()
         }
     }
 

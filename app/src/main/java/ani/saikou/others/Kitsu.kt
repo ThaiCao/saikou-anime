@@ -1,7 +1,8 @@
 package ani.saikou.others
 
 import ani.saikou.anime.Episode
-import ani.saikou.httpClient
+import ani.saikou.client
+import ani.saikou.logError
 import ani.saikou.logger
 import ani.saikou.media.Media
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -15,7 +16,7 @@ object Kitsu {
             "DNT" to "1",
             "Origin" to "https://kitsu.io"
         )
-        val json = httpClient.post("https://kitsu.io/api/graphql",headers, data = mapOf("query" to query))
+        val json = client.post("https://kitsu.io/api/graphql",headers, data = mapOf("query" to query))
         return json.parsed()
     }
 

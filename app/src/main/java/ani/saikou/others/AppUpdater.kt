@@ -22,9 +22,9 @@ object AppUpdater {
         try {
             val version =
                 if (!BuildConfig.DEBUG)
-                    httpClient.get("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/stable.txt").text.replace("\n", "")
+                    client.get("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/stable.txt").text.replace("\n", "")
                 else {
-                    httpClient.get("https://raw.githubusercontent.com/saikou-app/saikou/main/app/build.gradle").text.substringAfter("versionName \"").substringBefore('"')
+                    client.get("https://raw.githubusercontent.com/saikou-app/saikou/main/app/build.gradle").text.substringAfter("versionName \"").substringBefore('"')
                 }
             logger("Git Version : $version")
             val dontShow = loadData("dont_ask_for_update_$version") ?: false

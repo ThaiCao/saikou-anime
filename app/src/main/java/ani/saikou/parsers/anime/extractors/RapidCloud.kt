@@ -2,8 +2,8 @@ package ani.saikou.parsers.anime.extractors
 
 import android.net.Uri
 import android.util.Base64
+import ani.saikou.client
 import ani.saikou.findBetween
-import ani.saikou.httpClient
 import ani.saikou.okHttpClient
 import ani.saikou.parsers.*
 import okhttp3.*
@@ -20,7 +20,7 @@ class RapidCloud(override val server: VideoServer) : VideoExtractor() {
 
         val embed = server.embed
 
-        val soup = httpClient.get(embed.url, embed.headers).text.replace("\n", "")
+        val soup = client.get(embed.url, embed.headers).text.replace("\n", "")
         val key = soup.findBetween("var recaptchaSiteKey = '", "',")
         val number = soup.findBetween("recaptchaNumber = '", "';")
 
@@ -32,7 +32,7 @@ class RapidCloud(override val server: VideoServer) : VideoExtractor() {
                     embed.url.findBetween("/embed-6/", "?z=")!!
                 }&_token=${this}&_number=$number&sId=$sId"
 
-                val json = httpClient.get(jsonLink).parsed<SourceResponse>()
+                val json = client.get(jsonLink).parsed<SourceResponse>()
 
                 json.sources?.forEach {
                     videos.add(Video(0,true, FileUrl(it.file?:return@forEach)))
@@ -57,13 +57,13 @@ class RapidCloud(override val server: VideoServer) : VideoExtractor() {
             Base64.NO_PADDING
         ) + ".").replace("\n", "")
         val vToken =
-            httpClient.get("https://www.google.com/recaptcha/api.js?render=$key", referer = (uri.scheme + "://" + uri.host))
+            client.get("https://www.google.com/recaptcha/api.js?render=$key", referer = (uri.scheme + "://" + uri.host))
                 .text.replace("\n", "")
                 .findBetween("/releases/", "/recaptcha") ?: return null
         val recapToken =
-            httpClient.get("https://www.google.com/recaptcha/api2/anchor?ar=1&hl=en&size=invisible&cb=kr60249sk&k=$key&co=$domain&v=$vToken")
+            client.get("https://www.google.com/recaptcha/api2/anchor?ar=1&hl=en&size=invisible&cb=kr60249sk&k=$key&co=$domain&v=$vToken")
                 .document.selectFirst("#recaptcha-token")?.attr("value") ?: return null
-        return httpClient.post(
+        return client.post(
             "https://www.google.com/recaptcha/api2/reload?k=$key",
             data = mutableMapOf("v" to vToken, "k" to key, "c" to recapToken, "co" to domain, "sa" to "", "reason" to "q")
         )

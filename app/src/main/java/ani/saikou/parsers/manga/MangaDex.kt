@@ -1,7 +1,7 @@
 package ani.saikou.parsers.manga
 
-import ani.saikou.httpClient
-import ani.saikou.others.asyncEach
+import ani.saikou.client
+import ani.saikou.asyncMap
 import ani.saikou.parsers.MangaChapter
 import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaParser
@@ -16,15 +16,19 @@ class MangaDex : MangaParser() {
     val host = "https://api.mangadex.org"
 
     override suspend fun loadChapters(mangaLink: String): List<MangaChapter> {
+
         setUserText("Getting Chapters...")
         val list = mutableListOf<MangaChapter>()
-        val totalChapters =
-            httpClient.get("$host/manga/$mangaLink/feed?limit=0").parsed<MangaResponse>().total ?: return list
+
+        val totalChapters = client.get("$host/manga/$mangaLink/feed?limit=0")
+            .parsed<MangaResponse>().total ?: return list
+
         setUserText("Parsing Chapters...")
-        (0..totalChapters step 200).reversed().toList().asyncEach { index ->
-            val data = httpClient
+        (0..totalChapters step 200).reversed().toList().asyncMap { index ->
+            val data = client
                 .get("$host/manga/$mangaLink/feed?limit=200&order[volume]=desc&order[chapter]=desc&offset=$index")
                 .parsed<MangaResponse>().data?.reversed()
+
             data?.forEach {
                 if (it.attributes!!.translatedLanguage == "en") {
                     val chapter = (it.attributes.chapter ?: return@forEach).toString()
@@ -39,27 +43,23 @@ class MangaDex : MangaParser() {
     }
 
     override suspend fun loadImages(chapterLink: String): List<MangaImage> {
-        val list = mutableListOf<MangaImage>()
-        httpClient.get("$host/at-home/server/${chapterLink}").parsed<ChapterResponse>().chapter?.apply {
-            for (page in data ?: return@apply) {
-                list.add(MangaImage("https://uploads.mangadex.org/data/${hash ?: return@apply}/${page}"))
-            }
-        }
-        return list
+        val res = client.get("$host/at-home/server/${chapterLink}").parsed<ChapterResponse>().chapter
+        return res?.data?.map {
+            MangaImage("https://uploads.mangadex.org/data/${res.hash}/${it}")
+        } ?: emptyList()
     }
 
     override suspend fun search(query: String): List<ShowResponse> {
-        val list = mutableListOf<ShowResponse>()
-        val json = httpClient.get("$host/manga?limit=15&title=$query&order[relevance]=desc&includes[]=cover_art")
+        val json = client.get("$host/manga?limit=15&title=$query&order[relevance]=desc&includes[]=cover_art")
             .parsed<SearchResponse>()
-        json.data?.forEach {
-            val id = it.id ?: return@forEach
-            val title = it.attributes?.title?.en ?: return@forEach
+
+        return json.data?.mapNotNull {
+            val id = it.id ?: return@mapNotNull null
+            val title = it.attributes?.title?.en ?: return@mapNotNull null
             val coverName = it.relationships?.find { i -> i.type == "cover_art" }?.attributes?.fileName
             val coverURL = if (coverName != null) "https://uploads.mangadex.org/covers/$id/$coverName.256.jpg" else ""
-            list.add(ShowResponse(title, id, coverURL))
-        }
-        return list
+            ShowResponse(title, id, coverURL)
+        } ?: emptyList()
     }
 
     private data class SearchResponse(

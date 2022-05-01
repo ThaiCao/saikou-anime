@@ -1,6 +1,6 @@
 package ani.saikou.parsers.manga
 
-import ani.saikou.httpClient
+import ani.saikou.client
 import ani.saikou.parsers.*
 
 class MangaKakalot : MangaParser() {
@@ -13,56 +13,46 @@ class MangaKakalot : MangaParser() {
 
     override suspend fun loadChapters(mangaLink: String): List<MangaChapter> {
 
-        val list = mutableListOf<MangaChapter>()
-
-        val res = httpClient.get(mangaLink).document
+        val res = client.get(mangaLink).document
             .select(
                 if (mangaLink.contains("readmanganato.com")) ".row-content-chapter > .a-h"
                 else ".chapter-list > .row > span"
             ).reversed()
-        
-        res.forEach {
+
+        return res.mapNotNull {
             val chap = Regex("((?<=Chapter )[0-9.]+)([\\s:]+)?(.+)?").find(it.select("a").text())?.destructured
             if (chap != null) {
                 val link = it.select("a").attr("href")
-                list.add(MangaChapter(link, chap.component1(), chap.component3()))
+                MangaChapter(link, chap.component1(), chap.component3())
             }
+            else null
         }
 
-        return list
     }
 
     override suspend fun loadImages(chapterLink: String): List<MangaImage> {
 
-        val list = mutableListOf<MangaImage>()
-
-        httpClient.get(chapterLink).document.select(".container-chapter-reader > img").forEach {
+        return client.get(chapterLink).document.select(".container-chapter-reader > img").map {
             val file = FileUrl(it.attr("src"), headers)
-            list.add(MangaImage(file))
+            MangaImage(file)
         }
-
-        return list
     }
 
     override suspend fun search(query: String): List<ShowResponse> {
 
-        val list = mutableListOf<ShowResponse>()
-
-        val res = httpClient
+        val res = client
             .get("$hostUrl/search/story/${query.replace(" ", "_").replace(Regex("\\W"), "")}")
             .document.select(".story_item")
-        res.forEach {
+
+        return res.mapNotNull {
             if (it.select(".story_name > a").text() != "") {
-                list.add(
-                    ShowResponse(
-                        it.select(".story_name > a").text(),
-                        it.select("a").attr("href"),
-                        FileUrl(it.select("img").attr("src"), headers)
-                    )
+                ShowResponse(
+                    it.select(".story_name > a").text(),
+                    it.select("a").attr("href"),
+                    FileUrl(it.select("img").attr("src"), headers)
                 )
             }
+            else null
         }
-
-        return list
     }
 }

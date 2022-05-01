@@ -1,7 +1,7 @@
 package ani.saikou.parsers.anime.extractors
 
+import ani.saikou.client
 import ani.saikou.findBetween
-import ani.saikou.httpClient
 import ani.saikou.parsers.Video
 import ani.saikou.parsers.VideoContainer
 import ani.saikou.parsers.VideoExtractor
@@ -14,7 +14,7 @@ class StreamSB(override val server: VideoServer) : VideoExtractor() {
         val hex = bytesToHex((server.embed.url.let { it.findBetween("/e/", ".html") ?: it.split("/e/")[1] }.encodeToByteArray()))
         val jsonLink =
             "${getHost()}/7361696b6f757c7c${hex}7c7c7361696b6f757c7c73747265616d7362/7361696b6f757c7c363136653639366436343663363136653639366436343663376337633631366536393664363436633631366536393664363436633763376336313665363936643634366336313665363936643634366337633763373337343732363536313664373336327c7c7361696b6f757c7c73747265616d7362"
-        val json = httpClient.get(jsonLink, mapOf("watchsb" to "streamsb")).parsed<Response>()
+        val json = client.get(jsonLink, mapOf("watchsb" to "streamsb")).parsed<Response>()
         if (json.statusCode == 200) {
             videos.add(Video(null, true, json.streamData!!.file))
         }
@@ -48,7 +48,7 @@ class StreamSB(override val server: VideoServer) : VideoExtractor() {
         private var host: String? = null
         private suspend fun getHost(): String? {
             host = host
-                ?: httpClient.get("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/sb.txt").text
+                ?: client.get("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/sb.txt").text
             return host
         }
     }

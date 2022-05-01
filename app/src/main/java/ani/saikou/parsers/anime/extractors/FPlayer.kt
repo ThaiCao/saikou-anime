@@ -1,8 +1,8 @@
 package ani.saikou.parsers.anime.extractors
 
+import ani.saikou.asyncMap
+import ani.saikou.client
 import ani.saikou.getSize
-import ani.saikou.httpClient
-import ani.saikou.others.asyncEach
 import ani.saikou.parsers.Video
 import ani.saikou.parsers.VideoContainer
 import ani.saikou.parsers.VideoExtractor
@@ -12,31 +12,24 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 class FPlayer(override val server: VideoServer) : VideoExtractor() {
 
     override suspend fun extract(): VideoContainer {
-        val videos = mutableListOf<Video>()
-
         val url = server.embed.url
         val apiLink = url.replace("/v/", "/api/source/")
         try {
-            val json = httpClient.post(apiLink, referer = url).parsed<Json>()
-
+            val json = client.post(apiLink, referer = url).parsed<Json>()
             if (json.success) {
-                json.data?.asyncEach {
-                    videos.add(
-                        Video(
-                            it.label.replace("p", "").toIntOrNull() ?: 0,
-                            false,
-                            it.file,
-                            getSize(it.file)
-                        )
+                return VideoContainer(json.data?.asyncMap {
+                    Video(
+                        it.label.replace("p", "").toIntOrNull(),
+                        false,
+                        it.file,
+                        getSize(it.file)
                     )
-                }
+                }?: emptyList())
             }
 
         } catch (e: MismatchedInputException) {}
-
-        return VideoContainer(videos)
+        return VideoContainer(emptyList())
     }
-
 
     private data class Data(
         val file: String,

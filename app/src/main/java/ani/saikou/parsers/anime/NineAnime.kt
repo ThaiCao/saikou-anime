@@ -1,7 +1,7 @@
 package ani.saikou.parsers.anime
 
-import ani.saikou.httpClient
-import ani.saikou.others.asyncEach
+import ani.saikou.asyncMap
+import ani.saikou.client
 import ani.saikou.parsers.*
 import ani.saikou.parsers.anime.extractors.StreamTape
 import ani.saikou.parsers.anime.extractors.VizCloud
@@ -25,7 +25,7 @@ class NineAnime : AnimeParser() {
             host =
                 if (host != null) host ?: defaultHost
                 else {
-                    httpClient.get("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/nine.txt")
+                    client.get("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/nine.txt")
                         .text.replace("\n", "")
                 }
             return "https://$host"
@@ -33,33 +33,28 @@ class NineAnime : AnimeParser() {
     }
 
     override suspend fun loadEpisodes(animeLink: String): List<Episode> {
-        val list = mutableListOf<Episode>()
         val animeId = animeLink.substringAfterLast(".")
         val vrf = encode(getVrf(animeId))
-        val body = httpClient.get("${host()}/ajax/anime/servers?id=$animeId&vrf=$vrf").parsed<Response>()
-        Jsoup.parse(body.html).body().select("ul.episodes li a").forEach {
+        val body = client.get("${host()}/ajax/anime/servers?id=$animeId&vrf=$vrf").parsed<Response>()
+        return Jsoup.parse(body.html).body().select("ul.episodes li a").map {
             val num = it.attr("data-base")
             val text = it.text()
-            list.add(Episode(text, "${host()}/ajax/anime/servers?id=$animeId&vrf=$vrf&episode=$num"))
+            Episode(text, "${host()}/ajax/anime/servers?id=$animeId&vrf=$vrf&episode=$num")
         }
-        return list
     }
 
     override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
-        val list = mutableListOf<VideoServer>()
-
-        val body = httpClient.get(episodeLink).parsed<Response>().html
+        val body = client.get(episodeLink).parsed<Response>().html
         val document = Jsoup.parse(body)
         val rawJson = document.select(".episodes li a").select(".active").attr("data-sources")
         val dataSources = Requests.mapper.readValue<Map<String, String>>(rawJson)
-        document.select(".tabs span").asyncEach {
+
+        return document.select(".tabs span").asyncMap {
             val name = it.text()
             val encodedStreamUrl = getEpisodeLinks(dataSources[it.attr("data-id")].toString()).url
             val realLink = getLink(encodedStreamUrl)
-            list.add(VideoServer(name, realLink))
+            VideoServer(name, realLink)
         }
-
-        return list
     }
 
     override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor? {
@@ -73,27 +68,21 @@ class NineAnime : AnimeParser() {
     }
 
     override suspend fun search(query: String): List<ShowResponse> {
-        val list = mutableListOf<ShowResponse>()
         val vrf = getVrf(query)
-        httpClient.get(
-            "${host()}/filter?language%5B%5D=${
-                if (selectDub) "dubbed" else "subbed"
-            }&keyword=${encode(query)}&vrf=${encode(vrf)}&page=1"
-        ).document.select("ul.anime-list li").forEach {
-
+        val searchLink = "${host()}/filter?language%5B%5D=${if (selectDub) "dubbed" else "subbed"}&keyword=${encode(query)}&vrf=${encode(vrf)}&page=1"
+        return client.get(searchLink).document.select("ul.anime-list li").map {
             val link = it.select("a.name").attr("href")
             val title = it.select("a.name").text()
             val cover = it.select("a.poster img").attr("src")
-            list.add(ShowResponse(title, link, cover))
+            ShowResponse(title, link, cover)
         }
-        return list
     }
 
     private data class Links(val url: String)
     data class Response(val html: String)
 
     private suspend fun getEpisodeLinks(source: String): Links {
-        return httpClient.get("${host()}/ajax/anime/episode?id=${source.replace("\"", "")}").parsed()
+        return client.get("${host()}/ajax/anime/episode?id=${source.replace("\"", "")}").parsed()
     }
 
     //The code below is fully taken from

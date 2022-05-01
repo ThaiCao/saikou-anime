@@ -5,8 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Point
+import ani.saikou.client
 import ani.saikou.findBetween
-import ani.saikou.httpClient
 import ani.saikou.parsers.MangaChapter
 import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaParser
@@ -31,49 +31,42 @@ class MangaReaderTo : MangaParser() {
     private val transformation = MangaReaderToTransformation()
 
     override suspend fun loadChapters(mangaLink: String): List<MangaChapter> {
-        val list = mutableListOf<MangaChapter>()
-        httpClient.get(mangaLink).document.select("#en-chapters > .chapter-item > a").reversed()
-            .forEachIndexed { i: Int, it: Element ->
-                it.attr("title").apply {
-                    val chap = findBetween("Chapter ", ":") ?: "${i + 1}"
-                    val title = subSequence(indexOf(":") + 1, length).toString()
-                    list.add(MangaChapter(chap, hostUrl + it.attr("href"), title))
-                }
+
+        return client.get(mangaLink).document.select("#en-chapters > .chapter-item > a").reversed()
+            .mapIndexed { i: Int, it: Element ->
+                val name = it.attr("title")
+                val chap = name.findBetween("Chapter ", ":") ?: "${i + 1}"
+                val title = name.subSequence(name.indexOf(":") + 1, name.length).toString()
+                MangaChapter(chap, hostUrl + it.attr("href"), title)
             }
-        return list
     }
 
     override suspend fun loadImages(chapterLink: String): List<MangaImage> {
-        val list = mutableListOf<MangaImage>()
 
-        val id = httpClient.get(chapterLink).document.select("#wrapper").attr("data-reading-id")
-        val res =
-            httpClient.get("$hostUrl/ajax/image/list/chap/$id?mode=vertical&quality=high&hozPageSize=1")
-                .parsed<HtmlResponse>().html ?: return list
-        val element = Jsoup.parse(res)
-        var a = element.select(".iv-card.shuffled")
-        var transformation: Transformation<File>? = transformation
-        if (a.isEmpty()) {
-            a = element.select(".iv-card")
-            transformation = null
+        val id = client.get(chapterLink).document.select("#wrapper").attr("data-reading-id")
+
+        val res = client.get("$hostUrl/ajax/image/list/chap/$id?mode=vertical&quality=high&hozPageSize=1")
+                .parsed<HtmlResponse>().html ?: return emptyList()
+
+        return Jsoup.parse(res).select(".iv-card").map {
+            val link = it.attr("data-url")
+            val trans = if (it.hasClass("shuffled")) transformation else null
+            MangaImage(link, trans)
         }
-        a.forEach {
-            list.add(MangaImage(it.attr("data-url"), transformation))
-        }
-        return list
+
     }
 
     override suspend fun search(query: String): List<ShowResponse> {
-        val list = mutableListOf<ShowResponse>()
-        val encoded = encode(query)
-        val res = httpClient.get("$hostUrl/ajax/manga/search/suggest?keyword=$encoded").parsed<HtmlResponse>().html ?: return list
-        Jsoup.parse(res).select("a:not(.nav-bottom)").forEach {
+
+        val res = client.get("$hostUrl/ajax/manga/search/suggest?keyword=${encode(query)}")
+            .parsed<HtmlResponse>().html ?: return emptyList()
+
+        return Jsoup.parse(res).select("a:not(.nav-bottom)").map {
             val link = hostUrl + it.attr("href")
             val title = it.select(".manga-name").text()
             val cover = it.select(".manga-poster-img").attr("src")
-            list.add(ShowResponse(title, link, cover))
+            ShowResponse(title, link, cover)
         }
-        return list
     }
 
     private data class HtmlResponse(

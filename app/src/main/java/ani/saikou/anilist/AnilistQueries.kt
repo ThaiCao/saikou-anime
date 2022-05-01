@@ -9,12 +9,10 @@ import ani.saikou.anilist.api.User
 import ani.saikou.media.Character
 import ani.saikou.media.Media
 import ani.saikou.media.Studio
-import ani.saikou.others.logError
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import java.io.Serializable
-import java.net.UnknownHostException
 
 suspend fun executeQuery(
     query: String,
@@ -23,7 +21,7 @@ suspend fun executeQuery(
     useToken: Boolean = true,
     show: Boolean = false
 ): Data? {
-    try {
+    return tryForNetwork {
         val data = mapOf(
             "query" to query,
             "variables" to variables
@@ -35,15 +33,12 @@ suspend fun executeQuery(
 
         if (Anilist.token != null || force) {
             if (Anilist.token != null && useToken) headers["Authorization"] = "Bearer ${Anilist.token}"
-            val json = httpClient.post("https://graphql.anilist.co/", headers, data = data)
+            val json = client.post("https://graphql.anilist.co/", headers, data = data)
             if (show) toastString("Response : ${json.text}")
-            return json.parsed<Query>().data
+            return@tryForNetwork json.parsed<Query>().data
         }
-    } catch (e: Exception) {
-        if (e is UnknownHostException) toastString("Network error, please Retry.")
-        else logError(e)
+        else null
     }
-    return null
 }
 
 data class SearchResults(

@@ -1,11 +1,11 @@
 package ani.saikou.parsers.anime
 
 import android.util.Base64
+import ani.saikou.client
 import ani.saikou.findBetween
-import ani.saikou.httpClient
-import ani.saikou.others.logError
 import ani.saikou.parsers.*
 import ani.saikou.parsers.anime.extractors.FPlayer
+import ani.saikou.tryWith
 import java.net.URI
 
 class HentaiFF : AnimeParser() {
@@ -18,20 +18,15 @@ class HentaiFF : AnimeParser() {
 
     override suspend fun loadEpisodes(animeLink: String): List<Episode> {
         val map = mutableMapOf<String, Episode>()
-        val pageBody = httpClient.get(animeLink).document.body()
+        val pageBody = client.get(animeLink).document.body()
         val notRaw = mutableListOf<Episode>()
         val raw = mutableListOf<Episode>()
         pageBody.select("div.eplister>ul>li>a").reversed().forEach { i ->
             i.select(".epl-num").text().split(" ").apply {
                 val num = this[0]
                 val title = this[1]
-                (if (title == "RAW") raw else notRaw).add(
-                    Episode(
-                        num,
-                        i.attr("href"),
-                        title
-                    )
-                )
+                (if (title == "RAW") raw else notRaw)
+                    .add(Episode(num, i.attr("href"), title))
             }
         }
         raw.map { map[it.number] = it }
@@ -40,17 +35,13 @@ class HentaiFF : AnimeParser() {
     }
 
     override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
-        val list = mutableListOf<VideoServer>()
-        httpClient.get(episodeLink).document.select("select.mirror>option").forEach {
-            try {
+        return client.get(episodeLink).document.select("select.mirror>option").mapNotNull {
+            tryWith {
                 val base64 = it.attr("value")
                 val link = String(Base64.decode(base64, Base64.DEFAULT)).findBetween("src=\"", "\" ")!!
-                list.add(VideoServer(it.text(), link))
-            } catch (e: Exception) {
-                logError(e)
+                VideoServer(it.text(), link)
             }
         }
-        return list
     }
 
     override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor? {
@@ -64,21 +55,19 @@ class HentaiFF : AnimeParser() {
     }
 
     override suspend fun search(query: String): List<ShowResponse> {
-        val list = mutableListOf<ShowResponse>()
-        httpClient.get("${hostUrl}/?s=$query").document.body()
-            .select(".bs>.bsx>a").forEach {
+        return client.get("${hostUrl}/?s=$query").document.body()
+            .select(".bs>.bsx>a").map {
                 val link = it.attr("href").toString()
                 val title = it.attr("title")
                 val cover = it.select("img").attr("src")
-                list.add(ShowResponse(title, link, cover))
+                ShowResponse(title, link, cover)
             }
-        return list
     }
 
     private class CdnView(override val server: VideoServer) : VideoExtractor() {
         override suspend fun extract(): VideoContainer {
             val host = URI.create(server.embed.url).host
-            val link = "https://" + host + httpClient.get(server.embed.url).document.select("source").attr("src")
+            val link = "https://" + host + client.get(server.embed.url).document.select("source").attr("src")
             return VideoContainer(listOf(Video(null, true, link)))
         }
     }

@@ -1,6 +1,6 @@
 package ani.saikou.parsers.anime
 
-import ani.saikou.httpClient
+import ani.saikou.client
 import ani.saikou.media.Media
 import ani.saikou.parsers.*
 import ani.saikou.parsers.anime.extractors.VizCloud
@@ -15,7 +15,7 @@ class AnimeKisa : AnimeParser() {
 
     override suspend fun loadEpisodes(animeLink: String): List<Episode> {
         val list = mutableListOf<Episode>()
-        val pageBody = httpClient.get(animeLink).document
+        val pageBody = client.get(animeLink).document
         pageBody.select(".tab-pane > ul.nav").forEach {
             it.select("li>a").forEach { i ->
                 val num = i.text().trim()
@@ -26,7 +26,7 @@ class AnimeKisa : AnimeParser() {
     }
 
     override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
-        return httpClient.get(episodeLink).document.select("#servers-list ul.nav li a").map { servers ->
+        return client.get(episodeLink).document.select("#servers-list ul.nav li a").map { servers ->
             VideoServer(servers.select("span").text(), servers.attr("data-embed"))
         }
     }
@@ -34,23 +34,18 @@ class AnimeKisa : AnimeParser() {
     override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor = VizCloud(server)
 
     override suspend fun search(query: String): List<ShowResponse> {
-
         var url = encode(query)
         if (query.startsWith("$!")) {
             val a = query.replace("$!", "").split(" | ")
             url = encode(a[0]) + a[1]
         }
-
-        val list = mutableListOf<ShowResponse>()
-
-        httpClient.get("$hostUrl/filter?keyword=$url").document
-            .select("#main-wrapper .film_list-wrap > .flw-item .film-poster").forEach {
+        return client.get("$hostUrl/filter?keyword=$url").document
+            .select("#main-wrapper .film_list-wrap > .flw-item .film-poster").map {
                 val link = it.select("a").attr("href")
                 val title = it.select("img").attr("title")
                 val cover = it.select("img").attr("data-src")
-                list.add(ShowResponse(title, link, cover))
+                ShowResponse(title, link, cover)
             }
-        return list
     }
 
     override suspend fun autoSearch(mediaObj: Media): ShowResponse? {

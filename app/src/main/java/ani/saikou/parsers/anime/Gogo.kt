@@ -1,7 +1,7 @@
 package ani.saikou.parsers.anime
 
 import android.net.Uri
-import ani.saikou.httpClient
+import ani.saikou.client
 import ani.saikou.parsers.*
 import ani.saikou.parsers.anime.extractors.FPlayer
 import ani.saikou.parsers.anime.extractors.GogoCDN
@@ -17,11 +17,11 @@ class Gogo : AnimeParser() {
     override suspend fun loadEpisodes(animeLink: String): List<Episode> {
         val list = mutableListOf<Episode>()
 
-        val pageBody = httpClient.get("$hostUrl/category/$animeLink").document
+        val pageBody = client.get("$hostUrl/category/$animeLink").document
         val lastEpisode = pageBody.select("ul#episode_page > li:last-child > a").attr("ep_end").toString()
         val animeId = pageBody.select("input#movie_id").attr("value").toString()
 
-        val epList = httpClient
+        val epList = client
             .get("https://ajax.gogo-load.com/ajax/load-list-episode?ep_start=0&ep_end=$lastEpisode&id=$animeId").document
             .select("ul > li > a").reversed()
         epList.forEach {
@@ -39,7 +39,7 @@ class Gogo : AnimeParser() {
 
     override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
         val list = mutableListOf<VideoServer>()
-        httpClient.get(episodeLink).document.select("div.anime_muti_link > ul > li").forEach {
+        client.get(episodeLink).document.select("div.anime_muti_link > ul > li").forEach {
             val name = it.select("a").text().replace("Choose this server", "")
             val url = httpsIfy(it.select("a").attr("data-video"))
             val embed = FileUrl(url, mapOf("referer" to hostUrl))
@@ -65,7 +65,7 @@ class Gogo : AnimeParser() {
     override suspend fun search(query: String): List<ShowResponse> {
         val encoded = encode(query + if(selectDub) " (Dub)" else "")
         val list = mutableListOf<ShowResponse>()
-        httpClient.get("$hostUrl/search.html?keyword=$encoded").document
+        client.get("$hostUrl/search.html?keyword=$encoded").document
             .select(".last_episodes > ul > li div.img > a").forEach {
                 val link = it.attr("href").toString().replace("/category/", "")
                 val title = it.attr("title")

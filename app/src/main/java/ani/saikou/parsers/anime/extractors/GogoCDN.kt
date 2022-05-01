@@ -2,10 +2,10 @@ package ani.saikou.parsers.anime.extractors
 
 import android.net.Uri
 import android.util.Base64
+import ani.saikou.asyncMap
+import ani.saikou.client
 import ani.saikou.findBetween
 import ani.saikou.getSize
-import ani.saikou.httpClient
-import ani.saikou.others.asyncEach
 import ani.saikou.parsers.*
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -23,7 +23,7 @@ class GogoCDN(override val server: VideoServer) : VideoExtractor() {
         val url = server.embed.url
         val host = server.embed.headers["referer"]
 
-        val response = httpClient.get(url).document
+        val response = client.get(url).document
 
         if (url.contains("streaming.php")) {
 
@@ -38,7 +38,7 @@ class GogoCDN(override val server: VideoServer) : VideoExtractor() {
             val encryptedId = cryptoHandler(id, keys.key, keys.iv, true)
             val encryptedUrl = "https://${Uri.parse(url).host}/encrypt-ajax.php?id=$encryptedId$end&alias=$id"
 
-            val encrypted = httpClient.get(encryptedUrl, mapOf("X-Requested-With" to "XMLHttpRequest"), host)
+            val encrypted = client.get(encryptedUrl, mapOf("X-Requested-With" to "XMLHttpRequest"), host)
                 .text.findBetween("""{"data":"""", "\"}")!!
 
             val jumbledJson = cryptoHandler(encrypted, keys.secondKey, keys.iv, false)!!
@@ -66,10 +66,10 @@ class GogoCDN(override val server: VideoServer) : VideoExtractor() {
                 )
             }
 
-            json.source?.asyncEach { i ->
+            json.source?.asyncMap { i ->
                 add(i, false)
             }
-            json.sourceBk?.asyncEach { i ->
+            json.sourceBk?.asyncMap { i ->
                 add(i, true)
             }
         } else if (url.contains("embedplus")) {
@@ -77,7 +77,7 @@ class GogoCDN(override val server: VideoServer) : VideoExtractor() {
             if (file != null) {
                 if (
                     try {
-                        httpClient.head(file);true
+                        client.head(file);true
                     } catch (e: Exception) {
                         false
                     }

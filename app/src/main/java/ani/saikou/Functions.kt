@@ -44,7 +44,6 @@ import ani.saikou.anilist.api.FuzzyDate
 import ani.saikou.anime.Episode
 import ani.saikou.databinding.ItemCountDownBinding
 import ani.saikou.media.Media
-import ani.saikou.others.logError
 import ani.saikou.parsers.FileUrl
 import ani.saikou.parsers.ShowResponse
 import ani.saikou.settings.UserInterfaceSettings
@@ -60,7 +59,6 @@ import com.google.android.material.internal.ViewUtils
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import nl.joery.animatedbottombar.AnimatedBottomBar
 import java.io.*
@@ -100,7 +98,7 @@ fun logger(e: Any?, print: Boolean = true) {
 }
 
 fun saveData(fileName: String, data: Any?, activity: Activity? = null) {
-    try {
+    tryWith {
         val a = activity ?: currActivity()
         if (a != null) {
             val fos: FileOutputStream = a.openFileOutput(fileName, Context.MODE_PRIVATE)
@@ -109,8 +107,6 @@ fun saveData(fileName: String, data: Any?, activity: Activity? = null) {
             os.close()
             fos.close()
         }
-    } catch (e: Exception) {
-        logError(e)
     }
 }
 
@@ -145,9 +141,9 @@ fun initActivity(a: Activity) {
     uiSettings.darkMode.apply {
         AppCompatDelegate.setDefaultNightMode(
             when (this) {
-                true -> AppCompatDelegate.MODE_NIGHT_YES
+                true  -> AppCompatDelegate.MODE_NIGHT_YES
                 false -> AppCompatDelegate.MODE_NIGHT_NO
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                else  -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
         )
     }
@@ -210,34 +206,32 @@ open class BottomSheetDialogFragment : BottomSheetDialogFragment() {
 
 fun isOnline(context: Context): Boolean {
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    try {
+    return tryWith {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            if (capabilities != null) {
+            return@tryWith if (capabilities != null) {
                 when {
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
                         logger("Device on Cellular")
-                        return true
+                        true
                     }
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)     -> {
                         logger("Device on Wifi")
-                        return true
+                        true
                     }
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
                         logger("Device on Ethernet, TF man?")
-                        return true
+                        true
                     }
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)      -> {
                         logger("Device on VPN")
-                        return true
+                        true
                     }
+                    else -> false
                 }
-            }
-        } else return true
-    } catch (e: Exception) {
-        logError(e)
-    }
-    return false
+            } else false
+        } else true
+    } ?: false
 }
 
 fun startMainActivity(activity: Activity) {
@@ -291,9 +285,9 @@ class InputFilterMinMax(private val min: Double, private val max: Double, privat
 }
 
 suspend fun getMalMedia(media: Media): Media {
-    try {
+    tryForNetwork {
         if (media.anime != null) {
-            val res = httpClient.get("https://myanimelist.net/anime/${media.idMAL}").document
+            val res = client.get("https://myanimelist.net/anime/${media.idMAL}").document
             val a = res.select(".title-english").text()
             media.nameMAL = if (a != "") a else res.select(".title-name").text()
             media.typeMAL =
@@ -312,15 +306,13 @@ suspend fun getMalMedia(media: Media): Media {
             }
 
         } else {
-            val res = httpClient.get("https://myanimelist.net/manga/${media.idMAL}").document
+            val res = client.get("https://myanimelist.net/manga/${media.idMAL}").document
             val b = res.select(".title-english").text()
             val a = res.select(".h1-title").text().removeSuffix(b)
             media.nameMAL = a
             media.typeMAL =
                 if (res.select("div.spaceit_pad > a").isNotEmpty()) res.select("div.spaceit_pad > a")[0].text() else null
         }
-    } catch (e: Exception) {
-        logError(e)
     }
     return media
 }
@@ -451,11 +443,9 @@ fun String.findBetween(a: String, b: String): String? {
 
 fun ImageView.loadImage(url: String?, size: Int = 0, headers: MutableMap<String, String>? = null) {
     if (!url.isNullOrEmpty()) {
-        try {
+        tryWith {
             val glideUrl = GlideUrl(url) { headers ?: mutableMapOf() }
             Glide.with(this).load(glideUrl).transition(withCrossFade()).override(size).into(this)
-        } catch (e: Exception) {
-            logger(e.localizedMessage)
         }
     }
 }
@@ -483,16 +473,13 @@ fun View.setSafeOnClickListener(onSafeClick: (View) -> Unit) {
     setOnClickListener(safeClickListener)
 }
 
-suspend fun getSize(file:FileUrl): Long? {
-    return try {
-        httpClient.head(file.url,file.headers, timeout = 1000).size
-    } catch (e: Exception) {
-        logger(e)
-        null
+suspend fun getSize(file: FileUrl): Long? {
+    return tryForNetwork {
+        client.head(file.url, file.headers, timeout = 1000).size
     }
 }
 
-suspend fun getSize(file:String) : Long?{
+suspend fun getSize(file: String): Long? {
     return getSize(FileUrl(file))
 }
 
@@ -619,11 +606,9 @@ fun View.circularReveal(x: Int, y: Int, time: Long) {
 }
 
 fun openLinkInBrowser(link: String?) {
-    try {
+    tryWith {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
         currActivity()?.startActivity(intent)
-    } catch (e: Exception) {
-        logError(e)
     }
 }
 
@@ -673,7 +658,7 @@ fun download(activity: Activity, episode: Episode, animeTitle: String) {
 
 fun updateAnilistProgress(media: Media, number: String) {
     if (Anilist.userid != null) {
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             val a = number.toFloatOrNull()?.roundToInt()
             if (a != media.userProgress) {
                 Anilist.mutation.editList(
