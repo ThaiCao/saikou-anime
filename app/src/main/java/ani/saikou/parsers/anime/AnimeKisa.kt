@@ -13,9 +13,9 @@ class AnimeKisa : AnimeParser() {
     override val hostUrl = "https://animekisa.in"
     override val isDubAvailableSeparately = true
 
-    override suspend fun loadEpisodes(showUrl: String): List<Episode> {
+    override suspend fun loadEpisodes(animeLink: String): List<Episode> {
         val list = mutableListOf<Episode>()
-        val pageBody = httpClient.get(showUrl).document
+        val pageBody = httpClient.get(animeLink).document
         pageBody.select(".tab-pane > ul.nav").forEach {
             it.select("li>a").forEach { i ->
                 val num = i.text().trim()
@@ -25,8 +25,8 @@ class AnimeKisa : AnimeParser() {
         return list
     }
 
-    override suspend fun loadVideoServers(episodeUrl: String): List<VideoServer> {
-        return httpClient.get(episodeUrl).document.select("#servers-list ul.nav li a").map { servers ->
+    override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
+        return httpClient.get(episodeLink).document.select("#servers-list ul.nav li a").map { servers ->
             VideoServer(servers.select("span").text(), servers.attr("data-embed"))
         }
     }

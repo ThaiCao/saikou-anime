@@ -14,10 +14,10 @@ class Gogo : AnimeParser() {
     override val malSyncBackupName = "Gogoanime"
     override val isDubAvailableSeparately = true
 
-    override suspend fun loadEpisodes(showUrl: String): List<Episode> {
+    override suspend fun loadEpisodes(animeLink: String): List<Episode> {
         val list = mutableListOf<Episode>()
 
-        val pageBody = httpClient.get("$hostUrl/category/$showUrl").document
+        val pageBody = httpClient.get("$hostUrl/category/$animeLink").document
         val lastEpisode = pageBody.select("ul#episode_page > li:last-child > a").attr("ep_end").toString()
         val animeId = pageBody.select("input#movie_id").attr("value").toString()
 
@@ -37,9 +37,9 @@ class Gogo : AnimeParser() {
         else text
     }
 
-    override suspend fun loadVideoServers(episodeUrl: String): List<VideoServer> {
+    override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
         val list = mutableListOf<VideoServer>()
-        httpClient.get(episodeUrl).document.select("div.anime_muti_link > ul > li").forEach {
+        httpClient.get(episodeLink).document.select("div.anime_muti_link > ul > li").forEach {
             val name = it.select("a").text().replace("Choose this server", "")
             val url = httpsIfy(it.select("a").attr("data-video"))
             val embed = FileUrl(url, mapOf("referer" to hostUrl))

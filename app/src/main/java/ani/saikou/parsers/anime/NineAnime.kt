@@ -32,9 +32,9 @@ class NineAnime : AnimeParser() {
         }
     }
 
-    override suspend fun loadEpisodes(showUrl: String): List<Episode> {
+    override suspend fun loadEpisodes(animeLink: String): List<Episode> {
         val list = mutableListOf<Episode>()
-        val animeId = showUrl.substringAfterLast(".")
+        val animeId = animeLink.substringAfterLast(".")
         val vrf = encode(getVrf(animeId))
         val body = httpClient.get("${host()}/ajax/anime/servers?id=$animeId&vrf=$vrf").parsed<Response>()
         Jsoup.parse(body.html).body().select("ul.episodes li a").forEach {
@@ -45,10 +45,10 @@ class NineAnime : AnimeParser() {
         return list
     }
 
-    override suspend fun loadVideoServers(episodeUrl: String): List<VideoServer> {
+    override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
         val list = mutableListOf<VideoServer>()
 
-        val body = httpClient.get(episodeUrl).parsed<Response>().html
+        val body = httpClient.get(episodeLink).parsed<Response>().html
         val document = Jsoup.parse(body)
         val rawJson = document.select(".episodes li a").select(".active").attr("data-sources")
         val dataSources = Requests.mapper.readValue<Map<String, String>>(rawJson)

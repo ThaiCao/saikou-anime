@@ -18,9 +18,9 @@ class Zoro : AnimeParser() {
     override val hostUrl: String = "https://zoro.to"
     override val isDubAvailableSeparately: Boolean = false
 
-    override suspend fun loadEpisodes(showUrl: String): List<Episode> {
+    override suspend fun loadEpisodes(animeLink: String): List<Episode> {
         val list = mutableListOf<Episode>()
-        val res = httpClient.get("$hostUrl/ajax/v2/episode/list/$showUrl").parsed<HtmlResponse>()
+        val res = httpClient.get("$hostUrl/ajax/v2/episode/list/$animeLink").parsed<HtmlResponse>()
         val element = Jsoup.parse(res.html ?: return list)
         element.select(".detail-infor-content > div > a").forEach {
             val title = it.attr("title")
@@ -33,9 +33,9 @@ class Zoro : AnimeParser() {
         return list
     }
 
-    override suspend fun loadVideoServers(episodeUrl: String): List<VideoServer> {
+    override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
         val list = mutableListOf<VideoServer>()
-        val res = httpClient.get("$hostUrl/ajax/v2/episode/servers?episodeId=$episodeUrl").parsed<HtmlResponse>()
+        val res = httpClient.get("$hostUrl/ajax/v2/episode/servers?episodeId=$episodeLink").parsed<HtmlResponse>()
         val element = Jsoup.parse(res.html?:return list)
         element.select("div.server-item").asyncEach {
             val serverName = "${it.attr("data-type").uppercase()} - ${it.text()}"

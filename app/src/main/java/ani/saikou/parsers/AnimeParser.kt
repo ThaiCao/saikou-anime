@@ -6,7 +6,6 @@ import ani.saikou.others.asyncEach
 import ani.saikou.others.logError
 import kotlin.properties.Delegates
 
-
 /**
  * An abstract class for creating a new Source
  *
@@ -15,16 +14,16 @@ import kotlin.properties.Delegates
 abstract class AnimeParser : BaseParser() {
 
     /**
-     * Usually takes a SearchResponse.url as argument & gives a list of total episode present on the server.
+     * Takes ShowResponse.link as an argument & gives a list of total episodes present on the site.
      * **/
-    abstract suspend fun loadEpisodes(showUrl: String): List<Episode>
+    abstract suspend fun loadEpisodes(animeLink: String): List<Episode>
 
     /**
-     * Most of the time takes Episode.link as parameter, but you can use anything else if needed
+     * Takes Episode.link as a parameter
      *
-     * This returns a Map of "Video Server's Name" & "Link/Data" of all the Extractor VideoServers, which can be further used by loadVideoServers() & loadSingleVideoServer()
+     * This returns a Map of "Video Server's Name" & "Link/Data" of all the Video Servers present on the site, which can be further used by loadVideoServers() & loadSingleVideoServer()
      * **/
-    abstract suspend fun loadVideoServers(episodeUrl: String): List<VideoServer>
+    abstract suspend fun loadVideoServers(episodeLink: String): List<VideoServer>
 
 
     /**
@@ -60,8 +59,8 @@ abstract class AnimeParser : BaseParser() {
      *
      * Doesn't need to be overridden, if the parser is following the norm.
      * **/
-    open suspend fun loadVideoServers(url: String, callback: (VideoExtractor) -> Unit) {
-        loadVideoServers(url).asyncEach {
+    open suspend fun loadVideoServers(episodeUrl: String, callback: (VideoExtractor) -> Unit) {
+        loadVideoServers(episodeUrl).asyncEach {
             try {
                 getVideoExtractor(it)?.apply {
                     extract()
@@ -78,9 +77,9 @@ abstract class AnimeParser : BaseParser() {
      *
      * Doesn't need to be overridden, if the parser is following the norm.
      * **/
-    open suspend fun loadSingleVideoServer(serverName: String, url: String): VideoExtractor? {
+    open suspend fun loadSingleVideoServer(serverName: String, episodeUrl: String): VideoExtractor? {
         try {
-            loadVideoServers(url).apply {
+            loadVideoServers(episodeUrl).apply {
                 find { it.name == serverName }?.also {
                     return getVideoExtractor(it)?.apply {
                         extract()
@@ -115,7 +114,9 @@ abstract class AnimeParser : BaseParser() {
      * **/
     open val malSyncBackupName = ""
 
-
+    /**
+     * Overridden to add MalSyncBackup support for Anime Sites
+     * **/
     override suspend fun loadSavedShowResponse(mediaId: Int): ShowResponse? {
         checkIfVariablesAreEmpty()
         var loaded = loadData<ShowResponse>("${saveName}_$mediaId")
@@ -148,27 +149,13 @@ data class Episode(
     val description: String? = null,
     val isFiller: Boolean = false,
 ) {
-    constructor(
-        number: String,
-        link: String,
-        title: String? = null,
-        thumbnail: String,
-        description: String?,
-        isFiller: Boolean = false
-    ) : this(number, link, title, FileUrl(thumbnail), description, isFiller)
+    constructor(number: String, link: String, title: String? = null, thumbnail: String, description: String?,
+                isFiller: Boolean = false)
+            : this(number, link, title, FileUrl(thumbnail), description, isFiller)
 
-    constructor(number: String, link: String, title: String? = null, thumbnail: String, description: String?) : this(
-        number,
-        link,
-        title,
-        FileUrl(thumbnail),
-        description
-    )
+    constructor(number: String, link: String, title: String? = null, thumbnail: String, description: String?)
+            : this(number, link, title, FileUrl(thumbnail), description)
 
-    constructor(number: String, link: String, title: String? = null, thumbnail: String) : this(
-        number,
-        link,
-        title,
-        FileUrl(thumbnail)
-    )
+    constructor(number: String, link: String, title: String? = null, thumbnail: String)
+            : this(number, link, title, FileUrl(thumbnail))
 }

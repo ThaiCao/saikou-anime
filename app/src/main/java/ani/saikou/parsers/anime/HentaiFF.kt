@@ -16,9 +16,9 @@ class HentaiFF : AnimeParser() {
     override val isDubAvailableSeparately = false
     override val isNSFW: Boolean = true
 
-    override suspend fun loadEpisodes(showUrl: String): List<Episode> {
+    override suspend fun loadEpisodes(animeLink: String): List<Episode> {
         val map = mutableMapOf<String, Episode>()
-        val pageBody = httpClient.get(showUrl).document.body()
+        val pageBody = httpClient.get(animeLink).document.body()
         val notRaw = mutableListOf<Episode>()
         val raw = mutableListOf<Episode>()
         pageBody.select("div.eplister>ul>li>a").reversed().forEach { i ->
@@ -39,9 +39,9 @@ class HentaiFF : AnimeParser() {
         return map.values.toList()
     }
 
-    override suspend fun loadVideoServers(episodeUrl: String): List<VideoServer> {
+    override suspend fun loadVideoServers(episodeLink: String): List<VideoServer> {
         val list = mutableListOf<VideoServer>()
-        httpClient.get(episodeUrl).document.select("select.mirror>option").forEach {
+        httpClient.get(episodeLink).document.select("select.mirror>option").forEach {
             try {
                 val base64 = it.attr("value")
                 val link = String(Base64.decode(base64, Base64.DEFAULT)).findBetween("src=\"", "\" ")!!
