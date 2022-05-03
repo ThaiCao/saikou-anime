@@ -66,9 +66,9 @@ class MediaInfoFragment : Fragment() {
                 loaded = true
                 binding.mediaInfoProgressBar.visibility = View.GONE
                 binding.mediaInfoContainer.visibility = View.VISIBLE
-                binding.mediaInfoName.text = "\t\t\t" + media.mainName
+                binding.mediaInfoName.text = "\t\t\t" + (media.name?:media.nameRomaji)
                 binding.mediaInfoName.setOnLongClickListener {
-                    copyToClipboard(media.mainName)
+                    copyToClipboard(media.name?:media.nameRomaji)
                     true
                 }
                 if (media.name != null) binding.mediaInfoNameRomajiContainer.visibility = View.VISIBLE

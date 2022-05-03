@@ -1,7 +1,7 @@
 package ani.saikou.parsers.manga
 
-import ani.saikou.client
 import ani.saikou.asyncMap
+import ani.saikou.client
 import ani.saikou.parsers.MangaChapter
 import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaParser
@@ -38,7 +38,7 @@ class MangaDex : MangaParser() {
                 }
             }
         }
-        list.sortBy { it.number }
+        list.sortBy { it.number.toFloatOrNull() }
         return list
     }
 

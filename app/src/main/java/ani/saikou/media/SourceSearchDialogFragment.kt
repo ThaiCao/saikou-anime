@@ -14,12 +14,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import ani.saikou.BottomSheetDialogFragment
 import ani.saikou.anime.AnimeSourceAdapter
+import ani.saikou.databinding.BottomSheetSourceSearchBinding
+import ani.saikou.manga.MangaSourceAdapter
+import ani.saikou.navBarHeight
 import ani.saikou.parsers.AnimeSources
 import ani.saikou.parsers.HAnimeSources
-import ani.saikou.databinding.BottomSheetSourceSearchBinding
-import ani.saikou.manga.source.MangaSourceAdapter
-import ani.saikou.manga.source.MangaSources
-import ani.saikou.navBarHeight
+import ani.saikou.parsers.HMangaSources
+import ani.saikou.parsers.MangaSources
 import ani.saikou.px
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,7 +60,7 @@ class SourceSearchDialogFragment : BottomSheetDialogFragment() {
                 if (media!!.anime != null) {
                     val source = (if (!media!!.isAdult) AnimeSources else HAnimeSources)[i!!]
                     binding.searchSourceTitle.text = source.name
-                    binding.searchBarText.setText(media!!.mangaName)
+                    binding.searchBarText.setText(media!!.mangaName())
                     fun search() {
                         binding.searchBarText.clearFocus()
                         imm.hideSoftInputFromWindow(binding.searchBarText.windowToken, 0)
@@ -81,9 +82,9 @@ class SourceSearchDialogFragment : BottomSheetDialogFragment() {
 
                 } else if (media!!.manga != null) {
                     anime = false
-                    val source = MangaSources[i!!]!!
+                    val source = (if (media!!.isAdult) HMangaSources else MangaSources)[i!!]
                     binding.searchSourceTitle.text = source.name
-                    binding.searchBarText.setText(media!!.mangaName)
+                    binding.searchBarText.setText(media!!.mangaName())
                     fun search() {
                         binding.searchBarText.clearFocus()
                         imm.hideSoftInputFromWindow(binding.searchBarText.windowToken, 0)

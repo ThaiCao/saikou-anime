@@ -100,6 +100,6 @@ data class Media(
         this.relation = mediaEdge.relationType.toString()
     }
 
-    val mainName by lazy { name ?: nameRomaji }
-    val mangaName by lazy { if (countryOfOrigin != "JP") mainName else nameRomaji }
+    fun mainName() = nameMAL ?: name ?: nameRomaji
+    fun mangaName() = if (countryOfOrigin != "JP") mainName() else nameRomaji
 }

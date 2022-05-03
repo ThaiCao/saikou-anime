@@ -10,15 +10,41 @@ object AnimeSources : WatchSources() {
         ::Gogo,
         ::Zoro,
         ::Tenshi,
+        ::AllAnime,
         ::AnimeKisa,
-        ::AllAnime
+
     )
     override val names: List<String> = listOf(
         "9Anime",
         "Gogo",
         "Zoro",
         "Tenshi",
-        "AnimeKisa",
-        "AllAnime"
+        "AllAnime",
+        "AnimeKisa"
+    )
+}
+
+object HAnimeSources : WatchSources() {
+
+    override val list: List<Lazier<BaseParser>> = lazyList(
+        ::Haho,
+        ::HentaiFF,
+        ::NineAnime,
+        ::Gogo,
+        ::Zoro,
+        ::Tenshi,
+        ::AllAnime,
+        ::AnimeKisa
+    )
+
+    override val names: List<String> = listOf(
+        "Haho",
+        "HentaiFF",
+        "9Anime",
+        "Gogo",
+        "Zoro",
+        "Tenshi",
+        "AllAnime",
+        "AnimeKisa"
     )
 }

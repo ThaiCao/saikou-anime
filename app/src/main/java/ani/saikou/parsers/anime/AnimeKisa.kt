@@ -55,16 +55,16 @@ class AnimeKisa : AnimeParser() {
     override suspend fun autoSearch(mediaObj: Media): ShowResponse? {
         var response = loadSavedShowResponse(mediaObj.id)
         if (response != null) {
-            setUserText("Selected : ${response.name}")
+            saveShowResponse(mediaObj.id, response,true)
         } else {
-            setUserText("Searching : ${mediaObj.mainName}")
+            setUserText("Searching : ${mediaObj.mainName()}")
             val query =
                 "$! | &language%5B%5D=${if (selectDub) "dubbed" else "subbed"}&year%5B%5D=${mediaObj.anime?.seasonYear ?: ""}&sort=default&season%5B%5D=${mediaObj.anime?.season?.lowercase() ?: ""}&type%5B%5D=${mediaObj.typeMAL?.lowercase() ?: ""}"
             val responses = search(query).toMutableList()
-            responses.sortByTitle(mediaObj.mainName)
+            responses.sortByTitle(mediaObj.mainName())
             response = if (responses.isNotEmpty()) responses[0] else null
+            saveShowResponse(mediaObj.id, response)
         }
-        saveShowResponse(mediaObj.id, response)
         return response
     }
 }

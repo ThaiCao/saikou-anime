@@ -9,6 +9,7 @@ import ani.saikou.anilist.api.User
 import ani.saikou.media.Character
 import ani.saikou.media.Media
 import ani.saikou.media.Studio
+import ani.saikou.others.Mal
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -238,7 +239,7 @@ class AnilistQueries {
             }
             val mal = async {
                 if (media.idMAL != null) {
-                    getMalMedia(media)
+                    Mal.loadMedia(media)
                 }
             }
             awaitAll(anilist, mal)

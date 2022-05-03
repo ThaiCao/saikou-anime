@@ -1,10 +1,7 @@
 package ani.saikou.parsers
 
-import ani.saikou.FileUrl
-import ani.saikou.asyncMap
-import ani.saikou.loadData
+import ani.saikou.*
 import ani.saikou.others.MalSyncBackup
-import ani.saikou.tryForNetwork
 import kotlin.properties.Delegates
 
 /**
@@ -116,12 +113,21 @@ abstract class AnimeParser : BaseParser() {
      * **/
     override suspend fun loadSavedShowResponse(mediaId: Int): ShowResponse? {
         checkIfVariablesAreEmpty()
-        var loaded = loadData<ShowResponse>("${saveName}_$mediaId")
+        val dub = if(isDubAvailableSeparately) "_${if (selectDub) "dub" else "sub"}" else ""
+        var loaded = loadData<ShowResponse>("${saveName}${dub}_$mediaId")
         if (loaded == null && malSyncBackupName.isNotEmpty())
-            loaded = MalSyncBackup.get(mediaId, malSyncBackupName, selectDub)?.also { saveShowResponse(mediaId, it, false) }
+            loaded = MalSyncBackup.get(mediaId, malSyncBackupName, selectDub)?.also { saveShowResponse(mediaId, it, true) }
         return loaded
     }
 
+    override fun saveShowResponse(mediaId: Int, response: ShowResponse?, selected: Boolean) {
+        if (response != null) {
+            checkIfVariablesAreEmpty()
+            setUserText("${if (selected) "Selected" else "Found"} : ${response.name}")
+            val dub = if(isDubAvailableSeparately) "_${if (selectDub) "dub" else "sub"}" else ""
+            saveData("${saveName}${dub}_$mediaId", response)
+        }
+    }
 }
 
 /**

@@ -49,17 +49,17 @@ abstract class BaseParser {
     open suspend fun autoSearch(mediaObj: Media): ShowResponse? {
         var response = loadSavedShowResponse(mediaObj.id)
         if (response != null) {
-            setUserText("Selected : ${response.name}")
+            saveShowResponse(mediaObj.id, response, true)
         } else {
-            setUserText("Searching : ${mediaObj.mainName}")
-            response = search(mediaObj.mainName).let { if (it.isNotEmpty()) it[0] else null }
+            setUserText("Searching : ${mediaObj.mainName()}")
+            response = search(mediaObj.mainName()).let { if (it.isNotEmpty()) it[0] else null }
 
             if (response == null) {
                 setUserText("Searching : ${mediaObj.nameRomaji}")
                 response = search(mediaObj.nameRomaji).let { if (it.isNotEmpty()) it[0] else null }
             }
+            saveShowResponse(mediaObj.id, response)
         }
-        saveShowResponse(mediaObj.id, response)
         return response
     }
 

@@ -1,4 +1,4 @@
-package ani.saikou.manga.source
+package ani.saikou.manga
 
 import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.media.SourceAdapter

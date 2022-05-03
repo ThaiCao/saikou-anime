@@ -2,6 +2,7 @@ package ani.saikou.parsers.anime
 
 import ani.saikou.FileUrl
 import ani.saikou.client
+import ani.saikou.mapper
 import ani.saikou.parsers.*
 import ani.saikou.parsers.anime.extractors.StreamTape
 import ani.saikou.parsers.anime.extractors.VizCloud
@@ -49,7 +50,7 @@ class NineAnime : AnimeParser() {
         val body = client.get(episodeLink).parsed<Response>().html
         val document = Jsoup.parse(body)
         val rawJson = document.select(".episodes li a").select(".active").attr("data-sources")
-        val dataSources = Requests.mapper.readValue<Map<String, String>>(rawJson)
+        val dataSources = mapper.readValue<Map<String, String>>(rawJson)
 
         return document.select(".tabs span").map {
             val name = it.text()

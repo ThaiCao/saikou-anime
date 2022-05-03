@@ -16,7 +16,7 @@ import androidx.core.view.updateLayoutParams
 import ani.saikou.*
 import ani.saikou.parsers.AnimeSources
 import ani.saikou.databinding.ActivitySettingsBinding
-import ani.saikou.manga.source.MangaSources
+import ani.saikou.parsers.MangaSources
 
 class SettingsActivity : AppCompatActivity() {
 

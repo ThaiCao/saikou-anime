@@ -7,11 +7,8 @@ import ani.saikou.parsers.*
 import ani.saikou.parsers.anime.extractors.FPlayer
 import ani.saikou.parsers.anime.extractors.GogoCDN
 import ani.saikou.parsers.anime.extractors.StreamSB
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.lagradost.nicehttp.Requests.Companion.mapper
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.text.DecimalFormat
@@ -25,7 +22,6 @@ class AllAnime : AnimeParser() {
     private val apiHost = "https://blog.allanimenews.com/"
     private val idRegex = Regex("${hostUrl}/anime/(\\w+)")
     private val epNumRegex = Regex("/[sd]ub/(\\d+)")
-
 
 
     override suspend fun loadEpisodes(animeLink: String): List<Episode> {
@@ -156,16 +152,14 @@ class AllAnime : AnimeParser() {
             val rawResponse = client.get(url)
             val linkList = mutableListOf<String>()
             if (rawResponse.code < 400) {
-                val response = rawResponse.body?.string()
-                if (response != null) {
-                    mapper.readValue<ApiSourceResponse>(response).links.forEach {
-                        // Avoid languages other than english when multiple urls are provided
-                        val matchesLanguagePattern = languageRegex.find(it.resolutionStr)
-                        val language = matchesLanguagePattern?.groupValues?.get(1)
-                        if (matchesLanguagePattern == null || language?.contains("en") == true) {
-                            (it.src ?: it.link)?.let { fileUrl ->
-                                linkList.add(fileUrl)
-                            }
+                val response = rawResponse.text
+                mapper.readValue<ApiSourceResponse>(response).links.forEach {
+                    // Avoid languages other than english when multiple urls are provided
+                    val matchesLanguagePattern = languageRegex.find(it.resolutionStr)
+                    val language = matchesLanguagePattern?.groupValues?.get(1)
+                    if (matchesLanguagePattern == null || language?.contains("en") == true) {
+                        (it.src ?: it.link)?.let { fileUrl ->
+                            linkList.add(fileUrl)
                         }
                     }
                 }
@@ -198,98 +192,93 @@ class AllAnime : AnimeParser() {
         }
     }
 
+    override suspend fun loadSavedShowResponse(mediaId: Int): ShowResponse? {
+        return loadData("${saveName}_$mediaId")
+    }
+
+    override fun saveShowResponse(mediaId: Int, response: ShowResponse?, selected: Boolean) {
+        if (response != null) {
+            setUserText("${if (selected) "Selected" else "Found"} : ${response.name}")
+            saveData("${saveName}_$mediaId", response)
+        }
+    }
+
+    private data class Query(var data: Data?) {
+        data class Data(
+            val shows: ShowsConnection?,
+            val show: Show?,
+            val episodeInfos: List<EpisodeInfo>?,
+            val episode: AllAnimeEpisode?,
+        )
+
+        data class ShowsConnection(
+            val edges: List<Show>
+        )
+
+        data class Show(
+            @JsonProperty("_id")
+            val id: String,
+            val name: String,
+            val englishName: String?,
+            val nativeName: String?,
+            val thumbnail: String,
+            val availableEpisodes: AvailableEpisodes,
+            // Actually just raw unspecified json
+            val lastEpisodeInfo: LastEpisodeInfos
+        )
+
+        data class AvailableEpisodes(
+            val sub: Int,
+            val dub: Int,
+            // val raw: Int,
+        )
+
+        data class LastEpisodeInfos(
+            val sub: LastEpisodeInfo?,
+            val dub: LastEpisodeInfo?,
+        )
+
+        data class LastEpisodeInfo(
+            val episodeString: String?,
+            val notes: String?
+        )
+
+        data class AllAnimeEpisode(
+            var sourceUrls: List<SourceUrl>
+        )
+
+        data class SourceUrl(
+            val sourceUrl: String,
+            val sourceName: String,
+            val priority: String
+        )
+    }
+
+    private data class EpisodeInfo(
+        // Episode "numbers" can have decimal values, hence float
+        val episodeIdNum: Float,
+        val notes: String?,
+        val thumbnails: List<String>?,
+        val vidInforssub: VidInfo?,
+        val vidInforsdub: VidInfo?,
+    ) {
+        data class VidInfo(
+            // val vidPath
+            val vidResolution: Int?,
+            val vidSize: Double?,
+        )
+    }
+
+    private data class ApiSourceResponse(val links: List<ApiLink>) {
+        data class ApiLink(
+            val link: String?,
+            val src: String?,
+            val hls: Boolean?,
+            val mp4: Boolean?,
+            val resolutionStr: String,
+        )
+    }
 
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Query(
-    var data: Data?
-)
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Data(
-    val shows: ShowsConnection?,
-    val show: Show?,
-    val episodeInfos: List<EpisodeInfo>?,
-    val episode: AllAnimeEpisode?,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class ShowsConnection(
-    val edges: List<Show>
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Show(
-    @JsonProperty("_id")
-    val id: String,
-    val name: String,
-    val englishName: String?,
-    val nativeName: String?,
-    val thumbnail: String,
-    val availableEpisodes: AvailableEpisodes,
-    // Actually just raw unspecified json
-    val lastEpisodeInfo: LastEpisodeInfos
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class AvailableEpisodes(
-    val sub: Int,
-    val dub: Int,
-    // val raw: Int,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class LastEpisodeInfos(
-    val sub: LastEpisodeInfo?,
-    val dub: LastEpisodeInfo?,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class LastEpisodeInfo(
-    val episodeString: String?,
-    val notes: String?
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class EpisodeInfo(
-    // Episode "numbers" can have decimal values, hence float
-    val episodeIdNum: Float,
-    val notes: String?,
-    val thumbnails: List<String>?,
-    val vidInforssub: VidInfo?,
-    val vidInforsdub: VidInfo?,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class VidInfo(
-    // val vidPath
-    val vidResolution: Int?,
-    val vidSize: Double?,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class AllAnimeEpisode(
-    var sourceUrls: List<SourceUrl>
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class SourceUrl(
-    val sourceUrl: String,
-    val sourceName: String,
-    val priority: String
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class ApiSourceResponse(
-    val links: List<ApiLink>
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class ApiLink(
-    val link: String?,
-    val src: String?,
-    val hls: Boolean?,
-    val mp4: Boolean?,
-    val resolutionStr: String,
-)

@@ -27,9 +27,8 @@ class MangaKakalot : MangaParser() {
             val chap = Regex("((?<=Chapter )[0-9.]+)([\\s:]+)?(.+)?").find(it.select("a").text())?.destructured
             if (chap != null) {
                 val link = it.select("a").attr("href")
-                MangaChapter(link, chap.component1(), chap.component3())
-            }
-            else null
+                MangaChapter(chap.component1(), link, chap.component3())
+            } else null
         }
 
     }
@@ -55,8 +54,7 @@ class MangaKakalot : MangaParser() {
                     it.select("a").attr("href"),
                     FileUrl(it.select("img").attr("src"), headers)
                 )
-            }
-            else null
+            } else null
         }
     }
 }

@@ -14,13 +14,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import ani.saikou.*
-import ani.saikou.parsers.AnimeSources
-import ani.saikou.parsers.HAnimeSources
-import ani.saikou.parsers.WatchSources
 import ani.saikou.databinding.FragmentAnimeWatchBinding
 import ani.saikou.media.Media
 import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.parsers.AnimeParser
+import ani.saikou.parsers.AnimeSources
+import ani.saikou.parsers.HAnimeSources
+import ani.saikou.parsers.WatchSources
 import ani.saikou.settings.PlayerSettings
 import ani.saikou.settings.UserInterfaceSettings
 import kotlinx.coroutines.Dispatchers
@@ -207,6 +207,15 @@ open class AnimeWatchFragment : Fragment() {
         model.saveSelected(media.id, selected, requireActivity())
         media.selected = selected
         return watchSources[i]
+    }
+
+    fun onDubClicked(checked:Boolean){
+        val selected = model.loadSelected(media)
+        watchSources[selected.source].selectDub = checked
+        selected.preferDub = checked
+        model.saveSelected(media.id, selected, requireActivity())
+        media.selected = selected
+        lifecycleScope.launch(Dispatchers.IO) { model.forceLoadEpisode(media, selected.source) }
     }
 
     fun loadEpisodes(i: Int) {

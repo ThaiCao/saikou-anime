@@ -1,11 +1,14 @@
 package ani.saikou
 
+import android.content.Context
 import com.lagradost.nicehttp.Requests
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import okhttp3.Cache
 import okhttp3.OkHttpClient
+import java.io.File
 import java.io.IOException
 import java.io.Serializable
 import kotlin.reflect.KFunction
@@ -13,8 +16,23 @@ import kotlin.reflect.KFunction
 val defaultHeaders = mapOf(
     "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"
 )
-val okHttpClient = OkHttpClient()
-val client = Requests(okHttpClient, defaultHeaders)
+lateinit var cache : Cache
+
+lateinit var okHttpClient : OkHttpClient
+lateinit var client : Requests
+
+fun initializeNetwork(context: Context){
+    cache = Cache(
+        File(context.cacheDir, "http_cache"),
+        50L * 1024L * 1024L // 50 MiB
+    )
+    okHttpClient = OkHttpClient.Builder()
+        .cache(cache)
+        .build()
+    client = Requests(okHttpClient, defaultHeaders)
+}
+
+val mapper = Requests.mapper
 
 fun <K, V, R> Map<out K, V>.asyncMap(f: suspend (Map.Entry<K, V>) -> R): List<R> = runBlocking {
     map { withContext(Dispatchers.IO) { async { f(it) } } }.map { it.await() }

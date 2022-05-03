@@ -2,6 +2,7 @@ package ani.saikou.parsers.manga
 
 import ani.saikou.client
 import ani.saikou.findBetween
+import ani.saikou.mapper
 import ani.saikou.parsers.MangaChapter
 import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaParser
@@ -9,7 +10,6 @@ import ani.saikou.parsers.ShowResponse
 import ani.saikou.sortByTitle
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.lagradost.nicehttp.Requests
 
 class MangaSee : MangaParser() {
 
@@ -22,7 +22,7 @@ class MangaSee : MangaParser() {
         val json = client.get("$hostUrl/manga/$mangaLink").document.select("script")
             .lastOrNull()?.toString()?.findBetween("vm.Chapters = ", ";")?: return emptyList()
 
-        return Requests.mapper.readValue<List<MangaResponse>>(json).map {
+        return mapper.readValue<List<MangaResponse>>(json).map {
             val chap = it.chapter
             val num = chapChop(chap, 3)
             val link = hostUrl + "/read-online/$mangaLink-chapter-" + chapChop(chap, 1) + chapChop(chap, 2) + chapChop(chap, 0) + ".html"
@@ -35,7 +35,7 @@ class MangaSee : MangaParser() {
         val str = res?.toString() ?: return emptyList()
         val server = str.findBetween("vm.CurPathName = ", ";")?.trim('"') ?: return emptyList()
         val slug = str.findBetween("vm.IndexName = ", ";")?.trim('"') ?: return emptyList()
-        val json = Requests.mapper.readValue<ChapterResponse>(
+        val json = mapper.readValue<ChapterResponse>(
             str.findBetween("vm.CurChapter = ", ";") ?: return emptyList()
         )
         val id = json.chapter
@@ -64,7 +64,7 @@ class MangaSee : MangaParser() {
             else {
                 val json = client.get("$host/search/").document.select("script").last().toString()
                     .findBetween("vm.Directory = ", "\n")!!.replace(";", "")
-                Requests.mapper.readValue<List<SearchResponse>>(json).map {
+                mapper.readValue<List<SearchResponse>>(json).map {
                     ShowResponse(
                         it.s,
                         it.i,

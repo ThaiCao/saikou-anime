@@ -13,9 +13,9 @@ import ani.saikou.anime.SelectorDialogFragment
 import ani.saikou.loadData
 import ani.saikou.logger
 import ani.saikou.manga.MangaChapter
-import ani.saikou.manga.source.MangaReadSources
 import ani.saikou.others.AnimeFillerList
 import ani.saikou.others.Kitsu
+import ani.saikou.parsers.MangaReadSources
 import ani.saikou.parsers.ShowResponse
 import ani.saikou.parsers.WatchSources
 import ani.saikou.saveData
@@ -37,6 +37,7 @@ class MediaDetailsViewModel : ViewModel() {
                 true -> loadData("settings_default_anime_source") ?: 0
                 else -> loadData("settings_default_manga_source") ?: 0
             }
+            it.preferDub = loadData("settings_prefer_dub") ?: false
             it
         }
     }
@@ -87,6 +88,11 @@ class MediaDetailsViewModel : ViewModel() {
         episodes.postValue(epsLoaded)
     }
 
+    suspend fun forceLoadEpisode(media: Media,i:Int){
+        epsLoaded[i] = watchSources.loadEpisodesFromMedia(i, media)
+        episodes.postValue(epsLoaded)
+    }
+
     suspend fun overrideEpisodes(i: Int, source: ShowResponse, id: Int) {
         watchSources.saveResponse(i, id, source)
         epsLoaded[i] = watchSources.loadEpisodes(i, source.link)
@@ -119,10 +125,10 @@ class MediaDetailsViewModel : ViewModel() {
     suspend fun loadEpisodeSingleVideo(ep: Episode, selected: Selected, post: Boolean = true): Boolean {
         if (ep.extractors.isNullOrEmpty()) {
 
-            val server = selected.server?:return false
-            val link = ep.link?:return false
+            val server = selected.server ?: return false
+            val link = ep.link ?: return false
 
-            ep.extractors = mutableListOf(watchSources[selected.source].loadSingleVideoServer(server,link) ?: return false)
+            ep.extractors = mutableListOf(watchSources[selected.source].loadSingleVideoServer(server, link) ?: return false)
             ep.allStreams = false
         }
         if (post) {
@@ -161,7 +167,7 @@ class MediaDetailsViewModel : ViewModel() {
 
 
     //Manga
-    var readMangaReadSources: MangaReadSources? = null
+    lateinit var readMangaReadSources: MangaReadSources
 
     private val mangaChapters: MutableLiveData<MutableMap<Int, MutableMap<String, MangaChapter>>> =
         MutableLiveData<MutableMap<Int, MutableMap<String, MangaChapter>>>(null)
@@ -170,21 +176,21 @@ class MediaDetailsViewModel : ViewModel() {
     suspend fun loadMangaChapters(media: Media, i: Int) {
         logger("Loading Manga Chapters : $mangaLoaded")
         if (!mangaLoaded.containsKey(i)) {
-            mangaLoaded[i] = readMangaReadSources?.get(i)!!.getChapters(media)
+            mangaLoaded[i] = readMangaReadSources.loadChaptersFromMedia(i, media)
         }
         mangaChapters.postValue(mangaLoaded)
     }
 
     suspend fun overrideMangaChapters(i: Int, source: ShowResponse, id: Int) {
-//        readMangaReadSources?.get(i)!!.saveSource(source, id)
-        mangaLoaded[i] = readMangaReadSources?.get(i)!!.getLinkChapters(source.link)
+        readMangaReadSources.saveResponse(i, id, source)
+        mangaLoaded[i] = readMangaReadSources.loadChapters(i,source.link)
         mangaChapters.postValue(mangaLoaded)
     }
 
     private val mangaChapter = MutableLiveData<MangaChapter?>(null)
     fun getMangaChapter(): LiveData<MangaChapter?> = mangaChapter
     suspend fun loadMangaChapterImages(chapter: MangaChapter, selected: Selected) {
-        readMangaReadSources?.get(selected.source)?.getChapter(chapter)
+        readMangaReadSources[selected.source].loadImages(chapter.link)
         mangaChapter.postValue(chapter)
     }
 }
