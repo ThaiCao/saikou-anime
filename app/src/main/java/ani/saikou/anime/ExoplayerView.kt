@@ -1007,11 +1007,11 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     override fun onPlayerError(error: PlaybackException) {
         when (error.errorCode) {
-            PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS
+            PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS,PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
             -> {
                 toast("Source Exception : ${error.message}")
                 isPlayerPlaying = true
-
+                sourceClick()
             }
             else
             -> toast("Player Error ${error.errorCode} (${error.errorCodeName}) : ${error.message}")

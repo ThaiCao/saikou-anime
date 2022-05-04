@@ -6,8 +6,8 @@ import ani.saikou.mapper
 import ani.saikou.parsers.*
 import ani.saikou.parsers.anime.extractors.StreamTape
 import ani.saikou.parsers.anime.extractors.VizCloud
+import ani.saikou.tryWithSuspend
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.lagradost.nicehttp.Requests
 import org.jsoup.Jsoup
 import java.net.URLDecoder
 
@@ -52,9 +52,9 @@ class NineAnime : AnimeParser() {
         val rawJson = document.select(".episodes li a").select(".active").attr("data-sources")
         val dataSources = mapper.readValue<Map<String, String>>(rawJson)
 
-        return document.select(".tabs span").map {
+        return document.select(".tabs span").mapNotNull {
             val name = it.text()
-            val encodedStreamUrl = getEpisodeLinks(dataSources[it.attr("data-id")].toString()).url
+            val encodedStreamUrl = getEpisodeLinks(dataSources[it.attr("data-id")].toString())?.url ?: return@mapNotNull null
             val realLink = FileUrl(getLink(encodedStreamUrl), embedHeaders)
             VideoServer(name, realLink)
         }
@@ -81,11 +81,11 @@ class NineAnime : AnimeParser() {
         }
     }
 
-    private data class Links(val url: String)
+    private data class Links(val url: String?)
     data class Response(val html: String)
 
-    private suspend fun getEpisodeLinks(source: String): Links {
-        return client.get("${host()}/ajax/anime/episode?id=${source.replace("\"", "")}").parsed()
+    private suspend fun getEpisodeLinks(source: String): Links? {
+        return tryWithSuspend { client.get("${host()}/ajax/anime/episode?id=${source.replace("\"", "")}").parsed() }
     }
 
     //The code below is fully taken from

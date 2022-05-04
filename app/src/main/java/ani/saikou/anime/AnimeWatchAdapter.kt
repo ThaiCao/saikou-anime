@@ -47,12 +47,15 @@ class AnimeWatchAdapter(
             }
         }
 
+        binding.animeSourceDubbed.isChecked = media.selected!!.preferDub
+        binding.animeSourceDubbedText.text = if(media.selected!!.preferDub) "Dubbed" else "Subbed"
+
         //PreferDub
+        var changing = false
         binding.animeSourceDubbed.setOnCheckedChangeListener { _, isChecked ->
             binding.animeSourceDubbedText.text = if(isChecked) "Dubbed" else "Subbed"
-            fragment.onDubClicked(isChecked)
+            if(!changing) fragment.onDubClicked(isChecked)
         }
-        binding.animeSourceDubbed.isChecked = media.selected!!.preferDub
 
         //Wrong Title
         binding.animeSourceSearch.setOnClickListener {
@@ -74,7 +77,9 @@ class AnimeWatchAdapter(
             fragment.onSourceChange(i).apply {
                 binding.animeSourceTitle.text = showUserText
                 showUserTextListener = { MainScope().launch { binding.animeSourceTitle.text = it } }
+                changing=true
                 binding.animeSourceDubbed.isChecked = selectDub
+                changing=false
                 binding.animeSourceDubbedCont.visibility = if(isDubAvailableSeparately) View.VISIBLE else View.GONE
             }
             fragment.loadEpisodes(i)

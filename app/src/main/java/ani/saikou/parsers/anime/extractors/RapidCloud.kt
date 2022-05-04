@@ -87,7 +87,6 @@ class RapidCloud(override val server: VideoServer) : VideoExtractor() {
                     }
                     text == "2"           -> webSocket.send("3")
                 }
-                println("web : $text")
             }
         }
         webSocket = client.newWebSocket(

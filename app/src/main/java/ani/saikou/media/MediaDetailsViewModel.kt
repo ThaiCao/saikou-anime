@@ -107,7 +107,6 @@ class MediaDetailsViewModel : ViewModel() {
         if (!ep.allStreams || ep.extractors.isNullOrEmpty()) {
             ep.extractors = mutableListOf()
             watchSources[i].loadByVideoServers(link) {
-                println(it.videos)
                 ep.extractors?.add(it)
                 episode.postValue(ep)
             }

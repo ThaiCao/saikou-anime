@@ -92,12 +92,12 @@ data class Media(
     constructor(mediaList: MediaList) : this(mediaList.media!!) {
         this.userProgress = mediaList.progress
         this.userScore = mediaList.score?.toInt() ?: 0
-        this.userStatus = mediaList.status.toString()
+        this.userStatus = mediaList.status?.toString()
         this.userUpdatedAt = mediaList.updatedAt?.toLong()
     }
 
     constructor(mediaEdge: MediaEdge) : this(mediaEdge.node!!) {
-        this.relation = mediaEdge.relationType.toString()
+        this.relation = mediaEdge.relationType?.toString()
     }
 
     fun mainName() = nameMAL ?: name ?: nameRomaji

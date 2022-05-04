@@ -101,7 +101,7 @@ open class MangaReadFragment : Fragment() {
                 progress = View.GONE
                 binding.mediaInfoProgressBar.visibility = progress
 
-                if (media.format == "MANGA" || media.format == "ONE_SHOT") {
+                if (media.format == "MANGA" || media.format == "ONE SHOT") {
                     media.selected = model.loadSelected(media)
                     style = media.selected!!.recyclerStyle
                     reverse = media.selected!!.recyclerReversed

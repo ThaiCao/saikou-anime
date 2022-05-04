@@ -22,7 +22,7 @@ object Kitsu {
     }
 
     suspend fun getKitsuEpisodesDetails(media: Media): MutableMap<String, Episode>? {
-        val print = true
+        val print = false
         logger("Kitsu : title=${media.mainName()}", print)
         try {
             val query =

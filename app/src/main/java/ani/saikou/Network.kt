@@ -2,6 +2,8 @@ package ani.saikou
 
 import android.content.Context
 import com.lagradost.nicehttp.Requests
+import com.lagradost.nicehttp.addGenericDns
+import com.lagradost.nicehttp.ignoreAllSSLErrors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -16,20 +18,34 @@ import kotlin.reflect.KFunction
 val defaultHeaders = mapOf(
     "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"
 )
-lateinit var cache : Cache
+lateinit var cache: Cache
 
-lateinit var okHttpClient : OkHttpClient
-lateinit var client : Requests
+lateinit var okHttpClient: OkHttpClient
+lateinit var client: Requests
 
-fun initializeNetwork(context: Context){
+fun initializeNetwork(context: Context) {
+    val dns = loadData<Int>("settings_dns")
     cache = Cache(
         File(context.cacheDir, "http_cache"),
         50L * 1024L * 1024L // 50 MiB
     )
     okHttpClient = OkHttpClient.Builder()
+        .followRedirects(true)
+        .followSslRedirects(true)
+        .ignoreAllSSLErrors()
         .cache(cache)
+        .apply {
+            when (dns) {
+                1 -> addGoogleDns()
+                2 -> addCloudFlareDns()
+                3 -> addAdGuardDns()
+            }
+
+        }
         .build()
-    client = Requests(okHttpClient, defaultHeaders)
+    client = Requests(
+        okHttpClient,
+        defaultHeaders =  defaultHeaders)
 }
 
 val mapper = Requests.mapper
@@ -42,35 +58,32 @@ fun <A, B> Collection<A>.asyncMap(f: suspend (A) -> B): List<B> = runBlocking {
     map { async { f(it) } }.map { it.await() }
 }
 
-fun logError(e:Exception) {
+fun logError(e: Exception) {
     toastString(e.localizedMessage)
 }
 
-fun <T> tryWith(call : () -> T) : T?{
+fun <T> tryWith(call: () -> T): T? {
     return try {
         call.invoke()
-    }
-    catch (e:Exception){
+    } catch (e: Exception) {
         logError(e)
         null
     }
 }
 
-suspend fun <T> tryWithSuspend(call: suspend () -> T) : T?{
-    return try{
+suspend fun <T> tryWithSuspend(call: suspend () -> T): T? {
+    return try {
         call.invoke()
-    }
-    catch (e: Exception) {
+    } catch (e: Exception) {
         logError(e)
         null
     }
 }
 
-suspend fun <T> tryForNetwork(call: suspend () -> T) : T?{
-    return try{
+suspend fun <T> tryForNetwork(call: suspend () -> T): T? {
+    return try {
         call.invoke()
-    }
-    catch (e: IOException) {
+    } catch (e: IOException) {
         logError(e)
         e.printStackTrace()
         null
@@ -87,8 +100,8 @@ data class FileUrl(
 
 //Credits to leg
 data class Lazier<T>(
-    val lClass : KFunction<T>
-){
+    val lClass: KFunction<T>
+) {
     val get = lazy { lClass.call() }
 }
 
@@ -97,3 +110,34 @@ fun <T> lazyList(vararg objects: KFunction<T>): List<Lazier<T>> {
         Lazier(it)
     }
 }
+
+fun OkHttpClient.Builder.addGoogleDns() = (
+        addGenericDns(
+            "https://dns.google/dns-query",
+            listOf(
+                "8.8.4.4",
+                "8.8.8.8"
+            )
+        ))
+
+fun OkHttpClient.Builder.addCloudFlareDns() = (
+        addGenericDns(
+            "https://cloudflare-dns.com/dns-query",
+            // https://www.cloudflare.com/ips/
+            listOf(
+                "1.1.1.1",
+                "1.0.0.1",
+                "2606:4700:4700::1111",
+                "2606:4700:4700::1001"
+            )
+        ))
+
+fun OkHttpClient.Builder.addAdGuardDns() = (
+        addGenericDns(
+            "https://dns.adguard.com/dns-query",
+            listOf(
+                // "Non-filtering"
+                "94.140.14.140",
+                "94.140.14.141",
+            )
+        ))

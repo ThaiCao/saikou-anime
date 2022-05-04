@@ -10,7 +10,6 @@ object Mal {
             if (media.anime != null) {
                 val res = client.get("https://myanimelist.net/anime/${media.idMAL}").document
                 val a = res.select(".title-english").text()
-                println("name : $a")
                 media.nameMAL = if (a != "") a else res.select(".title-name").text()
                 media.typeMAL =
                     if (res.select("div.spaceit_pad > a").isNotEmpty()) res.select("div.spaceit_pad > a")[0].text() else null

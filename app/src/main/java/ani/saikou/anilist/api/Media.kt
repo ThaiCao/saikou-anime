@@ -427,10 +427,6 @@ enum class MediaRelation {
 
 enum class MediaSeason {
     WINTER, SPRING, SUMMER, FALL;
-
-    override fun toString(): String {
-        return super.toString().replace("_", " ")
-    }
 }
 
 data class MediaExternalLink(
