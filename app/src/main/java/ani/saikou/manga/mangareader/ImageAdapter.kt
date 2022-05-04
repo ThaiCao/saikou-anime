@@ -29,7 +29,7 @@ class ImageAdapter(
     private val settings: CurrentReaderSettings,
     private val uiSettings: UserInterfaceSettings
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    val images = chapter.images ?: listOf()
+    val images = chapter.images!!
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val binding = ItemImageBinding.inflate(LayoutInflater.from(parent.context), parent, false)

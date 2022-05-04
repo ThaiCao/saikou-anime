@@ -189,7 +189,7 @@ class MediaDetailsViewModel : ViewModel() {
     private val mangaChapter = MutableLiveData<MangaChapter?>(null)
     fun getMangaChapter(): LiveData<MangaChapter?> = mangaChapter
     suspend fun loadMangaChapterImages(chapter: MangaChapter, selected: Selected) {
-        readMangaReadSources[selected.source].loadImages(chapter.link)
+        chapter.images = readMangaReadSources[selected.source].loadImages(chapter.link)
         mangaChapter.postValue(chapter)
     }
 }

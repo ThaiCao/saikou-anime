@@ -111,6 +111,8 @@ fun <T> lazyList(vararg objects: KFunction<T>): List<Lazier<T>> {
     }
 }
 
+//Kangings from CS333333333333
+
 fun OkHttpClient.Builder.addGoogleDns() = (
         addGenericDns(
             "https://dns.google/dns-query",
@@ -123,7 +125,6 @@ fun OkHttpClient.Builder.addGoogleDns() = (
 fun OkHttpClient.Builder.addCloudFlareDns() = (
         addGenericDns(
             "https://cloudflare-dns.com/dns-query",
-            // https://www.cloudflare.com/ips/
             listOf(
                 "1.1.1.1",
                 "1.0.0.1",
