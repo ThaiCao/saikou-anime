@@ -12,7 +12,7 @@ object AnimeSources : WatchSources() {
         ::Tenshi,
         ::AllAnime,
         ::AnimeKisa,
-
+        ::Kamyroll,
     )
     override val names: List<String> = listOf(
         "9Anime",
@@ -20,7 +20,8 @@ object AnimeSources : WatchSources() {
         "Zoro",
         "Tenshi",
         "AllAnime",
-        "AnimeKisa"
+        "AnimeKisa",
+        "Kamyroll"
     )
 }
 
