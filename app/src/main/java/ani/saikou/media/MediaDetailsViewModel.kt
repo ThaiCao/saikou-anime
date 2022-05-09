@@ -107,14 +107,17 @@ class MediaDetailsViewModel : ViewModel() {
         val link = ep.link ?: return
         if (!ep.allStreams || ep.extractors.isNullOrEmpty()) {
             val list = mutableListOf<VideoExtractor>()
+            ep.extractors =list
             watchSources[i].loadByVideoServers(link,ep.extra) {
-                list.add(it)
-                ep.extractorCallback?.invoke(it)
+                if(it.videos.isNotEmpty()) {
+                    list.add(it)
+                    ep.extractorCallback?.invoke(it)
+                }
             }
-            ep.extractors = list.mapNotNull { if(it.videos.isNotEmpty()) it else null }
             ep.extractorCallback = null
             ep.allStreams = true
         }
+
         if (post) {
             episode.postValue(ep)
             MainScope().launch(Dispatchers.Main) {
@@ -130,7 +133,7 @@ class MediaDetailsViewModel : ViewModel() {
             val server = selected.server ?: return false
             val link = ep.link ?: return false
 
-            ep.extractors = listOf(watchSources[selected.source].loadSingleVideoServer(server, link, ep.extra) ?: return false)
+            ep.extractors = mutableListOf(watchSources[selected.source].loadSingleVideoServer(server, link, ep.extra) ?: return false)
             ep.allStreams = false
         }
         if (post) {
