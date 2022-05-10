@@ -172,7 +172,7 @@ class MediaDetailsViewModel : ViewModel() {
 
 
     //Manga
-    lateinit var readMangaReadSources: MangaReadSources
+    lateinit var mangaReadSources: MangaReadSources
 
     private val mangaChapters: MutableLiveData<MutableMap<Int, MutableMap<String, MangaChapter>>> =
         MutableLiveData<MutableMap<Int, MutableMap<String, MangaChapter>>>(null)
@@ -181,21 +181,21 @@ class MediaDetailsViewModel : ViewModel() {
     suspend fun loadMangaChapters(media: Media, i: Int) {
         logger("Loading Manga Chapters : $mangaLoaded")
         if (!mangaLoaded.containsKey(i)) {
-            mangaLoaded[i] = readMangaReadSources.loadChaptersFromMedia(i, media)
+            mangaLoaded[i] = mangaReadSources.loadChaptersFromMedia(i, media)
         }
         mangaChapters.postValue(mangaLoaded)
     }
 
     suspend fun overrideMangaChapters(i: Int, source: ShowResponse, id: Int) {
-        readMangaReadSources.saveResponse(i, id, source)
-        mangaLoaded[i] = readMangaReadSources.loadChapters(i,source.link)
+        mangaReadSources.saveResponse(i, id, source)
+        mangaLoaded[i] = mangaReadSources.loadChapters(i,source.link)
         mangaChapters.postValue(mangaLoaded)
     }
 
     private val mangaChapter = MutableLiveData<MangaChapter?>(null)
     fun getMangaChapter(): LiveData<MangaChapter?> = mangaChapter
     suspend fun loadMangaChapterImages(chapter: MangaChapter, selected: Selected) {
-        chapter.images = readMangaReadSources[selected.source].loadImages(chapter.link)
+        chapter.images = mangaReadSources[selected.source].loadImages(chapter.link)
         mangaChapter.postValue(chapter)
     }
 }
