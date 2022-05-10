@@ -23,7 +23,7 @@ class AllAnime : MangaParser() {
             val showId = idRegex.find(mangaLink)?.groupValues?.get(1)
             if (showId != null) {
                 val episodeInfos = getEpisodeInfos(showId)
-                val format = DecimalFormat("0")
+                val format = DecimalFormat("#####.#####")
                 episodeInfos?.sortedBy { it.episodeIdNum }?.forEach { epInfo ->
                     val link = """${hostUrl}/manga/$showId/chapters/sub/${epInfo.episodeIdNum}"""
                     val epNum = format.format(epInfo.episodeIdNum).toString()
