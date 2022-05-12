@@ -19,7 +19,7 @@ import java.io.File
 
 object AppUpdater {
     suspend fun check(activity: Activity) {
-        try {
+        tryWithSuspend {
             val version =
                 if (!BuildConfig.DEBUG)
                     client.get("https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/stable.txt").text.replace("\n", "")
@@ -64,8 +64,6 @@ object AppUpdater {
                         }
                     }.show()
             }
-        } catch (e: Exception) {
-            logError(e)
         }
     }
 
