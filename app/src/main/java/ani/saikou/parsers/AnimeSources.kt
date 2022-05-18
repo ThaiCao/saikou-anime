@@ -10,18 +10,18 @@ object AnimeSources : WatchSources() {
         ::Gogo,
         ::Zoro,
         ::Tenshi,
+        ::Kamyroll,
         ::AllAnime,
         ::AnimeKisa,
-        ::Kamyroll,
     )
     override val names: List<String> = listOf(
         "9Anime",
         "Gogo",
         "Zoro",
         "Tenshi",
+        "Kamyroll",
         "AllAnime",
-        "AnimeKisa",
-        "Kamyroll"
+        "9Anime Backup",
     )
 }
 
@@ -34,8 +34,9 @@ object HAnimeSources : WatchSources() {
         ::Gogo,
         ::Zoro,
         ::Tenshi,
+        ::Kamyroll,
         ::AllAnime,
-        ::AnimeKisa
+        ::AnimeKisa,
     )
 
     override val names: List<String> = listOf(
@@ -45,7 +46,8 @@ object HAnimeSources : WatchSources() {
         "Gogo",
         "Zoro",
         "Tenshi",
+        "Kamyroll",
         "AllAnime",
-        "AnimeKisa"
+        "9Anime Backup",
     )
 }
