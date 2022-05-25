@@ -6,6 +6,7 @@ import ani.saikou.client
 import ani.saikou.logger
 import ani.saikou.media.Media
 import ani.saikou.tryWithSuspend
+import com.fasterxml.jackson.annotation.JsonProperty
 
 object Kitsu {
     private suspend fun getKitsuData(query: String): KitsuResponse? {
@@ -47,17 +48,19 @@ query {
     }
   }
 }"""
+
+
         val result = getKitsuData(query) ?: return null
         logger("Kitsu : result=$result", print)
-        return result.data?.lookupMapping?.episodes?.nodes?.associate { ep ->
-            val num = ep.number.toString()
+        return (result.data?.lookupMapping?.episodes?.nodes?:return null).mapNotNull { ep ->
+            val num = ep?.num?.toString()?:return@mapNotNull null
             num to Episode(
                 number = num,
                 title = ep.titles?.canonical,
                 desc = ep.description?.en,
                 thumb = FileUrl[ep.thumbnail?.original?.url],
             )
-        }
+        }.toMap()
     }
 
     private data class KitsuResponse(
@@ -73,11 +76,12 @@ query {
         )
 
         data class Episodes (
-            val nodes: List<Node>? = null
+            val nodes: List<Node?>? = null
         )
 
         data class Node (
-            val number: Long? = null,
+            @JsonProperty("number")
+            val num: Long? = null,
             val titles: Titles? = null,
             val description: Description? = null,
             val thumbnail: Thumbnail? = null

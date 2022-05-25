@@ -421,7 +421,7 @@ class MangaReaderActivity : AppCompatActivity() {
     }
 
     fun handleController(shouldShow: Boolean? = null) {
-        println("o :"+binding.mangaReaderSliderContainer.height)
+        println("o :" + binding.mangaReaderSliderContainer.height)
         if (!sliding) {
             if (!settings.showSystemBars) {
                 hideBars()
@@ -441,7 +441,7 @@ class MangaReaderActivity : AppCompatActivity() {
                     rotation = 0f
                 }
 
-            } else{
+            } else {
                 binding.mangaReaderSliderContainer.updateLayoutParams {
                     height = ViewGroup.LayoutParams.MATCH_PARENT
                     width = 48f.px
@@ -449,11 +449,15 @@ class MangaReaderActivity : AppCompatActivity() {
 
                 binding.mangaReaderSlider.apply {
                     updateLayoutParams {
-                        width = binding.mangaReaderSliderContainer.height-16f.px
+                        width = binding.mangaReaderSliderContainer.height - 16f.px
                     }
                     rotation = 90f
                 }
             }
+            binding.mangaReaderSlider.layoutDirection =
+                if (settings.default.direction == RIGHT_TO_LEFT || settings.default.direction == BOTTOM_TO_TOP)
+                    View.LAYOUT_DIRECTION_RTL
+                else View.LAYOUT_DIRECTION_LTR
             shouldShow?.apply { isContVisible = !this }
             if (isContVisible) {
                 isContVisible = false
