@@ -1,11 +1,21 @@
-# 1.2.0.8
+# 1.2.0.9
 
+- Added New App Updater
 - New Source HentaiStream
 - New Source Hentaimama @Diegopyl1209
 - Fix some HentaiFF
-- Add True Color Toggle
 - Autoload next chapter when on last page
-- Fixed 9anime's VizCloud
-- Implemented ReaderSettings.kt
+- Fixed 9Anime & VizCloud, Thanks to @Modder4869
+- Nhentai Removed For now
+- Implemented Reader Settings
 - Added long click to reload image on paged layout 
 - Fix episode thumbnail being too big
+- Totally changed Manga Reader Zooming
+- Add Dual Page Support
+- Add True Color Support
+- Add Image Rotation Support
+- Add Auto Webtoon Support
+- Add ScrollBar Orientation Support
+- Add Keep Screen On Support
+- Fixed Crashes on Wrong Title
+- Better Disclaimer
