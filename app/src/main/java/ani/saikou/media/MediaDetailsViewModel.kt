@@ -61,8 +61,8 @@ class MediaDetailsViewModel : ViewModel() {
 
 
     //Anime
-    private val kitsuEpisodes: MutableLiveData<MutableMap<String, Episode>> = MutableLiveData<MutableMap<String, Episode>>(null)
-    fun getKitsuEpisodes(): LiveData<MutableMap<String, Episode>> = kitsuEpisodes
+    private val kitsuEpisodes: MutableLiveData<Map<String, Episode>> = MutableLiveData<Map<String, Episode>>(null)
+    fun getKitsuEpisodes(): LiveData<Map<String, Episode>> = kitsuEpisodes
     suspend fun loadKitsuEpisodes(s: Media) {
         if (kitsuEpisodes.value == null) kitsuEpisodes.postValue(Kitsu.getKitsuEpisodesDetails(s))
     }

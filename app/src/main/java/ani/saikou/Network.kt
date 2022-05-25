@@ -88,22 +88,28 @@ suspend fun <T> tryWithSuspend(call: suspend () -> T): T? {
 data class FileUrl(
     val url: String,
     val headers: Map<String, String> = mapOf()
-) : Serializable
+) : Serializable{
+    companion object{
+        operator fun get(url:String?,headers: Map<String, String> = mapOf()) : FileUrl?{
+            return FileUrl(url?:return null,headers)
+        }
+    }
+}
 
 //Credits to leg
 data class Lazier<T>(
-    val lClass: KFunction<T>
+    val lClass: KFunction<T>,
+    val name: String
 ) {
     val get = lazy { lClass.call() }
 }
 
-fun <T> lazyList(vararg objects: KFunction<T>): List<Lazier<T>> {
+fun <T> lazyList(vararg objects: Pair<String,KFunction<T>>): List<Lazier<T>> {
     return objects.map {
-        Lazier(it)
+        Lazier(it.second,it.first)
     }
 }
 
-//Kangings from CS333333333333
 
 fun OkHttpClient.Builder.addGoogleDns() = (
         addGenericDns(

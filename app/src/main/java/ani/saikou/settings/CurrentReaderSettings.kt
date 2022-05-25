@@ -7,6 +7,7 @@ data class CurrentReaderSettings(
     var layout: Layouts = Layouts.CONTINUOUS,
     var dualPageMode: DualPageModes = DualPageModes.Automatic,
     var trueColors : Boolean = false,
+    var rotation: Boolean = true,
     var padding: Boolean = true,
     var horizontalScrollBar: Boolean = true,
     var keepScreenOn: Boolean = false,
@@ -52,6 +53,17 @@ data class CurrentReaderSettings(
 
         companion object {
             operator fun get(value: Int) = values().firstOrNull { it.ordinal == value }
+        }
+    }
+
+    companion object{
+        fun applyWebtoon(settings: CurrentReaderSettings) {
+            settings.apply {
+                layout = Layouts.CONTINUOUS
+                direction = Directions.TOP_TO_BOTTOM
+                dualPageMode = DualPageModes.No
+                padding = false
+            }
         }
     }
 }

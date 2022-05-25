@@ -2,64 +2,69 @@ package ani.saikou.others
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.app.DownloadManager
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
+import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.core.content.getSystemService
+import androidx.fragment.app.FragmentActivity
 import ani.saikou.*
+import io.noties.markwon.Markwon
+import io.noties.markwon.SoftBreakAddsNewLinePlugin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.io.File
 
 object AppUpdater {
-    suspend fun check(activity: Activity) {
+    suspend fun check(activity: FragmentActivity) {
         val repo = activity.getString(R.string.repo)
         tryWithSuspend {
-            val md = client.get("https://raw.githubusercontent.com/$repo/${if (!BuildConfig.DEBUG) "stable" else "beta"}.md").text
+            val md =
+                client.get("https://raw.githubusercontent.com/$repo/main/${if (!BuildConfig.DEBUG) "stable" else "beta"}.md").text
+
             val version = md.substringAfter("# ").substringBefore("\n")
             logger("Git Version : $version")
             val dontShow = loadData("dont_ask_for_update_$version") ?: false
             if (compareVersion(version) && !dontShow && !activity.isDestroyed) activity.runOnUiThread {
-                AlertDialog.Builder(activity, R.style.DialogTheme)
-                    .setTitle("Update Available").apply {
-                        setMultiChoiceItems(
-                            arrayOf("Don't show again for version $version"),
-                            booleanArrayOf(false)
-                        ) { _, _, isChecked ->
-                            if (isChecked) {
-                                saveData("dont_ask_for_update_$version", isChecked)
-                            }
+                CustomBottomDialog.newInstance().apply {
+                    setTitleText("${if (!BuildConfig.DEBUG) "" else "Beta "}Update Available")
+                    addView(
+                        TextView(activity).apply {
+                            val markWon = Markwon.builder(activity).usePlugin(SoftBreakAddsNewLinePlugin.create()).build()
+                            markWon.setMarkdown(this, md)
                         }
-                        setPositiveButton("Let's Go") { _: DialogInterface, _: Int ->
-                            if (!BuildConfig.DEBUG) {
-                                MainScope().launch(Dispatchers.IO) {
-                                    try {
-                                        OkHttpClient().newCall(
-                                            Request.Builder()
-                                                .url("https://api.github.com/repos/saikou-app/saikou/releases/tags/v$version")
-                                                .build()
-                                        ).execute().body?.string()?.apply {
-                                            substringAfter("\"browser_download_url\":\"").substringBefore('"').apply {
-                                                if (endsWith("apk")) activity.downloadUpdate(this)
-                                                else openLinkInBrowser("https://github.com/saikou-app/saikou/releases/")
-                                            }
-                                        }
-                                    } catch (e: Exception) {
-                                        logError(e)
+                    )
+
+                    setCheck("Don't show again for version $version", false) { isChecked ->
+                        if (isChecked) {
+                            saveData("dont_ask_for_update_$version", isChecked)
+                        }
+                    }
+                    setPositiveButton("Let's Go") {
+                        MainScope().launch(Dispatchers.IO) {
+                            try {
+                                client.get("https://api.github.com/repos/$repo/releases/tags/v$version").text.apply {
+                                    substringAfter("\"browser_download_url\":\"").substringBefore('"').apply {
+                                        if (endsWith("apk")) activity.downloadUpdate(this)
+                                        else openLinkInBrowser("https://github.com/$repo/releases/tags/v$version")
                                     }
                                 }
-                            } else openLinkInBrowser("https://discord.com/channels/902174389351620629/946852010198728704")
+                            } catch (e: Exception) {
+                                logError(e)
+                            }
                         }
-                        setNegativeButton("Cope") { dialogInterface: DialogInterface, _: Int ->
-                            dialogInterface.dismiss()
-                        }
-                    }.show()
+                    }
+                    setNegativeButton("Cope") {
+                        dismiss()
+                    }
+                    show(activity.supportFragmentManager, "dialog")
+                }
             }
         }
     }

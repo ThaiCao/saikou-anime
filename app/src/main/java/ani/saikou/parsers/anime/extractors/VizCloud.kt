@@ -20,7 +20,8 @@ class VizCloud(override val server: VideoServer) : VideoExtractor() {
     private val regex = Regex("(.+?/)e(?:mbed)?/([a-zA-Z0-9]+)")
 
     //key credits to @Modder4869
-    private val key = "LCbu3iYC7ln24K7P"
+    private val key = "0wMrYU+ixjJ4QdzgfN2HlyIVAt3sBOZnCT9Lm7uFDovkb/EaKpRWhqXS5168ePcG"
+    private val cipherKey = "LCbu3iYC7ln24K7P"
 
     override suspend fun extract(): VideoContainer {
 
@@ -28,10 +29,10 @@ class VizCloud(override val server: VideoServer) : VideoExtractor() {
         val group = regex.find(embed.url)?.groupValues!!
 
         val host = group[1]
-        val key = encrypt(cipher(key, encrypt(group[2]))).replace("/", "_")
+        val id = encrypt(cipher(cipherKey,encrypt(group[2],key)),key).replace("/", "_")
 
         val response = client.get(
-            "${host}info/$key",
+            "${host}info/$id",
             embed.headers
         ).parsed<Response>()
         return VideoContainer(response.data.media.sources.map {
