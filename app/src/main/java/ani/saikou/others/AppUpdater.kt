@@ -14,6 +14,7 @@ import androidx.core.content.FileProvider
 import androidx.core.content.getSystemService
 import androidx.fragment.app.FragmentActivity
 import ani.saikou.*
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.noties.markwon.Markwon
 import io.noties.markwon.SoftBreakAddsNewLinePlugin
 import kotlinx.coroutines.Dispatchers
@@ -49,16 +50,17 @@ object AppUpdater {
                     setPositiveButton("Let's Go") {
                         MainScope().launch(Dispatchers.IO) {
                             try {
-                                client.get("https://api.github.com/repos/$repo/releases/tags/v$version").text.apply {
-                                    substringAfter("\"browser_download_url\":\"").substringBefore('"').apply {
-                                        if (endsWith("apk")) activity.downloadUpdate(this)
-                                        else openLinkInBrowser("https://github.com/$repo/releases/tags/v$version")
-                                    }
+                                client.get("https://api.github.com/repos/$repo/releases/tags/v$version").parsed<GithubResponse>().assets?.find {
+                                    it.browserDownloadURL.endsWith("apk")
+                                }?.browserDownloadURL.apply {
+                                    if(this!=null) activity.downloadUpdate(version,this)
+                                    else openLinkInBrowser("https://github.com/repos/$repo/releases/tag/v$version")
                                 }
                             } catch (e: Exception) {
                                 logError(e)
                             }
                         }
+                        dismiss()
                     }
                     setNegativeButton("Cope") {
                         dismiss()
@@ -79,15 +81,18 @@ object AppUpdater {
 
 
     //Blatantly kanged from https://github.com/LagradOst/CloudStream-3/blob/master/app/src/main/java/com/lagradost/cloudstream3/utils/InAppUpdater.kt
-    private fun Activity.downloadUpdate(url: String): Boolean {
+    private fun Activity.downloadUpdate(version:String,url: String): Boolean {
+
+        toast("Downloading Update $version")
+
         val downloadManager = this.getSystemService<DownloadManager>()!!
 
         val request = DownloadManager.Request(Uri.parse(url))
             .setMimeType("application/vnd.android.package-archive")
-            .setTitle("Saikou Update")
+            .setTitle("Downloading Saikou $version")
             .setDestinationInExternalPublicDir(
                 Environment.DIRECTORY_DOWNLOADS,
-                "Saikou.apk"
+                "Saikou $version.apk"
             )
             .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             .setAllowedOverRoaming(true)
@@ -153,5 +158,13 @@ object AppUpdater {
         } catch (e: Exception) {
             logError(e)
         }
+    }
+    data class GithubResponse (
+        val assets: List<Asset>? = null
+    ) {
+        data class Asset(
+            @JsonProperty("browser_download_url")
+            val browserDownloadURL: String
+        )
     }
 }
