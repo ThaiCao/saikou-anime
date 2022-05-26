@@ -43,7 +43,7 @@ class ImageAdapter(
         imageView.visibility = View.GONE
 
         val link = images[position].url
-        val trans = images[position].transformation
+        val trans = activity.getTransformation(images[position])
 
         if (link.url.isEmpty()) return false
         Glide.with(imageView).download(GlideUrl(link.url) { link.headers })

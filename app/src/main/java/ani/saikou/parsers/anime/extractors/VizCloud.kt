@@ -20,7 +20,7 @@ class VizCloud(override val server: VideoServer) : VideoExtractor() {
     private val regex = Regex("(.+?/)e(?:mbed)?/([a-zA-Z0-9]+)")
 
     //key credits to @Modder4869
-    private val key = "0wMrYU+ixjJ4QdzgfN2HlyIVAt3sBOZnCT9Lm7uFDovkb/EaKpRWhqXS5168ePcG"
+    private val key = "51wJ0FDq/UVCefLopEcmK3ni4WIQztMjZdSYOsbHr9R2h7PvxBGAuglaN8+kXT6y"
     private val cipherKey = "LCbu3iYC7ln24K7P"
 
     override suspend fun extract(): VideoContainer {

@@ -12,6 +12,7 @@ import android.view.animation.OvershootInterpolator
 import android.widget.AdapterView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.math.MathUtils.clamp
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
@@ -26,6 +27,7 @@ import ani.saikou.manga.MangaChapter
 import ani.saikou.media.Media
 import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.parsers.HMangaSources
+import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaSources
 import ani.saikou.settings.CurrentReaderSettings.Companion.applyWebtoon
 import ani.saikou.settings.CurrentReaderSettings.Directions.*
@@ -35,9 +37,11 @@ import ani.saikou.settings.CurrentReaderSettings.Layouts.PAGED
 import ani.saikou.settings.ReaderSettings
 import ani.saikou.settings.UserInterfaceSettings
 import com.alexvasilkov.gestures.views.GestureFrameLayout
+import com.bumptech.glide.load.Transformation
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.*
 import kotlin.math.min
 import kotlin.properties.Delegates
@@ -288,8 +292,8 @@ class MangaReaderActivity : AppCompatActivity() {
             if (chapImages.size > 1) {
                 binding.mangaReaderSlider.apply {
                     visibility = View.VISIBLE
-                    value = currentChapterPage.toFloat()
                     valueTo = maxChapterPage.toFloat()
+                    value = clamp(currentChapterPage.toFloat(),1f,valueTo)
                 }
             } else {
                 binding.mangaReaderSlider.visibility = View.GONE
@@ -378,8 +382,8 @@ class MangaReaderActivity : AppCompatActivity() {
                 adapter = imageAdapter
                 layoutDirection =
                     if (settings.default.direction == BOTTOM_TO_TOP || settings.default.direction == RIGHT_TO_LEFT)
-                        View.LAYOUT_DIRECTION_LTR
-                    else View.LAYOUT_DIRECTION_RTL
+                        View.LAYOUT_DIRECTION_RTL
+                    else View.LAYOUT_DIRECTION_LTR
                 orientation =
                     if (settings.default.direction == LEFT_TO_RIGHT || settings.default.direction == RIGHT_TO_LEFT)
                         ViewPager2.ORIENTATION_HORIZONTAL
@@ -421,7 +425,6 @@ class MangaReaderActivity : AppCompatActivity() {
     }
 
     fun handleController(shouldShow: Boolean? = null) {
-        println("o :" + binding.mangaReaderSliderContainer.height)
         if (!sliding) {
             if (!settings.showSystemBars) {
                 hideBars()
@@ -487,7 +490,9 @@ class MangaReaderActivity : AppCompatActivity() {
             currentChapterPage = page
             saveData("${media.id}_${chapter.number}", page, this)
             binding.mangaReaderPageNumber.text = "${currentChapterPage}/$maxChapterPage"
-            if (!sliding) binding.mangaReaderSlider.value = currentChapterPage.toFloat()
+            if (!sliding) binding.mangaReaderSlider.apply {
+                value = clamp(currentChapterPage.toFloat(),1f,valueTo)
+            }
         }
         if (maxChapterPage - currentChapterPage <= 1) scope.launch(Dispatchers.IO) {
             model.loadMangaChapterImages(
@@ -522,6 +527,10 @@ class MangaReaderActivity : AppCompatActivity() {
         } else {
             runnable.run()
         }
+    }
+
+    fun getTransformation(mangaImage: MangaImage): Transformation<File>? {
+        return model.loadTransformation(mangaImage, media.selected!!.source)
     }
 
     override fun onBackPressed() {

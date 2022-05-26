@@ -140,8 +140,7 @@ class AnimeWatchFragment : Fragment() {
                         if (media.anime?.fillerEpisodes != null) {
                             if (media.anime!!.fillerEpisodes!!.containsKey(i)) {
                                 episode.title = episode.title ?: media.anime!!.fillerEpisodes!![i]?.title
-                                episode.filler =
-                                    media.anime!!.fillerEpisodes!![i]?.filler ?: false
+                                episode.filler = media.anime!!.fillerEpisodes!![i]?.filler ?: false
                             }
                         }
                         if (media.anime?.kitsuEpisodes != null) {

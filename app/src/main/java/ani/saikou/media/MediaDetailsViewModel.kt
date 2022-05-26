@@ -14,13 +14,12 @@ import ani.saikou.anime.SelectorDialogFragment
 import ani.saikou.manga.MangaChapter
 import ani.saikou.others.AnimeFillerList
 import ani.saikou.others.Kitsu
-import ani.saikou.parsers.MangaReadSources
-import ani.saikou.parsers.ShowResponse
-import ani.saikou.parsers.VideoExtractor
-import ani.saikou.parsers.WatchSources
+import ani.saikou.parsers.*
+import com.bumptech.glide.load.Transformation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import java.io.File
 
 class MediaDetailsViewModel : ViewModel() {
     val scrolledToTop = MutableLiveData(true)
@@ -64,13 +63,17 @@ class MediaDetailsViewModel : ViewModel() {
     private val kitsuEpisodes: MutableLiveData<Map<String, Episode>> = MutableLiveData<Map<String, Episode>>(null)
     fun getKitsuEpisodes(): LiveData<Map<String, Episode>> = kitsuEpisodes
     suspend fun loadKitsuEpisodes(s: Media) {
-        if (kitsuEpisodes.value == null) kitsuEpisodes.postValue(Kitsu.getKitsuEpisodesDetails(s))
+        tryWithSuspend {
+            if (kitsuEpisodes.value == null) kitsuEpisodes.postValue(Kitsu.getKitsuEpisodesDetails(s))
+        }
     }
 
-    private val fillerEpisodes: MutableLiveData<MutableMap<String, Episode>> = MutableLiveData<MutableMap<String, Episode>>(null)
-    fun getFillerEpisodes(): LiveData<MutableMap<String, Episode>> = fillerEpisodes
+    private val fillerEpisodes: MutableLiveData<Map<String, Episode>> = MutableLiveData<Map<String, Episode>>(null)
+    fun getFillerEpisodes(): LiveData<Map<String, Episode>> = fillerEpisodes
     suspend fun loadFillerEpisodes(s: Media) {
-        if (fillerEpisodes.value == null) fillerEpisodes.postValue(AnimeFillerList.getFillers(s.idMAL ?: return))
+        tryWithSuspend {
+            if (fillerEpisodes.value == null) fillerEpisodes.postValue(AnimeFillerList.getFillers(s.idMAL ?: return@tryWithSuspend))
+        }
     }
 
     var watchSources: WatchSources? = null
@@ -196,15 +199,13 @@ class MediaDetailsViewModel : ViewModel() {
         tryWithSuspend {
             if (chapter.images == null) {
                 chapter.images = mangaReadSources?.get(selected.source)?.loadImages(chapter.link) ?: return@tryWithSuspend
-                loadTransformation(chapter, selected.source)
             }
         }
         if (post) mangaChapter.postValue(chapter)
     }
 
-    private fun loadTransformation(chapter: MangaChapter, source: Int) {
-        chapter.images?.forEach {
-            if (it.useTransformation) it.transformation = mangaReadSources?.get(source)?.getTransformation()
-        }
+    fun loadTransformation(mangaImage: MangaImage, source: Int): Transformation<File>? {
+        return if (mangaImage.useTransformation) mangaReadSources?.get(source)?.getTransformation() else null
+
     }
 }

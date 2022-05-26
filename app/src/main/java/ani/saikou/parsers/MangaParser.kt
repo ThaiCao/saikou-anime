@@ -63,8 +63,7 @@ data class MangaImage(
      * **/
     val url: FileUrl,
 
-    val useTransformation: Boolean = false,
-    @Transient var transformation: Transformation<File>? = null
+    val useTransformation: Boolean = false
 ) {
     constructor(url: String,useTransformation: Boolean=false)
             : this(FileUrl(url),useTransformation)

@@ -13,8 +13,8 @@ android {
         applicationId "ani.saikou"
         minSdk 21
         targetSdk 31
-        versionCode 50
-        versionName "1.2.0.9"
+        versionCode 51
+        versionName "1.2.0.10"
         signingConfig signingConfigs.debug
     }
 
@@ -56,7 +56,7 @@ dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
     implementation 'com.google.firebase:firebase-analytics-ktx:21.0.0'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.10'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.11'
 
 //    Exoplayer
     implementation 'com.google.android.exoplayer:exoplayer-core:2.17.1'

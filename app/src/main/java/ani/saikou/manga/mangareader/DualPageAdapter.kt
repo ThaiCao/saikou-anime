@@ -39,7 +39,7 @@ class DualPageAdapter(
 
 
             val link = images.getOrNull(position)?.url ?: return true
-            val trans = images[position].transformation
+            val trans = activity.getTransformation(images[position])
 
             if (link.url.isEmpty()) return true
             Glide.with(imageView).download(GlideUrl(link.url) { link.headers })

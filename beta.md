@@ -1,4 +1,18 @@
-# 1.2.0.9
+# 1.2.0.10
+
+- Fix VizCloud
+- Fix LTR & RTL being opposite in Direction Icon
+- Fix Filler Episodes Not Showing up
+- Fix Dub getting auto selected
+- Fix Many Crashes
+
+##1.2.0.9.MK.II
+
+- Fix Kitsu Crash
+- Fix Keep Screen On disabled in settings
+- RTL support for slider
+
+## 1.2.0.9
 
 - Added New App Updater
 - New Source HentaiStream

@@ -210,7 +210,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                 binding.urlSize.text =
                     (if (video.extraNote != null) " : " else "") + DecimalFormat("#.##").format(video.size ?: 0).toString() + " MB"
                 binding.urlDownload.visibility = View.VISIBLE
-                binding.urlDownload.setOnClickListener {
+                binding.urlDownload.setSafeOnClickListener {
                     media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedServer = extractor.server.name
                     media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedVideo = position
                     download(
@@ -230,7 +230,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
 
         private inner class UrlViewHolder(val binding: ItemUrlBinding) : RecyclerView.ViewHolder(binding.root) {
             init {
-                itemView.setOnClickListener {
+                itemView.setSafeOnClickListener {
                     media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]?.selectedServer = extractor.server.name
                     media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]?.selectedVideo = bindingAdapterPosition
                     if (makeDefault) {
