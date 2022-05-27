@@ -3,7 +3,7 @@ package ani.saikou.parsers.anime
 import ani.saikou.*
 import ani.saikou.parsers.*
 import ani.saikou.parsers.anime.extractors.StreamTape
-import ani.saikou.parsers.anime.extractors.VidVard
+import ani.saikou.parsers.anime.extractors.VideoVard
 import ani.saikou.parsers.anime.extractors.VizCloud
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.sync.Mutex
@@ -34,24 +34,31 @@ class NineAnime : AnimeParser() {
     private val embedHeaders = mapOf("referer" to "$hostUrl/")
 
     override suspend fun loadVideoServers(episodeLink: String, extra: Any?): List<VideoServer> {
+        val list = mutableListOf<VideoServer>()
         val body = client.get(episodeLink).parsed<Response>().html
         val document = Jsoup.parse(body)
         val rawJson = document.select(".episodes li a").select(".active").attr("data-sources")
         val dataSources = mapper.readValue<Map<String, String>>(rawJson)
 
-        return document.select(".tabs span").mapNotNull {
+        var videoVardDownload: VideoServer?=null
+
+        list.addAll(document.select(".tabs span").mapNotNull {
             val name = it.text()
             val encodedStreamUrl = getEpisodeLinks(dataSources[it.attr("data-id")].toString())?.url ?: return@mapNotNull null
             val realLink = FileUrl(getLink(encodedStreamUrl), embedHeaders)
+            if(name=="VideoVard") videoVardDownload = VideoServer("$name Mp4", realLink)
             VideoServer(name, realLink)
-        }
+        })
+        videoVardDownload?.also { list.add(it) }
+        return list
     }
 
     override suspend fun getVideoExtractor(server: VideoServer): VideoExtractor? {
         val extractor: VideoExtractor? = when (server.name) {
             "Vidstream"  -> VizCloud(server)
             "MyCloud"    -> VizCloud(server)
-            "VideoVard"  -> VidVard(server)
+            "VideoVard"  -> VideoVard(server)
+            "VideoVard Mp4"  -> VideoVard(server,true)
             "Streamtape" -> StreamTape(server)
             else         -> null
         }
@@ -77,10 +84,12 @@ class NineAnime : AnimeParser() {
             servers.asyncMap {
                 tryWithSuspend {
                     it?.apply {
-                        if (this is VizCloud) mutex.withLock {
-                            load()
-                            callback.invoke(this)
-                        } else {
+                        if (this is VizCloud) {
+                            mutex.withLock {
+                                load()
+                                callback.invoke(this)
+                            }
+                        }else {
                             load()
                             callback.invoke(this)
                         }

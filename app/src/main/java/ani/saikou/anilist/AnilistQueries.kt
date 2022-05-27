@@ -122,7 +122,7 @@ class AnilistQueries {
                         fetchedMedia.tags?.apply {
                             media.tags = arrayListOf()
                             this.forEach { i ->
-                                if (i.isMediaSpoiler == true)
+                                if (i.isMediaSpoiler == false)
                                     media.tags.add("${i.name} : ${i.rank.toString()}%")
                             }
                         }

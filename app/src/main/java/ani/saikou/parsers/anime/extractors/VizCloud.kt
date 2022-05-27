@@ -16,12 +16,7 @@ class VizCloud(override val server: VideoServer) : VideoExtractor() {
     private data class Data(val media: Media)
     private data class Response(val data: Data)
 
-    //Regex credit to @justfoolingaround
     private val regex = Regex("(.+?/)e(?:mbed)?/([a-zA-Z0-9]+)")
-
-    //key credits to @Modder4869
-    private val key = "51wJ0FDq/UVCefLopEcmK3ni4WIQztMjZdSYOsbHr9R2h7PvxBGAuglaN8+kXT6y"
-    private val cipherKey = "LCbu3iYC7ln24K7P"
 
     override suspend fun extract(): VideoContainer {
 
@@ -29,7 +24,8 @@ class VizCloud(override val server: VideoServer) : VideoExtractor() {
         val group = regex.find(embed.url)?.groupValues!!
 
         val host = group[1]
-        val id = encrypt(cipher(cipherKey,encrypt(group[2],key)),key).replace("/", "_")
+        val it = getKeys()
+        val id = encrypt(cipher(it.cipherKey,encrypt(group[2],it.key)),it.key).replace("/", "_")
 
         val response = client.get(
             "${host}info/$id",
@@ -39,5 +35,23 @@ class VizCloud(override val server: VideoServer) : VideoExtractor() {
             val file = FileUrl(it.file, mapOf("referer" to host))
             Video(null, true, file, null)
         })
+    }
+
+    companion object {
+        private val defaultKey = VizCloudKeys(
+            "51wJ0FDq/UVCefLopEcmK3ni4WIQztMjZdSYOsbHr9R2h7PvxBGAuglaN8+kXT6y",
+            "fsVFfz49gtVHPw6i"
+        )
+        private const val jsonLink = "https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/vizcloud.json"
+        private var key: VizCloudKeys?=null
+        suspend fun getKeys(): VizCloudKeys {
+            key = if (key != null) key ?: defaultKey
+                else client.get(jsonLink).parsed()
+            return key!!
+        }
+        data class VizCloudKeys(
+            val key:String,
+            val cipherKey:String,
+        )
     }
 }
