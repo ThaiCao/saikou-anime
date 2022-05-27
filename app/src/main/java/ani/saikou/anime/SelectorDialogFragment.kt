@@ -152,12 +152,20 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
 
         dismiss()
         if (launch!!) {
+            stopAddingToList()
             val intent = Intent(activity, ExoplayerView::class.java).apply {
                 putExtra("media", media)
             }
             startActivity(intent)
         } else {
             model.setEpisode(media.anime!!.episodes!![media.anime.selectedEpisode!!]!!, "startExo no launch")
+        }
+    }
+
+    private fun stopAddingToList() {
+        episode?.extractorCallback = null
+        episode?.also {
+            it.extractors = it.extractors?.toMutableList()
         }
     }
 
