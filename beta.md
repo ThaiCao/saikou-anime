@@ -1,4 +1,4 @@
-# 1.2.0.11
+# 1.2.0.12
 
 - Fixed Some Crashes
 - Fix #216 (Zoro giving source exception after going to next episode)
