@@ -72,7 +72,11 @@ class MediaDetailsViewModel : ViewModel() {
     fun getFillerEpisodes(): LiveData<Map<String, Episode>> = fillerEpisodes
     suspend fun loadFillerEpisodes(s: Media) {
         tryWithSuspend {
-            if (fillerEpisodes.value == null) fillerEpisodes.postValue(AnimeFillerList.getFillers(s.idMAL ?: return@tryWithSuspend))
+            if (fillerEpisodes.value == null) fillerEpisodes.postValue(
+                AnimeFillerList.getFillers(
+                    s.idMAL ?: return@tryWithSuspend
+                )
+            )
         }
     }
 
@@ -107,15 +111,19 @@ class MediaDetailsViewModel : ViewModel() {
         if (!ep.allStreams || ep.extractors.isNullOrEmpty()) {
             val list = mutableListOf<VideoExtractor>()
             ep.extractors = list
-            watchSources?.get(i)?.loadByVideoServers(link, ep.extra) {
-                if (it.videos.isNotEmpty()) {
-                    list.add(it)
-                    ep.extractorCallback?.invoke(it)
+            watchSources?.get(i)?.apply {
+                if (!post && post == allowsPreloading) return@apply
+                loadByVideoServers(link, ep.extra) {
+                    if (it.videos.isNotEmpty()) {
+                        list.add(it)
+                        ep.extractorCallback?.invoke(it)
+                    }
                 }
+                ep.extractorCallback = null
+                ep.allStreams = true
             }
-            ep.extractorCallback = null
-            ep.allStreams = true
         }
+
 
         if (post) {
             episode.postValue(ep)
@@ -123,7 +131,6 @@ class MediaDetailsViewModel : ViewModel() {
                 episode.value = null
             }
         }
-
     }
 
     suspend fun loadEpisodeSingleVideo(ep: Episode, selected: Selected, post: Boolean = true): Boolean {
@@ -132,8 +139,10 @@ class MediaDetailsViewModel : ViewModel() {
             val server = selected.server ?: return false
             val link = ep.link ?: return false
 
-            ep.extractors =
-                mutableListOf(watchSources?.get(selected.source)?.loadSingleVideoServer(server, link, ep.extra) ?: return false)
+            ep.extractors = mutableListOf(watchSources?.get(selected.source)?.let {
+                if (!post && post == it.allowsPreloading) null
+                else it.loadSingleVideoServer(server, link, ep.extra)
+            } ?: return false)
             ep.allStreams = false
         }
         if (post) {

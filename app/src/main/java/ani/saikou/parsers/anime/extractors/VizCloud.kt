@@ -8,6 +8,7 @@ import ani.saikou.parsers.VideoExtractor
 import ani.saikou.parsers.VideoServer
 import ani.saikou.parsers.anime.NineAnime.Companion.cipher
 import ani.saikou.parsers.anime.NineAnime.Companion.encrypt
+import com.fasterxml.jackson.annotation.JsonProperty
 
 class VizCloud(override val server: VideoServer) : VideoExtractor() {
 
@@ -24,34 +25,38 @@ class VizCloud(override val server: VideoServer) : VideoExtractor() {
         val group = regex.find(embed.url)?.groupValues!!
 
         val host = group[1]
-        val it = getKeys()
-        val id = encrypt(cipher(it.cipherKey,encrypt(group[2],it.key)),it.key).replace("/", "_")
+        val id = encrypt(cipher(getKey(), encrypt(group[2], key)), key).replace("/", "_")
 
         val response = client.get(
             "${host}info/$id",
             embed.headers
-        ).parsed<Response>()
-        return VideoContainer(response.data.media.sources.map {
+        )
+        if(!response.text.startsWith("{")) throw Exception("Seems like 9Anime kiddies changed keys again,Go touch some grass for bout an hour Or use a different Server")
+        return VideoContainer(response.parsed<Response>().data.media.sources.map {
             val file = FileUrl(it.file, mapOf("referer" to host))
-            Video(null, true, file, null)
+            Video(null, true, file)
         })
     }
 
     companion object {
-        private val defaultKey = VizCloudKeys(
-            "51wJ0FDq/UVCefLopEcmK3ni4WIQztMjZdSYOsbHr9R2h7PvxBGAuglaN8+kXT6y",
-            "fsVFfz49gtVHPw6i"
-        )
-        private const val jsonLink = "https://raw.githubusercontent.com/saikou-app/mal-id-filler-list/main/vizcloud.json"
-        private var key: VizCloudKeys?=null
-        suspend fun getKeys(): VizCloudKeys {
-            key = if (key != null) key ?: defaultKey
-                else client.get(jsonLink).parsed()
-            return key!!
+        private var key = "51wJ0FDq/UVCefLopEcmK3ni4WIQztMjZdSYOsbHr9R2h7PvxBGAuglaN8+kXT6y"
+        private var defaultKey = "PmfGc5uJ7V0a5Wfy"
+        private var lastChecked = 0L
+        private const val jsonLink =
+            "https://raw.githubusercontent.com/justfoolingaround/animdl-provider-benchmarks/master/api/selgen.json"
+        private var cipherKey: String? = null
+        suspend fun getKey(): String {
+            cipherKey = if (cipherKey != null && (lastChecked - System.currentTimeMillis()) < 1000 * 60 * 30) cipherKey?: defaultKey
+            else {
+                lastChecked = System.currentTimeMillis()
+                client.get(jsonLink).parsed<VizCloudKey>().cipherKey
+            }
+            return cipherKey?: defaultKey
         }
-        data class VizCloudKeys(
-            val key:String,
-            val cipherKey:String,
+
+        data class VizCloudKey(
+            @JsonProperty("cipher_key")
+            val cipherKey: String?=null,
         )
     }
 }

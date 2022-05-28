@@ -52,6 +52,7 @@ class VideoVard(override val server: VideoServer, private val download:Boolean=f
                         "hash" to (hash.hash ?: return@tryWithSuspend null)
                     )
                 ).parsed<SetupResponse>()
+                println("aa $res")
                 val m3u8 = FileUrl(decode(res.src?:return@tryWithSuspend null, res.seed), headers)
                 Video(null, true, m3u8)
             }
@@ -204,12 +205,12 @@ class VideoVard(override val server: VideoServer, private val download:Boolean=f
             while (true) {
                 for (i in input) {
                     if (abc.contains(i)) {
-                        index += 1
+                        index++
                         break
                     }
                 }
 
-                bytes.add((abcMap[input[index]]!! * big4))
+                bytes.add((abcMap[input.getOrNull(index)?:return bytes]!! * big4))
 
                 while (true) {
                     index++
@@ -221,7 +222,7 @@ class VideoVard(override val server: VideoServer, private val download:Boolean=f
                 var temp = abcMap[input[index]]!!
 
                 bytes[listIndex] = bytes[listIndex] or rShift(temp, 4)
-                listIndex += 1
+                listIndex++
                 temp = (big15.and(temp))
 
                 if ((temp == big0) && (index == (length - 1))) return bytes
@@ -229,27 +230,27 @@ class VideoVard(override val server: VideoServer, private val download:Boolean=f
                 bytes.add((temp * big4 * big4))
 
                 while (true) {
-                    index += 1
+                    index++
                     if (index >= length) return bytes
                     if (abc.contains(input[index])) break
                 }
 
                 temp = abcMap[input[index]]!!
                 bytes[listIndex] = bytes[listIndex] or rShift(temp, 2)
-                listIndex += 1
+                listIndex++
                 temp = (big3 and temp)
                 if ((temp == big0) && (index == (length - 1))) {
                     return bytes
                 }
                 bytes.add((temp shl 6))
                 for (i in input) {
-                    index += 1
+                    index++
                     if (abc.contains(input[index])) {
                         break
                     }
                 }
                 bytes[listIndex] = bytes[listIndex] or abcMap[input[index]]!!
-                listIndex += 1
+                listIndex++
             }
         }
 

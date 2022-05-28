@@ -4,6 +4,7 @@ import ani.saikou.FileUrl
 import ani.saikou.media.Media
 import com.bumptech.glide.load.Transformation
 import java.io.File
+import java.io.Serializable
 
 abstract class MangaParser : BaseParser() {
 
@@ -64,7 +65,7 @@ data class MangaImage(
     val url: FileUrl,
 
     val useTransformation: Boolean = false
-) {
+) : Serializable{
     constructor(url: String,useTransformation: Boolean=false)
             : this(FileUrl(url),useTransformation)
 }
