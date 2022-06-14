@@ -69,22 +69,14 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 
 ## Planned Stuff
 
-- Rework Manga Reader #18  
-
-- User Profile
+- Rework Seatch & Anime schedule page
   
-- Downloads for Manga
+- User Profile
+
+- Offline Video Player & Reader 
   
 - source subscribe (will notify when new chapter/ep is released)
-  
-- Add novel sources (1lib.in)
-  
-- Add new anime sources (All anime, animepahe, Real 9anime ) & (hentaihaven)
-  
-- Add new manga sources (mangakakalot) & (nhentai)
-  
-- anime schedule page
-
+ 
 
 ## Rejected Stuff
 
