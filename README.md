@@ -102,8 +102,6 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 
 - TV support
   
-- PiP
-  
 - Multi Quality Download
 
 - Bulk Download
