@@ -69,13 +69,19 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 
 ## Planned Stuff
 
-- Rework Seatch & Anime schedule page
-  
+- Rework Search & Anime schedule page
+
 - User Profile
 
-- Offline Video Player & Reader 
+- Offline Video Player & Reader
+
+- Source Subscribe (will notify when new chapter/ep is released)
   
-- source subscribe (will notify when new chapter/ep is released)
+  - setting to change time in hrs to check for new episode/chapter/notification
+
+- Add new manga sources (toonily & comick.fun)
+
+- Add novel sources (1lib.in)?? Dk
  
 
 ## Rejected Stuff
@@ -124,7 +130,7 @@ https://telegram.me/saikou_app
 
 ### VISIT FOR MORE INFORMATION:-
 
-https://saikou-app.github.io/
+https://saikou.me/
 
 ## DISCLAIMER
 
