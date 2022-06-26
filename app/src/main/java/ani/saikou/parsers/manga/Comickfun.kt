@@ -44,12 +44,23 @@ class Comickfun : MangaParser() {
     }
 
     companion object {
+
+        private var lastChecked = 0L
+        private var buildManifestId: String? = null
+
         private suspend fun getBuildManifest(): String? {
-            val document = client.get("https://comick.fun/").document.html()
-            val buildIdRe = Regex("buildId\":\"(\\w+)\"")
-            return buildIdRe.find(document, 0)?.groupValues?.get(1)
+            buildManifestId = if (buildManifestId != null && (lastChecked - System.currentTimeMillis()) < 1000 * 60 * 30) buildManifestId
+            else {
+                lastChecked = System.currentTimeMillis()
+                val document = client.get("https://comick.fun/").text
+                val buildIdRe = Regex("buildId\":\"(.+?)\"")
+                buildIdRe.find(document, 0)?.groupValues?.get(1)
+            }
+            return buildManifestId
         }
+
     }
+
 }
 
 // --- dataclasses --- //
