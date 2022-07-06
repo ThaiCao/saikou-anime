@@ -8,7 +8,8 @@ import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaParser
 import ani.saikou.parsers.ShowResponse
 import ani.saikou.sortByTitle
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 class MangaSee : MangaParser() {
 
@@ -80,18 +81,21 @@ class MangaSee : MangaParser() {
         else -> ""
     }
 
+    @Serializable
     private data class MangaResponse(
-        @SerializedName("Chapter") val chapter: String,
-        @SerializedName("ChapterName") val chapterName: String?
+        @SerialName("Chapter") val chapter: String,
+        @SerialName("ChapterName") val chapterName: String?
     )
 
+    @Serializable
     private data class ChapterResponse(
-        @SerializedName("Chapter") val chapter: String,
-        @SerializedName("Page") val page: String
+        @SerialName("Chapter") val chapter: String,
+        @SerialName("Page") val page: String
     )
 
+    @Serializable
     private data class SearchResponse(
-        @SerializedName("s") val s: String,
-        @SerializedName("i") val i: String
+        val s: String,
+        val i: String
     )
 }

@@ -8,8 +8,9 @@ import ani.saikou.parsers.VideoContainer
 import ani.saikou.parsers.VideoExtractor
 import ani.saikou.parsers.VideoServer
 import ani.saikou.tryWithSuspend
-import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.delay
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.math.BigInteger
 
 class VideoVard(override val server: VideoServer, private val download:Boolean=false) : VideoExtractor() {
@@ -276,14 +277,16 @@ class VideoVard(override val server: VideoServer, private val download:Boolean=f
         }
     }
 
+    @Serializable
     private data class HashResponse(
-        @SerializedName("hash") val hash: String? = null,
-        @SerializedName("version") val version:String? = null
+        @SerialName("hash") val hash: String? = null,
+        @SerialName("version") val version:String? = null
     )
 
+    @Serializable
     private data class SetupResponse(
-        @SerializedName("seed") val seed: String,
-        @SerializedName("src") val src: String?=null,
-        @SerializedName("link") val link:String?=null
+        @SerialName("seed") val seed: String,
+        @SerialName("src") val src: String?=null,
+        @SerialName("link") val link:String?=null
     )
 }

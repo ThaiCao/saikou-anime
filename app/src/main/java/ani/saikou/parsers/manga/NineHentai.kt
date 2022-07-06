@@ -1,13 +1,13 @@
 package ani.saikou.parsers.manga
 
 import ani.saikou.client
-import ani.saikou.media.Media
 import ani.saikou.parsers.MangaChapter
 import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaParser
 import ani.saikou.parsers.ShowResponse
-import okhttp3.RequestBody
+import kotlinx.serialization.Serializable
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class NineHentai : MangaParser() {
 
@@ -18,7 +18,9 @@ class NineHentai : MangaParser() {
 
     override suspend fun search(query: String): List<ShowResponse> {
         val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
-        val requestBody = RequestBody.create(mediaType, "{\"search\":{\"text\":\"${encode(query)}\",\"page\":0,\"sort\":0,\"pages\":{\"range\":[0,2000]},\"tag\":{\"text\":\"\",\"type\":1,\"tags\":[],\"items\":{\"included\":[],\"excluded\":[]}}}}")
+        val requestBody =
+            "{\"search\":{\"text\":\"${encode(query)}\",\"page\":0,\"sort\":0,\"pages\":{\"range\":[0,2000]},\"tag\":{\"text\":\"\",\"type\":1,\"tags\":[],\"items\":{\"included\":[],\"excluded\":[]}}}}"
+                .toRequestBody(mediaType)
         val resp = client.post(
             "https://9hentai.to/api/getBook",
             requestBody = requestBody
@@ -27,7 +29,11 @@ class NineHentai : MangaParser() {
             return resp.results.map {
                 // we don't need ShowResponse.link here, we already got what we need
                 // and have passed it to ShowResponse.extra for loadChapters()
-                ShowResponse(name = it.title, link = "", coverUrl = "${it.image_server}/${it.id}/cover.jpg", otherNames = listOf(it.alt_title),
+                ShowResponse(
+                    name = it.title,
+                    link = "",
+                    coverUrl = "${it.image_server}/${it.id}/cover.jpg",
+                    otherNames = listOf(it.alt_title),
                     extra = mapOf(
                         "imageServer" to it.image_server,
                         "totalPages" to it.total_page.toString(),
@@ -46,7 +52,11 @@ class NineHentai : MangaParser() {
         val id = extra["id"]
         // There's no "chapters" here on 9hentai so we just return it as the first chapter.
         return listOf(
-            MangaChapter(number = "1", link = "$imageServer$id/TOTALPAGES=$totalPages", title = extra["title"])
+            MangaChapter(
+                number = "1",
+                link = "$imageServer$id/TOTALPAGES=$totalPages",
+                title = extra["title"]
+            )
         )
     }
 
@@ -56,17 +66,18 @@ class NineHentai : MangaParser() {
         return (1..totalPages).map { MangaImage(url = "$url$it.jpg") }
     }
 
-
+    @Serializable
     private data class SearchResponse(
-        @SerializedName("status") val status: Boolean,
-        @SerializedName("results") val results: List<Result>
+        val status: Boolean,
+        val results: List<Result>
     ) {
+        @Serializable
         data class Result(
-            @SerializedName("id") val id: Int,
-            @SerializedName("title") val title: String,
-            @SerializedName("alt_title") val alt_title: String,
-            @SerializedName("total_page") val total_page: Int,
-            @SerializedName("image_server") val image_server: String,
+            val id: Int,
+            val title: String,
+            val alt_title: String,
+            val total_page: Int,
+            val image_server: String,
         )
     }
 }
