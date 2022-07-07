@@ -3,6 +3,7 @@ package ani.saikou.anime
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -253,11 +254,10 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                 }
                 itemView.setOnLongClickListener {
                     val video = extractor.videos[bindingAdapterPosition]
-                    val intent = Intent().apply {
-                        action=Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, video.url.url)
-                        type="text/plain"
+                    val intent= Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(Uri.parse(video.url.url),"video/*")
                     }
+                    copyToClipboard(video.url.url,true)
                     dismiss()
                     startActivity(Intent.createChooser(intent,"Open Video in :"))
                     true
