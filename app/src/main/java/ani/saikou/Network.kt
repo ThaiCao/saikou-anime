@@ -66,7 +66,6 @@ object Mapper : ResponseParser {
 
     @OptIn(InternalSerializationApi::class)
     override fun <T : Any> parse(text: String, kClass: KClass<T>): T {
-        println("Json = $text")
         return json.decodeFromString(kClass.serializer(),text)
     }
 

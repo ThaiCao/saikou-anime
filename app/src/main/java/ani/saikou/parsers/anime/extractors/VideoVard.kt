@@ -38,7 +38,7 @@ class VideoVard(override val server: VideoServer, private val download:Boolean=f
                         "hash" to (res.hash?:return@tryWithSuspend null),
                         "version" to res.version!!,
                     )
-                ).parsed<SetupResponse>()
+                ).also { if(!it.text.startsWith("{")) throw Exception("Video Not Found") }.parsed<SetupResponse>()
                 val mp4 = FileUrl(decode(setup.link!!, setup.seed), headers)
                 Video(null, false, mp4, getSize(mp4))
             }
@@ -53,7 +53,7 @@ class VideoVard(override val server: VideoServer, private val download:Boolean=f
                         "file_code" to id,
                         "hash" to (hash.hash ?: return@tryWithSuspend null)
                     )
-                ).parsed<SetupResponse>()
+                ).also { if(!it.text.startsWith("{")) throw Exception("Video Not Found") }.parsed<SetupResponse>()
                 val m3u8 = FileUrl(decode(res.src!!, res.seed), headers)
                 Video(null, true, m3u8)
             }
