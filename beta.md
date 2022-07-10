@@ -1,11 +1,7 @@
-# 1.2.0.16
+# 1.2.0.17
 
-- Long Clicking Video Links will now be openable with different Browser/Downloaders (thanks to @adolar0042 & @diegopyl1209)
-- Sort in Anime & Manga Lists @defcoding
-- Add MangaHub, MangaKatana, ComickFun, NineHentai Source @scrazzz
-- Add AnimePahe Source @scrazzz (Not Reliable)
-- Long Clicking Version, now copies App & Device Info @scrazzz
-- Change all Jackson to Kotlinx Serialization
-- Fixed MangaSee not loading chapters for some mangas
-- Fixed Other Dead Sources
-- Fixed Firebase
+- Fixed Serialization Problems
+- Fixed Kamyroll Episode Problem
+- AniMixPlay Source by @scrazzz (Not Tested)
+- Add New Contributors Names
+- Fixed Firebase For Real this time
