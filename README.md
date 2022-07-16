@@ -10,9 +10,9 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 <i>Saikou (最高; Sai-kō) literally means the best in japanese. Well, we would like to say this is the best open source app for anime and manga on Android, but hey, Try it out yourself & judge!
 </i> 
 <br>
+<br>
 <a href="https://www.buymeacoffee.com/brahmkshatriya"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=brahmkshatriya&button_colour=FFDD00&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff" /></a>
 <br>
-
 ### 🌟STAR THIS REPOSITORY TO SUPPORT THE DEVELOPER AND ENCOURAGE THE DEVELOPMENT OF THE APPLICATION!
 
 <br>
@@ -49,6 +49,8 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 | [Zoro](https://zoro.to)                   | WORKING | SOME |
 | [Tenshi](https://tenshi.moe)              | WORKING | YES  |
 | [Kamyroll](https://kamyroll.herokuapp.com)| WORKING | NO   |
+| [AnimePahe](https://animepahe.ru)| SEMI-WORKING | NO   |
+| [AnimixPlay](https://animixplay.to)       | WORKING | NO  |
 | [9Anime Backup](https://animekisa.in)     | WORKING | NO   |
 | [Haho (18+)](https://haho.moe)                  | WORKING | YES  |
 | [HentaiMama (18+)](https://hentaimama.io)       | WORKING | SOME |
@@ -60,15 +62,18 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 
 | SITE                                     | STATUS  |
 |:----------------------------------------:|:-------:|
-| [MangaKakalot](https://mangakakalot.com/)| WORKING |
-| [MangaBuddy](https://mangabuddy.com/)    | WORKING |
-| [MangaSee](https://mangasee123.com/)     | SEMI-WORKING |
-| [MangaPill](https://mangapill.com/)      | WORKING |
-| [MangaDex](https://mangadex.org/)        | WORKING |
-| [MangaReaderTo](https://mangareader.to/) | WORKING |
-| [AllAnime](https://allanime.site)        | WORKING |
-| [Comickfun](https://comick.fun)          | WORKING |
-| [NHentai (18+)](https://nhentai.net)     | WORKING |
+| [MangaKakalot](https://mangakakalot.com)| WORKING |
+| [MangaBuddy](https://mangabuddy.com)    | WORKING |
+| [MangaSee](https://mangasee123.com)     | SEMI-WORKING |
+| [MangaPill](https://mangapill.com)      | WORKING |
+| [MangaDex](https://mangadex.org)        | WORKING |
+| [MangaReaderTo](https://mangareader.to) | WORKING |
+| [AllAnime](https://allanime.site)       | WORKING |
+| [Comickfun](https://comick.fun)         | WORKING |
+| [MangaHub](https://mangahub.io)         | WORKING |
+| [NHentai (18+)](https://nhentai.net)      | NOT WORKING |
+| [NineHentai (18+)](https://ninehentai.net)| NOT WORKING |
+| [Manwha18 (18+)](https://manhwa18.cc)   | WORKING |
 
 ## Planned Stuff
 
