@@ -10,6 +10,7 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 <i>Saikou (最高; Sai-kō) literally means the best in japanese. Well, we would like to say this is the best open source app for anime and manga on Android, but hey, Try it out yourself & judge!
 </i> 
 <br>
+<a href="https://www.buymeacoffee.com/brahmkshatriya"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=brahmkshatriya&button_colour=FFDD00&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff" /></a>
 <br>
 
 ### 🌟STAR THIS REPOSITORY TO SUPPORT THE DEVELOPER AND ENCOURAGE THE DEVELOPMENT OF THE APPLICATION!
