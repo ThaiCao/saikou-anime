@@ -1,6 +1,7 @@
 package ani.saikou.settings
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -11,8 +12,8 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.addTextChangedListener
 import ani.saikou.*
 import ani.saikou.databinding.ActivityPlayerSettingsBinding
+import com.google.android.material.snackbar.Snackbar
 import kotlin.math.roundToInt
-import kotlin.system.exitProcess
 
 
 class PlayerSettingsActivity : AppCompatActivity() {
@@ -223,6 +224,20 @@ class PlayerSettingsActivity : AppCompatActivity() {
                 dialog.dismiss()
             }.show()
         }
+        fun restartApp() {
+        Snackbar.make(
+            binding.root,
+            R.string.restart_app, Snackbar.LENGTH_SHORT
+        ).apply {
+            val mainIntent =
+                Intent.makeRestartActivityTask(context.packageManager.getLaunchIntentForPackage(context.packageName)!!.component)
+            setAction("Do it!") {
+                context.startActivity(mainIntent)
+                Runtime.getRuntime().exit(0)
+            }
+            show()
+        }
+    }
         val locales = arrayOf("[en-US] English", "[es-ES] Spanish", "[pt-PT] Portuguese", "[pt-BR] Brazilian Portuguese", "[fr-FR] French", "[de-DE] German", "[ar-ME] Arabic", "[ru-RU] Russian")
         val localeDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Subtitle Language")
         binding.subLang.setOnClickListener {
@@ -230,7 +245,7 @@ class PlayerSettingsActivity : AppCompatActivity() {
                 settings.locale = count5
                 saveData(player, settings)
                 dialog.dismiss()
-                exitProcess(0)
+                restartApp()
             }.show()
         }
     }
