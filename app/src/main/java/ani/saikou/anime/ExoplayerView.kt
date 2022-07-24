@@ -71,7 +71,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.*
-import java.util.concurrent.atomic.*
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -432,30 +431,42 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //Screen Gestures
         if (settings.gestures || settings.doubleTap) {
 
-            val seekTimer = ResettableTimer()
-            val seekLock = AtomicBoolean(false)
-            var seekTimes = 0
+            val seekTimerF = ResettableTimer()
+            val seekTimerR = ResettableTimer()
+            var seekTimesF = 0
+            var seekTimesR = 0
 
             fun doubleTap(view: View, event: MotionEvent?, text: TextView, dir: Boolean) {
                 if (!locked && isInitialized && settings.doubleTap) {
-                    if (dir) text.text = "+${settings.seekTime * ++seekTimes}"
-                    else text.text = "-${settings.seekTime * ++seekTimes}"
-                    if(dir) { handler.post { exoPlayer.seekTo(exoPlayer.currentPosition + settings.seekTime * 1000) } }
-                    else { handler.post { exoPlayer.seekTo(exoPlayer.currentPosition - settings.seekTime * 1000) } }
-                    if (!seekLock.getAndSet(true)) {
-                        startDoubleTapped(
-                            view,
-                            event,
-                            text
-                        )
+                    if (dir) {
+                        text.text = "+${settings.seekTime * ++seekTimesF}"
+                        handler.post { exoPlayer.seekTo(exoPlayer.currentPosition + settings.seekTime * 1000) }
                     }
-                    seekTimer.reset(object : TimerTask() {
-                        override fun run() {
-                            stopDoubleTapped(view, text)
-                            seekTimes = 0
-                            seekLock.set(false)
-                        }
-                    }, 850)
+                    else {
+                        text.text = "-${settings.seekTime * ++seekTimesR}"
+                        handler.post { exoPlayer.seekTo(exoPlayer.currentPosition - settings.seekTime * 1000) }
+                    }
+                    startDoubleTapped(
+                        view,
+                        event,
+                        text
+                    )
+                    if(dir){
+                        seekTimerR.reset(object : TimerTask() {
+                            override fun run() {
+                                stopDoubleTapped(view, text)
+                                seekTimesF = 0
+                            }
+                        }, 850)
+                    }
+                    else {
+                        seekTimerF.reset(object : TimerTask() {
+                            override fun run() {
+                                stopDoubleTapped(view, text)
+                                seekTimesR = 0
+                            }
+                        }, 850)
+                    }
                 }
             }
 
