@@ -41,7 +41,7 @@ class MangaRead: MangaParser() {
         val doc = client.get(chapterLink).document
         val imgs = doc.select("div.reading-content > div > img")
         return imgs.map {
-            MangaImage(url = it.attr("href"))
+            MangaImage(url = it.attr("data-src").trim())
         }
     }
 
