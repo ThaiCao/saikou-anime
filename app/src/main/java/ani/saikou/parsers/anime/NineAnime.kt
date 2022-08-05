@@ -127,14 +127,15 @@ class NineAnime : AnimeParser() {
         }
 
         private const val nineAnimeKey = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-        private const val cipherKey = "kMXzgyNzT3k5dYab"
+        private const val cipherKey = "oZH6q4X4VAIHk0Ol"
+        private const val decipherKey = "hlPeNwkncH0fq9so" // Thanks to the community
 
         private fun encodeVrf(text: String): String {
             return encode(encrypt(cipher(cipherKey, encode(text)), nineAnimeKey))
         }
 
         private fun decodeVrf(text: String): String {
-            return decode(cipher(cipherKey, decrypt(text, nineAnimeKey)))
+            return decode(cipher(decipherKey, decrypt(text, nineAnimeKey)))
         }
 
         fun encrypt(input: String, key: String): String {
