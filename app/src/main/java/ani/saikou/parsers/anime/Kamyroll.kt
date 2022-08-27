@@ -3,6 +3,7 @@ package ani.saikou.parsers.anime
 import ani.saikou.*
 import ani.saikou.media.Media
 import ani.saikou.parsers.*
+import ani.saikou.parsers.anime.extractors.PStream
 import ani.saikou.settings.PlayerSettings
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -51,8 +52,9 @@ class Kamyroll : AnimeParser() {
                 }
             }.flatten()
             dataList.forEach {
-                epMap[it.first] = epMap[it.first] ?: it.second
-                epMap[it.first]?.series?.putAll(it.second.series)
+                val key = it.first?:return@forEach
+                epMap[key] = epMap[key] ?: it.second
+                epMap[key]?.series?.putAll(it.second.series)
             }
             epMap.map {
                 if (it.value.thumb != null)
@@ -125,6 +127,7 @@ class Kamyroll : AnimeParser() {
                 }?.also { foundSub = true }?.url ?: return VideoContainer(listOf()),
                 mapOf("accept" to "*/*", "accept-encoding" to "gzip")
             )
+            if(link.url.contains("pstream.net")) return PStream(VideoServer("PStream",link.url)).extract()
             val vid = listOf(Video(null, true, link))
             val subtitle = if (foundSub) eps.subtitles?.find { it.locale == locale || it.locale == "en-GB" }
                 .let { listOf(Subtitle("English", it?.url ?: return@let null, "ass")) } else null
@@ -298,7 +301,7 @@ class Kamyroll : AnimeParser() {
         @SerialName("episode") val episode: String? = null,
 
         @SerialName("sequence_number")
-        val sequenceNumber: Float,
+        val sequenceNumber: Float?=null,
 
         @SerialName("title")
         val title: String? = null,
