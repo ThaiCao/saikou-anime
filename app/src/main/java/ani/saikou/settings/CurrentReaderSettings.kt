@@ -6,12 +6,14 @@ data class CurrentReaderSettings(
     var direction: Directions = Directions.TOP_TO_BOTTOM,
     var layout: Layouts = Layouts.CONTINUOUS,
     var dualPageMode: DualPageModes = DualPageModes.Automatic,
+    var overScrollMode : Boolean = true,
     var trueColors: Boolean = false,
     var rotation: Boolean = true,
     var padding: Boolean = true,
+    var hidePageNumbers: Boolean = false,
     var horizontalScrollBar: Boolean = true,
     var keepScreenOn: Boolean = false,
-    var hidePageNumbers: Boolean = false
+    var volumeButtons: Boolean = false,
 ) : Serializable {
 
     enum class Directions {
