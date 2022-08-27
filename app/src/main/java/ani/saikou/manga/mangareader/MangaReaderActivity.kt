@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.view.*
+import android.view.KeyEvent.*
 import android.view.animation.OvershootInterpolator
 import android.widget.AdapterView
 import androidx.activity.viewModels
@@ -446,8 +447,7 @@ class MangaReaderActivity : AppCompatActivity() {
             )
 
             binding.mangaReaderRecycler.scrollToPosition(currentPage - 1)
-        }
-        else {
+        } else {
             binding.mangaReaderRecyclerContainer.visibility = View.GONE
             binding.mangaReaderPager.apply {
                 binding.mangaReaderSwipy.child = this
@@ -479,19 +479,25 @@ class MangaReaderActivity : AppCompatActivity() {
     private var onVolumeDown: (() -> Unit)? = null
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return when (event.keyCode) {
-            KeyEvent.KEYCODE_VOLUME_UP   -> {
-                if (event.action == 0 && settings.default.volumeButtons) {
+            KEYCODE_VOLUME_UP, KEYCODE_DPAD_UP, KEYCODE_PAGE_UP       -> {
+                if(event.keyCode == KEYCODE_VOLUME_UP)
+                    if(!settings.default.volumeButtons)
+                        return false
+                if (event.action == ACTION_DOWN) {
                     onVolumeUp?.invoke()
                     true
                 } else false
             }
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                if (event.action == 0 && settings.default.volumeButtons) {
+            KEYCODE_VOLUME_DOWN, KEYCODE_DPAD_DOWN, KEYCODE_PAGE_DOWN -> {
+                if(event.keyCode == KEYCODE_VOLUME_DOWN)
+                    if(!settings.default.volumeButtons)
+                        return false
+                if (event.action == ACTION_DOWN) {
                     onVolumeDown?.invoke()
                     true
                 } else false
             }
-            else                         -> {
+            else                                                      -> {
                 super.dispatchKeyEvent(event)
             }
         }
