@@ -126,6 +126,12 @@ class ReaderSettingsDialogFragment : BottomSheetDialogFragment() {
             settings.volumeButtons = isChecked
             activity.applySettings()
         }
+
+        binding.readerWrapImage.isChecked = settings.wrapImages
+        binding.readerWrapImage.setOnCheckedChangeListener { _,isChecked ->
+            settings.wrapImages = isChecked
+            activity.applySettings()
+        }
     }
 
     override fun onDestroy() {

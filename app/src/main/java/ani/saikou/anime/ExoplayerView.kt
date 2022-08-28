@@ -221,8 +221,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         @Suppress("DEPRECATION")
         audioManager.requestAudioFocus({ focus ->
             when (focus) {
-                AUDIOFOCUS_LOSS_TRANSIENT, AUDIOFOCUS_LOSS -> exoPlayer.pause()
-                AUDIOFOCUS_GAIN                                                      -> exoPlayer.play()
+                AUDIOFOCUS_LOSS_TRANSIENT, AUDIOFOCUS_LOSS -> if(isInitialized) exoPlayer.pause()
+                AUDIOFOCUS_GAIN                            -> if(isInitialized) exoPlayer.play()
             }
         }, AUDIO_CONTENT_TYPE_MOVIE, AUDIOFOCUS_GAIN)
 

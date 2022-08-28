@@ -52,7 +52,7 @@ class Kamyroll : AnimeParser() {
                 }
             }.flatten()
             dataList.forEach {
-                val key = it.first?:return@forEach
+                val key = it.first ?: return@forEach
                 epMap[key] = epMap[key] ?: it.second
                 epMap[key]?.series?.putAll(it.second.series)
             }
@@ -127,7 +127,7 @@ class Kamyroll : AnimeParser() {
                 }?.also { foundSub = true }?.url ?: return VideoContainer(listOf()),
                 mapOf("accept" to "*/*", "accept-encoding" to "gzip")
             )
-            if(link.url.contains("pstream.net")) return PStream(VideoServer("PStream",link.url)).extract()
+            if (link.url.contains("pstream.net")) return PStream(VideoServer("PStream", link.url)).extract()
             val vid = listOf(Video(null, true, link))
             val subtitle = if (foundSub) eps.subtitles?.find { it.locale == locale || it.locale == "en-GB" }
                 .let { listOf(Subtitle("English", it?.url ?: return@let null, "ass")) } else null
@@ -213,21 +213,20 @@ class Kamyroll : AnimeParser() {
         private const val player = "player_settings"
         val settings = loadData<PlayerSettings>(player, toast = false) ?: PlayerSettings().apply { saveData(player, this) }
         private val locale = when (settings.locale) {
-            0 -> ""
-            1 -> "ja-JP"
-            2 -> "en-US"
-            3 -> "de-DE"
-            4 -> "es-419"
-            5 -> "es-ES"
-            6 -> "fr-FR"
-            7 -> "it-IT"
-            8 -> "ar-SA"
-            9 -> "ar-ME"
-            10 -> "pt-BR"
-            11 -> "pt-PT"
-            12 -> "ru-RU"
-            13 -> "zh-CN"
-            14 -> "tr-TR"
+            0, 2 -> "en-US"
+            1    -> "ja-JP"
+            3    -> "de-DE"
+            4    -> "es-419"
+            5    -> "es-ES"
+            6    -> "fr-FR"
+            7    -> "it-IT"
+            8    -> "ar-SA"
+            9    -> "ar-ME"
+            10   -> "pt-BR"
+            11   -> "pt-PT"
+            12   -> "ru-RU"
+            13   -> "zh-CN"
+            14   -> "tr-TR"
             else -> "en-US"
         }
         private const val apiUrl = "https://kamyroll.herokuapp.com"
@@ -301,7 +300,7 @@ class Kamyroll : AnimeParser() {
         @SerialName("episode") val episode: String? = null,
 
         @SerialName("sequence_number")
-        val sequenceNumber: Float?=null,
+        val sequenceNumber: Float? = null,
 
         @SerialName("title")
         val title: String? = null,

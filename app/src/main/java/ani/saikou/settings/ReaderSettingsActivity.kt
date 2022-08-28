@@ -143,6 +143,12 @@ class ReaderSettingsActivity : AppCompatActivity() {
             settings.default.volumeButtons = isChecked
             saveData(reader, settings)
         }
+
+        binding.readerSettingsWrapImages.isChecked = settings.default.wrapImages
+        binding.readerSettingsWrapImages.setOnCheckedChangeListener { _,isChecked ->
+            settings.default.wrapImages = isChecked
+            saveData(reader, settings)
+        }
         
         //Update Progress
         binding.readerSettingsAskUpdateProgress.isChecked = settings.askIndividual

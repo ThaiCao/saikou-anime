@@ -283,7 +283,9 @@ class MangaReaderActivity : AppCompatActivity() {
         binding.mangaReaderPager.unregisterOnPageChangeCallback(pageChangeCallback)
 
         currentChapterPage = loadData("${media.id}_${chapter.number}", this) ?: 1
+
         val chapImages = chapter.images
+
         if (!chapImages.isNullOrEmpty()) {
             maxChapterPage = chapImages.size.toLong()
             saveData("${media.id}_${chapter.number}_max", maxChapterPage)
@@ -339,7 +341,8 @@ class MangaReaderActivity : AppCompatActivity() {
                     translationY = height.dp * (1 - min(value, 1f))
                 }
             }
-        } else {
+        }
+        else {
             binding.mangaReaderSwipy.vertical = false
             if (settings.default.direction == RIGHT_TO_LEFT) {
                 binding.LeftSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex + 1) ?: "No Chapter"
@@ -379,21 +382,6 @@ class MangaReaderActivity : AppCompatActivity() {
             binding.mangaReaderRecyclerContainer.visibility = View.VISIBLE
             binding.mangaReaderRecyclerContainer.controller.settings.isRotationEnabled = settings.default.rotation
 
-            binding.mangaReaderPager.visibility = View.GONE
-            binding.mangaReaderRecycler.clearOnScrollListeners()
-
-            binding.mangaReaderSwipy.child = binding.mangaReaderRecycler
-
-            val layoutManager = PreloadLinearLayoutManager(
-                this,
-                if (settings.default.direction == TOP_TO_BOTTOM || settings.default.direction == BOTTOM_TO_TOP) RecyclerView.VERTICAL
-                else RecyclerView.HORIZONTAL,
-                !(settings.default.direction == TOP_TO_BOTTOM || settings.default.direction == LEFT_TO_RIGHT)
-            )
-            layoutManager.preloadItemCount = 5
-
-            binding.mangaReaderRecycler.layoutManager = layoutManager
-
             val detector = GestureDetectorCompat(this, object : GesturesListener() {
                 override fun onLongPress(e: MotionEvent?) {
                     e ?: return
@@ -412,42 +400,70 @@ class MangaReaderActivity : AppCompatActivity() {
                 }
             })
 
-            binding.mangaReaderRecycler.setOnTouchListener { _, event ->
-                detector.onTouchEvent(event)
-            }
-
-            binding.mangaReaderRecycler.adapter = imageAdapter
-
-            binding.mangaReaderRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
-                    settings.default.apply {
-                        if (
-                            ((direction == TOP_TO_BOTTOM || direction == BOTTOM_TO_TOP)
-                                    && (!v.canScrollVertically(-1) || !v.canScrollVertically(1)))
-                            ||
-                            ((direction == LEFT_TO_RIGHT || direction == RIGHT_TO_LEFT)
-                                    && (!v.canScrollHorizontally(-1) || !v.canScrollHorizontally(1)))
-                        ) {
-                            handleController(true)
-                        } else handleController(false)
-                    }
-                    updatePageNumber(layoutManager.findLastVisibleItemPosition().toLong() * (dualPage { 2 } ?: 1) + 1)
-                    super.onScrolled(v, dx, dy)
-                }
-            })
-
-            if ((settings.default.direction == TOP_TO_BOTTOM || settings.default.direction == BOTTOM_TO_TOP))
-                binding.mangaReaderRecycler.updatePadding(0, 128f.px, 0, 128f.px)
-            else
-                binding.mangaReaderRecycler.updatePadding(128f.px, 0, 128f.px, 0)
-
-            snapHelper.attachToRecyclerView(
-                if (settings.default.layout == CONTINUOUS_PAGED) binding.mangaReaderRecycler
-                else null
+            val manager = PreloadLinearLayoutManager(
+                this,
+                if (settings.default.direction == TOP_TO_BOTTOM || settings.default.direction == BOTTOM_TO_TOP) RecyclerView.VERTICAL
+                else RecyclerView.HORIZONTAL,
+                !(settings.default.direction == TOP_TO_BOTTOM || settings.default.direction == LEFT_TO_RIGHT)
             )
+            manager.preloadItemCount = 5
 
-            binding.mangaReaderRecycler.scrollToPosition(currentPage - 1)
-        } else {
+            binding.mangaReaderPager.visibility = View.GONE
+
+            binding.mangaReaderRecycler.apply {
+                clearOnScrollListeners()
+                binding.mangaReaderSwipy.child = this
+                adapter = imageAdapter
+                layoutManager = manager
+                setOnTouchListener { _, event ->
+                    detector.onTouchEvent(event)
+                }
+
+                addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
+                        settings.default.apply {
+                            if (
+                                ((direction == TOP_TO_BOTTOM || direction == BOTTOM_TO_TOP)
+                                        && (!v.canScrollVertically(-1) || !v.canScrollVertically(1)))
+                                ||
+                                ((direction == LEFT_TO_RIGHT || direction == RIGHT_TO_LEFT)
+                                        && (!v.canScrollHorizontally(-1) || !v.canScrollHorizontally(1)))
+                            ) {
+                                handleController(true)
+                            } else handleController(false)
+                        }
+                        updatePageNumber(manager.findLastVisibleItemPosition().toLong() * (dualPage { 2 } ?: 1) + 1)
+                        super.onScrolled(v, dx, dy)
+                    }
+                })
+                if ((settings.default.direction == TOP_TO_BOTTOM || settings.default.direction == BOTTOM_TO_TOP))
+                    updatePadding(0, 128f.px, 0, 128f.px)
+                else
+                    updatePadding(128f.px, 0, 128f.px, 0)
+
+                snapHelper.attachToRecyclerView(
+                    if (settings.default.layout == CONTINUOUS_PAGED) this
+                    else null
+                )
+
+                onVolumeUp = {
+                    if ((settings.default.direction == TOP_TO_BOTTOM || settings.default.direction == BOTTOM_TO_TOP))
+                        smoothScrollBy(0,-500)
+                    else
+                        smoothScrollBy(-500,0)
+                }
+
+                onVolumeDown = {
+                    if ((settings.default.direction == TOP_TO_BOTTOM || settings.default.direction == BOTTOM_TO_TOP))
+                        smoothScrollBy(0,500)
+                    else
+                        smoothScrollBy(500,0)
+                }
+
+                scrollToPosition(currentPage - 1)
+            }
+        }
+        else {
             binding.mangaReaderRecyclerContainer.visibility = View.GONE
             binding.mangaReaderPager.apply {
                 binding.mangaReaderSwipy.child = this
@@ -484,6 +500,7 @@ class MangaReaderActivity : AppCompatActivity() {
                     if(!settings.default.volumeButtons)
                         return false
                 if (event.action == ACTION_DOWN) {
+                    println("on volume up")
                     onVolumeUp?.invoke()
                     true
                 } else false
