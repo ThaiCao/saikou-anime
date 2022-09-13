@@ -1274,13 +1274,12 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         shareVideo.setPackage("com.instantbits.cast.webvideo")
         if (subtitle != null) shareVideo.putExtra("subtitle", subtitle!!.url.url)
         shareVideo.putExtra("title", media.userPreferredName + " : Ep " + episodeTitleArr[currentEpisodeIndex])
-        shareVideo.putExtra("poster", episode.thumb ?: media.cover)
+        shareVideo.putExtra("poster", episode.thumb?.url ?: media.cover)
         val headers = Bundle()
         video?.url?.headers?.forEach {
             headers.putString(it.key, it.value)
         }
         shareVideo.putExtra("android.media.intent.extra.HTTP_HEADERS", headers)
-        shareVideo.putExtra("headers", headers)
         shareVideo.putExtra("secure_uri", true)
         try {
             startActivity(shareVideo)
