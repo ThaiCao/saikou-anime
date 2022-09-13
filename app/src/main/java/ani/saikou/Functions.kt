@@ -14,7 +14,7 @@ import android.content.res.Configuration
 import android.content.res.Resources.getSystem
 import android.graphics.Color
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.*
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
@@ -211,26 +211,18 @@ fun isOnline(context: Context): Boolean {
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     return tryWith {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            return@tryWith if (capabilities != null) {
+            val cap = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            return@tryWith if (cap != null) {
                 when {
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                        logger("Device on Cellular")
-                        true
-                    }
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)     -> {
-                        logger("Device on Wifi")
-                        true
-                    }
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-                        logger("Device on Ethernet, TF man?")
-                        true
-                    }
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)      -> {
-                        logger("Device on VPN")
-                        true
-                    }
-                    else                                                              -> false
+                    cap.hasTransport(TRANSPORT_BLUETOOTH) ||
+                            cap.hasTransport(TRANSPORT_CELLULAR) ||
+                            cap.hasTransport(TRANSPORT_ETHERNET) ||
+                            cap.hasTransport(TRANSPORT_LOWPAN) ||
+                            cap.hasTransport(TRANSPORT_USB) ||
+                            cap.hasTransport(TRANSPORT_VPN) ||
+                            cap.hasTransport(TRANSPORT_WIFI) ||
+                            cap.hasTransport(TRANSPORT_WIFI_AWARE) -> true
+                    else                                           -> false
                 }
             } else false
         } else true
@@ -414,7 +406,7 @@ fun String.findBetween(a: String, b: String): String? {
 
 fun ImageView.loadImage(url: String?, size: Int = 0) {
     if (!url.isNullOrEmpty()) {
-        loadImage(FileUrl(url),size)
+        loadImage(FileUrl(url), size)
     }
 }
 
@@ -452,7 +444,7 @@ fun View.setSafeOnClickListener(onSafeClick: (View) -> Unit) {
 
 suspend fun getSize(file: FileUrl): Double? {
     return tryWithSuspend {
-        client.head(file.url, file.headers, timeout = 1000).size?.toDouble()?.div(1024*1024)
+        client.head(file.url, file.headers, timeout = 1000).size?.toDouble()?.div(1024 * 1024)
     }
 }
 
@@ -496,6 +488,7 @@ class FTActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
     override fun onActivityStarted(p0: Activity) {
         currentActivity = p0
     }
+
     override fun onActivityResumed(p0: Activity) {
         currentActivity = p0
     }
