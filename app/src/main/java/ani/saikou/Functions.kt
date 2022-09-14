@@ -581,8 +581,20 @@ abstract class GesturesListener : GestureDetector.SimpleOnGestureListener() {
     open fun onLongClick(event: MotionEvent?) {}
 }
 
-fun View.circularReveal(x: Int, y: Int, time: Long) {
-    ViewAnimationUtils.createCircularReveal(this, x, y, 0f, max(height, width).toFloat()).setDuration(time).start()
+fun View.circularReveal(ex: Int, ey: Int, subX:Boolean, time: Long) {
+    println("check ")
+    println(width to height / 2)
+    println(this.x to this.y)
+    println(ex to ey)
+    println(ex - x.toInt() to ey - y.toInt())
+
+    ViewAnimationUtils.createCircularReveal(
+        this,
+        if(subX) (ex - x.toInt()) else ex,
+        ey - y.toInt(),
+        0f,
+        max(height, width).toFloat()
+    ).setDuration(time).start()
 }
 
 fun openLinkInBrowser(link: String?) {
@@ -651,7 +663,7 @@ fun saveImageToDownloads(title: String, bitmap: Bitmap, context: Context) {
     context.startActivity(intent)
 }
 
-fun shareImage(title: String, bitmap:Bitmap, context: Context) {
+fun shareImage(title: String, bitmap: Bitmap, context: Context) {
 
     val contentUri = FileProvider.getUriForFile(
         context,

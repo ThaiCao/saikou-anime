@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.app.PictureInPictureParams
+import android.app.PictureInPictureUiState
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
@@ -221,8 +222,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         @Suppress("DEPRECATION")
         audioManager.requestAudioFocus({ focus ->
             when (focus) {
-                AUDIOFOCUS_LOSS_TRANSIENT, AUDIOFOCUS_LOSS -> if(isInitialized) exoPlayer.pause()
-                AUDIOFOCUS_GAIN                            -> if(isInitialized) exoPlayer.play()
+                AUDIOFOCUS_LOSS_TRANSIENT, AUDIOFOCUS_LOSS -> if (isInitialized) exoPlayer.pause()
+                AUDIOFOCUS_GAIN                            -> if (isInitialized) exoPlayer.play()
             }
         }, AUDIO_CONTENT_TYPE_MOVIE, AUDIOFOCUS_GAIN)
 
@@ -302,7 +303,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             )
         )
         playerView.subtitleView?.alpha = when (settings.subtitles) {
-            true -> 1f
+            true  -> 1f
             false -> 0f
         }
         val fontSize = settings.fontSize.toFloat()
@@ -477,43 +478,62 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val fastForwardCard = playerView.findViewById<View>(R.id.exo_fast_forward)
         val fastRewindCard = playerView.findViewById<View>(R.id.exo_fast_rewind)
 
+
+        //Seeking
+        val seekTimerF = ResettableTimer()
+        val seekTimerR = ResettableTimer()
+        var seekTimesF = 0
+        var seekTimesR = 0
+
+        fun seek(forward: Boolean, event: MotionEvent? = null) {
+            val views = if (forward) {
+                forwardText.text = "+${settings.seekTime * ++seekTimesF}"
+                handler.post { exoPlayer.seekTo(exoPlayer.currentPosition + settings.seekTime * 1000) }
+                fastForwardCard to forwardText
+            } else {
+                rewindText.text = "-${settings.seekTime * ++seekTimesR}"
+                handler.post { exoPlayer.seekTo(exoPlayer.currentPosition - settings.seekTime * 1000) }
+                fastRewindCard to rewindText
+            }
+            startDoubleTapped(views.first, views.second, event, forward)
+            if (forward) {
+                seekTimerR.reset(object : TimerTask() {
+                    override fun run() {
+                        stopDoubleTapped(views.first, views.second)
+                        seekTimesF = 0
+                    }
+                }, 850)
+            } else {
+                seekTimerF.reset(object : TimerTask() {
+                    override fun run() {
+                        stopDoubleTapped(views.first, views.second)
+                        seekTimesR = 0
+                    }
+                }, 850)
+            }
+        }
+
+        if (!settings.doubleTap) {
+            playerView.findViewById<View>(R.id.exo_fast_forward_button_cont).visibility = View.VISIBLE
+            playerView.findViewById<View>(R.id.exo_fast_rewind_button_cont).visibility = View.VISIBLE
+            playerView.findViewById<ImageButton>(R.id.exo_fast_forward_button).setOnClickListener {
+                if (isInitialized) {
+                    seek(true)
+                }
+            }
+            playerView.findViewById<ImageButton>(R.id.exo_fast_rewind_button).setOnClickListener {
+                if (isInitialized) {
+                    seek(false)
+                }
+            }
+        }
+
         //Screen Gestures
         if (settings.gestures || settings.doubleTap) {
 
-            val seekTimerF = ResettableTimer()
-            val seekTimerR = ResettableTimer()
-            var seekTimesF = 0
-            var seekTimesR = 0
-
-            fun doubleTap(view: View, event: MotionEvent?, text: TextView, dir: Boolean) {
+            fun doubleTap(forward: Boolean, event: MotionEvent?) {
                 if (!locked && isInitialized && settings.doubleTap) {
-                    if (dir) {
-                        text.text = "+${settings.seekTime * ++seekTimesF}"
-                        handler.post { exoPlayer.seekTo(exoPlayer.currentPosition + settings.seekTime * 1000) }
-                    } else {
-                        text.text = "-${settings.seekTime * ++seekTimesR}"
-                        handler.post { exoPlayer.seekTo(exoPlayer.currentPosition - settings.seekTime * 1000) }
-                    }
-                    startDoubleTapped(
-                        view,
-                        event,
-                        text
-                    )
-                    if (dir) {
-                        seekTimerR.reset(object : TimerTask() {
-                            override fun run() {
-                                stopDoubleTapped(view, text)
-                                seekTimesF = 0
-                            }
-                        }, 850)
-                    } else {
-                        seekTimerF.reset(object : TimerTask() {
-                            override fun run() {
-                                stopDoubleTapped(view, text)
-                                seekTimesR = 0
-                            }
-                        }, 850)
-                    }
+                    seek(forward, event)
                 }
             }
 
@@ -541,32 +561,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 brightnessHide()
             }
 
-            //FastRewind (Left Panel)
-            val fastRewindDetector = GestureDetector(this, object : GesturesListener() {
-                override fun onDoubleClick(event: MotionEvent?) {
-                    doubleTap(fastRewindCard, event, rewindText, false)
-                }
-
-                override fun onScrollYClick(y: Float) {
-                    if (!locked && settings.gestures) {
-                        exoBrightness.value = clamp(exoBrightness.value + y / 100, 0f, 10f)
-                        if (exoBrightnessCont.visibility != View.VISIBLE) {
-                            exoBrightnessCont.visibility = View.VISIBLE
-                        }
-                        exoBrightnessCont.alpha = 1f
-                    }
-                }
-
-                override fun onSingleClick(event: MotionEvent?) = handleController()
-            })
-            val rewindArea = playerView.findViewById<View>(R.id.exo_rewind_area)
-            rewindArea.isClickable = true
-            rewindArea.setOnTouchListener { v, event ->
-                fastRewindDetector.onTouchEvent(event)
-                v.performClick()
-                true
-            }
-
             //Volume
             var volumeTimer = Timer()
             exoVolumeCont.visibility = View.GONE
@@ -590,10 +584,36 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 volumeHide()
             }
 
+            //FastRewind (Left Panel)
+            val fastRewindDetector = GestureDetector(this, object : GesturesListener() {
+                override fun onDoubleClick(event: MotionEvent?) {
+                    doubleTap(false, event)
+                }
+
+                override fun onScrollYClick(y: Float) {
+                    if (!locked && settings.gestures) {
+                        exoBrightness.value = clamp(exoBrightness.value + y / 100, 0f, 10f)
+                        if (exoBrightnessCont.visibility != View.VISIBLE) {
+                            exoBrightnessCont.visibility = View.VISIBLE
+                        }
+                        exoBrightnessCont.alpha = 1f
+                    }
+                }
+
+                override fun onSingleClick(event: MotionEvent?) = handleController()
+            })
+            val rewindArea = playerView.findViewById<View>(R.id.exo_rewind_area)
+            rewindArea.isClickable = true
+            rewindArea.setOnTouchListener { v, event ->
+                fastRewindDetector.onTouchEvent(event)
+                v.performClick()
+                true
+            }
+
             //FastForward (Right Panel)
             val fastForwardDetector = GestureDetector(this, object : GesturesListener() {
                 override fun onDoubleClick(event: MotionEvent?) {
-                    doubleTap(fastForwardCard, event, forwardText, true)
+                    doubleTap(true, event)
                 }
 
                 override fun onScrollYClick(y: Float) {
@@ -614,24 +634,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 fastForwardDetector.onTouchEvent(event)
                 v.performClick()
                 true
-            }
-        }
-
-        if (!settings.doubleTap) {
-
-            playerView.findViewById<View>(R.id.exo_fast_forward_button_cont).visibility = View.VISIBLE
-            playerView.findViewById<View>(R.id.exo_fast_rewind_button_cont).visibility = View.VISIBLE
-            playerView.findViewById<ImageButton>(R.id.exo_fast_forward_button).setOnClickListener {
-                if (isInitialized) {
-                    exoPlayer.seekTo(exoPlayer.currentPosition + settings.seekTime * 1000)
-                    startDoubleTapped(fastForwardCard, text = forwardText)
-                }
-            }
-            playerView.findViewById<ImageButton>(R.id.exo_fast_rewind_button).setOnClickListener {
-                if (isInitialized) {
-                    exoPlayer.seekTo(exoPlayer.currentPosition - settings.seekTime * 1000)
-                    startDoubleTapped(fastRewindCard, text = rewindText)
-                }
             }
         }
 
@@ -1241,7 +1243,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     }
 
     //Double Tap Animation
-    private fun startDoubleTapped(v: View, event: MotionEvent? = null, text: TextView) {
+    private fun startDoubleTapped(v: View, text: TextView, event: MotionEvent? = null, forward:Boolean) {
         ObjectAnimator.ofFloat(text, "alpha", 1f, 1f).setDuration(600).start()
         ObjectAnimator.ofFloat(text, "alpha", 0f, 1f).setDuration(150).start()
 
@@ -1251,8 +1253,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         if (event != null) {
             playerView.hideController()
-            v.circularReveal(event.x.toInt(), event.y.toInt(), 300)
-            ObjectAnimator.ofFloat(v, "alpha", 1f, 1f).setDuration(600).start()
+            v.circularReveal(event.x.toInt(), event.y.toInt(), !forward, 800)
+            ObjectAnimator.ofFloat(v, "alpha", 1f, 1f).setDuration(1000).start()
             ObjectAnimator.ofFloat(v, "alpha", 0f, 1f).setDuration(300).start()
         }
     }
@@ -1305,6 +1307,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                         .build()
                 )
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
                 enterPictureInPictureMode()
             }
         } catch (e: Exception) {
@@ -1312,9 +1315,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
     }
 
-    @Suppress("DEPRECATION")
-    @Deprecated("Deprecated in Java")
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+    private fun onPiPChanged(isInPictureInPictureMode: Boolean) {
+        println("pip changed")
         playerView.useController = !isInPictureInPictureMode
         if (isInPictureInPictureMode) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -1326,7 +1328,24 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             saveData("${media.id}_${episode.number}", exoPlayer.currentPosition, this)
             exoPlayer.play()
         }
+    }
+
+    @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in Java")
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        onPiPChanged(isInPictureInPictureMode)
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
+    override fun onPictureInPictureUiStateChanged(pipState: PictureInPictureUiState) {
+        onPiPChanged(isInPictureInPictureMode)
+        super.onPictureInPictureUiStateChanged(pipState)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        onPiPChanged(isInPictureInPictureMode)
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+    }
 }
