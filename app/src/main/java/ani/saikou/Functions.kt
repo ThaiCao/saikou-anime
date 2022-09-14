@@ -12,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources.getSystem
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities.*
@@ -29,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat.getExternalFilesDirs
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.FileProvider
 import androidx.core.math.MathUtils.clamp
 import androidx.core.view.*
 import androidx.fragment.app.DialogFragment
@@ -521,28 +523,28 @@ abstract class GesturesListener : GestureDetector.SimpleOnGestureListener() {
     private var timer: Timer? = null //at class level;
     private val delay: Long = 200
 
-    override fun onSingleTapUp(e: MotionEvent?): Boolean {
+    override fun onSingleTapUp(e: MotionEvent): Boolean {
         processSingleClickEvent(e)
         return super.onSingleTapUp(e)
     }
 
-    override fun onLongPress(e: MotionEvent?) {
+    override fun onLongPress(e: MotionEvent) {
         processLongClickEvent(e)
         super.onLongPress(e)
     }
 
-    override fun onDoubleTap(e: MotionEvent?): Boolean {
+    override fun onDoubleTap(e: MotionEvent): Boolean {
         processDoubleClickEvent(e)
         return super.onDoubleTap(e)
     }
 
-    override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+    override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
         onScrollYClick(distanceY)
         onScrollXClick(distanceX)
         return super.onScroll(e1, e2, distanceX, distanceY)
     }
 
-    private fun processSingleClickEvent(e: MotionEvent?) {
+    private fun processSingleClickEvent(e: MotionEvent) {
         val handler = Handler(Looper.getMainLooper())
         val mRunnable = Runnable {
             onSingleClick(e)
@@ -631,6 +633,46 @@ fun download(activity: Activity, episode: Episode, animeTitle: String) {
         } catch (e: Exception) {
             toast(e.toString())
         }
+    }
+}
+
+fun saveImageToDownloads(title: String, bitmap: Bitmap, context: Context) {
+    val contentUri = FileProvider.getUriForFile(
+        context,
+        BuildConfig.APPLICATION_ID + ".provider",
+        saveImage(
+            bitmap,
+            Environment.getExternalStorageDirectory().absolutePath + "/" + Environment.DIRECTORY_DOWNLOADS,
+            title
+        ) ?: return
+    )
+    val intent = Intent(Intent.ACTION_VIEW)
+    intent.setDataAndType(contentUri, "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    context.startActivity(intent)
+}
+
+fun shareImage(title: String, bitmap:Bitmap, context: Context) {
+
+    val contentUri = FileProvider.getUriForFile(
+        context,
+        BuildConfig.APPLICATION_ID + ".provider",
+        saveImage(bitmap, context.cacheDir.absolutePath, title) ?: return
+    )
+
+    val intent = Intent(Intent.ACTION_SEND)
+    intent.type = "image/png"
+    intent.putExtra(Intent.EXTRA_TEXT, title)
+    intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+    context.startActivity(Intent.createChooser(intent, "Share $title"))
+}
+
+fun saveImage(image: Bitmap, path: String, imageFileName: String): File? {
+    val imageFile = File(path, "$imageFileName.png")
+    return tryWith {
+        val fOut: OutputStream = FileOutputStream(imageFile)
+        image.compress(Bitmap.CompressFormat.PNG, 0, fOut)
+        fOut.close()
+        imageFile
     }
 }
 

@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.widget.FrameLayout
 
-class VerticalSwipy @JvmOverloads constructor(
+class Swipy @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
 
