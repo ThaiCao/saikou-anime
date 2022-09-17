@@ -508,7 +508,6 @@ class MangaReaderActivity : AppCompatActivity() {
                     if (!settings.default.volumeButtons)
                         return false
                 if (event.action == ACTION_DOWN) {
-                    println("on volume up")
                     onVolumeUp?.invoke()
                     true
                 } else false

@@ -46,6 +46,7 @@ import ani.saikou.anilist.Anilist
 import ani.saikou.databinding.ActivityExoplayerBinding
 import ani.saikou.media.Media
 import ani.saikou.media.MediaDetailsViewModel
+import ani.saikou.others.AniSkip
 import ani.saikou.others.ResettableTimer
 import ani.saikou.parsers.*
 import ani.saikou.settings.PlayerSettings
@@ -107,6 +108,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private lateinit var exoVolume: Slider
     private lateinit var exoBrightnessCont: View
     private lateinit var exoVolumeCont: View
+    private lateinit var exoSkip: View
+    private lateinit var skipTimeButton: View
+    private lateinit var skipTimeText: TextView
+    private lateinit var timeStampText: TextView
     private lateinit var animeTitle: TextView
     private lateinit var videoName: TextView
     private lateinit var videoInfo: TextView
@@ -146,6 +151,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     private val handler = Handler(Looper.getMainLooper())
     private val model: MediaDetailsViewModel by viewModels()
+
+    private var isTimeStampsLoaded = false
 
     var rotation = 0
 
@@ -211,6 +218,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         exoBrightnessCont = playerView.findViewById(R.id.exo_brightness_cont)
         exoVolumeCont = playerView.findViewById(R.id.exo_volume_cont)
         exoPip = playerView.findViewById(R.id.exo_pip)
+        exoSkip = playerView.findViewById(R.id.exo_skip)
+        skipTimeButton = playerView.findViewById(R.id.exo_skip_timestamp)
+        skipTimeText = skipTimeButton.findViewById(R.id.exo_skip_timestamp_text)
+        timeStampText = playerView.findViewById(R.id.exo_time_stamp_text)
 
         animeTitle = playerView.findViewById(R.id.exo_anime_title)
         episodeTitle = playerView.findViewById(R.id.exo_ep_sel)
@@ -321,6 +332,22 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             onBackPressed()
         }
 
+        //TimeStamps
+        model.timeStamps.observe(this) { it ->
+            isTimeStampsLoaded = true
+            if (it != null) {
+                val adGroups = it.flatMap {
+                    listOf(it.interval.startTime.toLong() * 1000, it.interval.endTime.toLong() * 1000)
+                }.toLongArray()
+
+                val playedAdGroups = it.flatMap {
+                    listOf(false, false)
+                }.toBooleanArray()
+
+                playerView.setExtraAdGroupMarkers(adGroups, playedAdGroups)
+            }
+        }
+
         //Play Pause
         exoPlay.setOnClickListener {
             if (isInitialized) {
@@ -371,12 +398,12 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         //Skip Time Button
         if (settings.skipTime > 0) {
-            playerView.findViewById<TextView>(R.id.exo_skip_time).text = settings.skipTime.toString()
-            playerView.findViewById<View>(R.id.exo_skip).setOnClickListener {
+            exoSkip.findViewById<TextView>(R.id.exo_skip_time).text = settings.skipTime.toString()
+            exoSkip.setOnClickListener {
                 if (isInitialized)
                     exoPlayer.seekTo(exoPlayer.currentPosition + settings.skipTime * 1000)
             }
-            playerView.findViewById<View>(R.id.exo_skip).setOnLongClickListener {
+            exoSkip.setOnLongClickListener {
                 val dialog = Dialog(this, R.style.DialogTheme)
                 dialog.setContentView(R.layout.item_seekbar_dialog)
                 dialog.setCancelable(true)
@@ -410,7 +437,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 true
             }
         } else {
-            playerView.findViewById<View>(R.id.exo_skip).visibility = View.GONE
+            exoSkip.visibility = View.GONE
         }
 
         val gestureSpeed = (300 * uiSettings.animationSpeed).toLong()
@@ -689,6 +716,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     this
                 )
                 val prev = episodeArr[currentEpisodeIndex]
+                isTimeStampsLoaded = false
                 episodeLength = 0f
                 media.anime!!.selectedEpisode = episodeArr[index]
                 model.setMedia(media)
@@ -872,6 +900,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     show()
                 }
         else model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!, "invoke")
+
+        //Start the recursive Fun
+        updateTimeStamp()
+
     }
 
     private fun initPlayer() {
@@ -1113,8 +1145,20 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         if (exoPlayer.duration < playbackPosition)
             exoPlayer.seekTo(0)
+
+        if (!isTimeStampsLoaded) {
+            val dur = exoPlayer.duration
+            lifecycleScope.launch(Dispatchers.IO) {
+                model.loadTimeStamps(
+                    media.idMAL,
+                    media.anime?.selectedEpisode?.toInt(),
+                    dur / 1000
+                )
+            }
+        }
     }
 
+    //Link Preloading
     private var preloading = false
     private fun updateProgress() {
         if (isInitialized) {
@@ -1135,6 +1179,35 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         if (!preloading) handler.postDelayed({
             updateProgress()
         }, 2500)
+    }
+
+    //TimeStamp Updating
+    private var currentTimeStamp: AniSkip.Stamp? = null
+    private fun updateTimeStamp(){
+        if(isInitialized){
+            val playerCurrentTime = exoPlayer.currentPosition / 1000
+            currentTimeStamp = model.timeStamps.value?.find { timestamp ->
+                timestamp.interval.startTime < playerCurrentTime && playerCurrentTime < timestamp.interval.endTime
+            }
+            println("time : ${currentTimeStamp?.skipType}")
+            val new = currentTimeStamp
+            timeStampText.text = if (new != null) {
+                skipTimeButton.visibility = View.VISIBLE
+                exoSkip.visibility = View.GONE
+                skipTimeText.text = new.skipType.getString()
+                skipTimeButton.setOnClickListener {
+                    exoPlayer.seekTo((new.interval.endTime * 1000).toLong())
+                }
+                new.skipType.getString()
+            } else {
+                skipTimeButton.visibility = View.GONE
+                exoSkip.visibility = View.VISIBLE
+                ""
+            }
+        }
+        handler.postDelayed({
+            updateTimeStamp()
+        }, 500)
     }
 
     override fun onTracksChanged(tracks: Tracks) {
@@ -1243,7 +1316,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     }
 
     //Double Tap Animation
-    private fun startDoubleTapped(v: View, text: TextView, event: MotionEvent? = null, forward:Boolean) {
+    private fun startDoubleTapped(v: View, text: TextView, event: MotionEvent? = null, forward: Boolean) {
         ObjectAnimator.ofFloat(text, "alpha", 1f, 1f).setDuration(600).start()
         ObjectAnimator.ofFloat(text, "alpha", 0f, 1f).setDuration(150).start()
 
@@ -1316,7 +1389,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     }
 
     private fun onPiPChanged(isInPictureInPictureMode: Boolean) {
-        println("pip changed")
         playerView.useController = !isInPictureInPictureMode
         if (isInPictureInPictureMode) {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED

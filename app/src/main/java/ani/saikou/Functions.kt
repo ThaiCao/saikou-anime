@@ -582,12 +582,6 @@ abstract class GesturesListener : GestureDetector.SimpleOnGestureListener() {
 }
 
 fun View.circularReveal(ex: Int, ey: Int, subX:Boolean, time: Long) {
-    println("check ")
-    println(width to height / 2)
-    println(this.x to this.y)
-    println(ex to ey)
-    println(ex - x.toInt() to ey - y.toInt())
-
     ViewAnimationUtils.createCircularReveal(
         this,
         if(subX) (ex - x.toInt()) else ex,
