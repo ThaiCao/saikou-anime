@@ -1189,14 +1189,16 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             currentTimeStamp = model.timeStamps.value?.find { timestamp ->
                 timestamp.interval.startTime < playerCurrentTime && playerCurrentTime < timestamp.interval.endTime
             }
-            println("time : ${currentTimeStamp?.skipType}")
+
             val new = currentTimeStamp
             timeStampText.text = if (new != null) {
-                skipTimeButton.visibility = View.VISIBLE
-                exoSkip.visibility = View.GONE
-                skipTimeText.text = new.skipType.getString()
-                skipTimeButton.setOnClickListener {
-                    exoPlayer.seekTo((new.interval.endTime * 1000).toLong())
+                if(settings.showTimeStampButton) {
+                    skipTimeButton.visibility = View.VISIBLE
+                    exoSkip.visibility = View.GONE
+                    skipTimeText.text = new.skipType.getString()
+                    skipTimeButton.setOnClickListener {
+                        exoPlayer.seekTo((new.interval.endTime * 1000).toLong())
+                    }
                 }
                 new.skipType.getString()
             } else {

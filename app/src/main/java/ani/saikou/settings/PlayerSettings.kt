@@ -8,6 +8,8 @@ data class PlayerSettings(
     var defaultSpeed: Int = 5,
     var cursedSpeeds: Boolean = false,
     var resize: Int = 0,
+
+    //Subtitles
     var subtitles: Boolean = true,
     var primaryColor: Int = 4,
     var secondaryColor: Int = 0,
@@ -28,6 +30,7 @@ data class PlayerSettings(
     //Behaviour
     var alwaysContinue: Boolean = true,
     var focusPause: Boolean = true,
+    var showTimeStampButton: Boolean = true,
     var gestures: Boolean = true,
     var doubleTap: Boolean = true,
     var seekTime: Int = 10,
@@ -35,4 +38,5 @@ data class PlayerSettings(
     var cast: Boolean = false,
     var pip: Boolean = true,
     var alwaysMinimize: Boolean = false,
-) : Serializable
+) : Serializable {
+}

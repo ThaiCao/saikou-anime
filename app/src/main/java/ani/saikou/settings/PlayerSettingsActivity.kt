@@ -122,6 +122,13 @@ class PlayerSettingsActivity : AppCompatActivity() {
             settings.focusPause = isChecked
             saveData(player, settings)
         }
+
+        binding.playerSettingsShowTimeStamp.isChecked = settings.showTimeStampButton
+        binding.playerSettingsShowTimeStamp.setOnCheckedChangeListener { _, isChecked ->
+            settings.showTimeStampButton = isChecked
+            saveData(player, settings)
+        }
+
         binding.playerSettingsVerticalGestures.isChecked = settings.gestures
         binding.playerSettingsVerticalGestures.setOnCheckedChangeListener { _, isChecked ->
             settings.gestures = isChecked
