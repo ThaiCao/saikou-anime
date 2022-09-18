@@ -18,7 +18,12 @@ data class PlayerSettings(
     var fontSize: Int = 20,
     var locale: Int = 2,
 
+    //TimeStamps
+    var timeStampsEnabled: Boolean = true,
+    var showTimeStampButton: Boolean = true,
+
     //Auto
+    var autoSkipOPED: Boolean = false,
     var autoPlay: Boolean = true,
     var autoSkipFiller: Boolean = false,
 
@@ -30,14 +35,12 @@ data class PlayerSettings(
     //Behaviour
     var alwaysContinue: Boolean = true,
     var focusPause: Boolean = true,
-    var timeStampsEnabled: Boolean = true,
-    var showTimeStampButton: Boolean = true,
     var gestures: Boolean = true,
     var doubleTap: Boolean = true,
     var seekTime: Int = 10,
     var skipTime: Int = 85,
+
+    //Other
     var cast: Boolean = false,
-    var pip: Boolean = true,
-    var alwaysMinimize: Boolean = false,
-) : Serializable {
-}
+    var pip: Boolean = true
+) : Serializable

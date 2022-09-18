@@ -104,6 +104,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private lateinit var exoScreen: ImageButton
     private lateinit var exoNext: ImageButton
     private lateinit var exoPrev: ImageButton
+    private lateinit var exoSkipOpEd: ImageButton
     private lateinit var exoPip: ImageButton
     private lateinit var exoBrightness: Slider
     private lateinit var exoVolume: Slider
@@ -219,6 +220,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         exoBrightnessCont = playerView.findViewById(R.id.exo_brightness_cont)
         exoVolumeCont = playerView.findViewById(R.id.exo_volume_cont)
         exoPip = playerView.findViewById(R.id.exo_pip)
+        exoSkipOpEd = playerView.findViewById(R.id.exo_skip_op_ed)
         exoSkip = playerView.findViewById(R.id.exo_skip)
         skipTimeButton = playerView.findViewById(R.id.exo_skip_timestamp)
         skipTimeText = skipTimeButton.findViewById(R.id.exo_skip_timestamp_text)
@@ -336,17 +338,31 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //TimeStamps
         model.timeStamps.observe(this) { it ->
             isTimeStampsLoaded = true
-            if (it != null) {
+            exoSkipOpEd.visibility = if (it != null) {
                 val adGroups = it.flatMap {
                     listOf(it.interval.startTime.toLong() * 1000, it.interval.endTime.toLong() * 1000)
                 }.toLongArray()
-
                 val playedAdGroups = it.flatMap {
                     listOf(false, false)
                 }.toBooleanArray()
-
                 playerView.setExtraAdGroupMarkers(adGroups, playedAdGroups)
+                View.VISIBLE
             }
+            else View.GONE
+        }
+
+        exoSkipOpEd.alpha = if(settings.autoSkipOPED) 1f else 0.3f
+        exoSkipOpEd.setOnClickListener {
+            settings.autoSkipOPED = if(settings.autoSkipOPED) {
+                toastString("Disabled Auto Skipping OP & ED")
+                false
+            }
+            else{
+                toastString("Auto Skipping OP & ED")
+                true
+            }
+            saveData("player_settings", settings)
+            exoSkipOpEd.alpha = if(settings.autoSkipOPED) 1f else 0.3f
         }
 
         //Play Pause
@@ -903,7 +919,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         else model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!, "invoke")
 
         //Start the recursive Fun
-        if(settings.timeStampsEnabled)
+        if (settings.timeStampsEnabled)
             updateTimeStamp()
     }
 
@@ -1184,16 +1200,17 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     //TimeStamp Updating
     private var currentTimeStamp: AniSkip.Stamp? = null
-    private fun updateTimeStamp(){
-        if(isInitialized){
+    private var skippedTimeStamps : MutableList<AniSkip.Stamp> = mutableListOf()
+    private fun updateTimeStamp() {
+        if (isInitialized) {
             val playerCurrentTime = exoPlayer.currentPosition / 1000
             currentTimeStamp = model.timeStamps.value?.find { timestamp ->
-                timestamp.interval.startTime < playerCurrentTime && playerCurrentTime < timestamp.interval.endTime
+                timestamp.interval.startTime < playerCurrentTime && playerCurrentTime < (timestamp.interval.endTime - 1)
             }
 
             val new = currentTimeStamp
             timeStampText.text = if (new != null) {
-                if(settings.showTimeStampButton) {
+                if (settings.showTimeStampButton) {
                     skipTimeButton.visibility = View.VISIBLE
                     exoSkip.visibility = View.GONE
                     skipTimeText.text = new.skipType.getType()
@@ -1201,10 +1218,14 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                         exoPlayer.seekTo((new.interval.endTime * 1000).toLong())
                     }
                 }
+                if(settings.autoSkipOPED && (new.skipType=="op" || new.skipType=="ed") && !skippedTimeStamps.contains(new)){
+                    exoPlayer.seekTo((new.interval.endTime * 1000).toLong())
+                    skippedTimeStamps.add(new)
+                }
                 new.skipType.getType()
             } else {
                 skipTimeButton.visibility = View.GONE
-                exoSkip.visibility = View.VISIBLE
+                if (settings.skipTime > 0) exoSkip.visibility = View.VISIBLE
                 ""
             }
         }
