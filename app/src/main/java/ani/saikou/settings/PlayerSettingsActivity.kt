@@ -123,6 +123,12 @@ class PlayerSettingsActivity : AppCompatActivity() {
             saveData(player, settings)
         }
 
+        binding.playerSettingsTimeStamps.isChecked = settings.timeStampsEnabled
+        binding.playerSettingsTimeStamps.setOnCheckedChangeListener { _, isChecked ->
+            settings.timeStampsEnabled = isChecked
+            saveData(player, settings)
+        }
+
         binding.playerSettingsShowTimeStamp.isChecked = settings.showTimeStampButton
         binding.playerSettingsShowTimeStamp.setOnCheckedChangeListener { _, isChecked ->
             settings.showTimeStampButton = isChecked

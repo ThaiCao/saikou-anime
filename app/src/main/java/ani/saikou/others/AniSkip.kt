@@ -29,21 +29,20 @@ object AniSkip {
     @Serializable
     data class Stamp(
         val interval: AniSkipInterval,
-        val skipType: SkipType,
+        val skipType: String,
         val skipId: String,
         val episodeLength: Double
     )
 
-    @Suppress("EnumEntryName")
-    enum class SkipType {
-        op, ed, recap;
 
-        fun getString(): String {
-            return when (this) {
-                op    -> "Opening"
-                ed    -> "Ending"
-                recap -> "Recap"
-            }
+    fun String.getType(): String {
+        return when (this) {
+            "op"    -> "Opening"
+            "ed"    -> "Ending"
+            "recap" -> "Recap"
+            "mixed-ed" -> "Mixed Ending"
+            "mixed-op" -> "Mixed Opening"
+            else -> this
         }
     }
 

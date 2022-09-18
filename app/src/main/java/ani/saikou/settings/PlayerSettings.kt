@@ -30,6 +30,7 @@ data class PlayerSettings(
     //Behaviour
     var alwaysContinue: Boolean = true,
     var focusPause: Boolean = true,
+    var timeStampsEnabled: Boolean = true,
     var showTimeStampButton: Boolean = true,
     var gestures: Boolean = true,
     var doubleTap: Boolean = true,

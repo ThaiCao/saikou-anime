@@ -283,5 +283,6 @@
     <string name="share">Share</string>
     <string name="skip">Skip</string>
     <string name="show_skip_time_stamp_button">Show Skip Time Stamp Button</string>
+    <string name="always_load_time_stamps">Always Load Time Stamps</string>
 
 </resources>

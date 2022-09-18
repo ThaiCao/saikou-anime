@@ -47,6 +47,7 @@ import ani.saikou.databinding.ActivityExoplayerBinding
 import ani.saikou.media.Media
 import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.others.AniSkip
+import ani.saikou.others.AniSkip.getType
 import ani.saikou.others.ResettableTimer
 import ani.saikou.parsers.*
 import ani.saikou.settings.PlayerSettings
@@ -902,8 +903,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         else model.setEpisode(episodes[media.anime!!.selectedEpisode!!]!!, "invoke")
 
         //Start the recursive Fun
-        updateTimeStamp()
-
+        if(settings.timeStampsEnabled)
+            updateTimeStamp()
     }
 
     private fun initPlayer() {
@@ -1195,12 +1196,12 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 if(settings.showTimeStampButton) {
                     skipTimeButton.visibility = View.VISIBLE
                     exoSkip.visibility = View.GONE
-                    skipTimeText.text = new.skipType.getString()
+                    skipTimeText.text = new.skipType.getType()
                     skipTimeButton.setOnClickListener {
                         exoPlayer.seekTo((new.interval.endTime * 1000).toLong())
                     }
                 }
-                new.skipType.getString()
+                new.skipType.getType()
             } else {
                 skipTimeButton.visibility = View.GONE
                 exoSkip.visibility = View.VISIBLE
