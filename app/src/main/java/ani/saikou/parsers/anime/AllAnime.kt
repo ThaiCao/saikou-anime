@@ -84,6 +84,7 @@ class AllAnime : AnimeParser() {
             "gogo" in domain    -> GogoCDN(server)
             "goload" in domain  -> GogoCDN(server)
             "sb" in domain      -> StreamSB(server)
+            "sss" in domain      -> StreamSB(server)
             "fplayer" in domain -> FPlayer(server)
             "fembed" in domain  -> FPlayer(server)
             "apivtwo" in path   -> AllAnimeExtractor(server)
