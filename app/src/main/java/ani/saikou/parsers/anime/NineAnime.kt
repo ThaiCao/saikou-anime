@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
 import org.jsoup.Jsoup
 import java.net.URLDecoder.decode
 import java.net.URLEncoder.encode
+
 class NineAnime : AnimeParser() {
 
     override val name = "9anime"
@@ -74,7 +75,6 @@ class NineAnime : AnimeParser() {
         val vrf = encodeVrf(query)
         val searchLink =
             "$hostUrl/filter?language%5B%5D=${if (selectDub) "dubbed" else "subbed"}&keyword=${encode(query)}&vrf=${vrf}&page=1"
-        println(searchLink)
         return client.get(searchLink).document.select("#list-items div.ani.poster.tip > a").map {
             val link = hostUrl + it.attr("href")
             val img = it.select("img")
@@ -122,18 +122,21 @@ class NineAnime : AnimeParser() {
 
 
     companion object {
-        private var lastChecked = 0L
-        private const val jsonLink = "https://raw.githubusercontent.com/chenkaslowankiya/BruvFlow/main/keys.json"
-        private var cipherKey: Key? = Key("sUuzSWVbCkqDDrkz","hlPeNwkncH0fq9so",
-            """GDCCEGGDCCEGGDCCHEDDFHHEDDFHHEDDIFEEGIIFEEGIIFEEJGFFHJJGFFHJJGFFKHGGIKKHGGIKKHGGLIHHJLLIHHJLLIHHMJIIKMMJIIKMMJIINKJJLNNKJJLNNKJJOLKKMOOLKKMOOLKKPMLLNPPMLLNPPMLLQNMMOQQNMMOQQNMMRONNPRRONNPRRONNSPOOQSSPOOQSSPOOTQPPRTTQPPRTTQPPURQQSUURQQSUURQQVSRRTVVSRRTVVSRRWTSSUWWTSSUWWTSSXUTTVXXUTTVXXUTTYVUUWYYVUUWYYVUUZWVVXZZWVVXZZWVV[XWWY[[XWWY[[XWW\\YXXZ\\\\YXXZ\\\\YXX]ZYY[]]ZYY[]]ZYY^[ZZ\\^^[ZZ\\^^[ZZ_\\[[]__\\[[]__\\[[`]\\\\^``]\\\\^``]\\\\gdcceggdcceggdccheddfhheddfhheddifeegiifeegiifeejgffhjjgffhjjgffkhggikkhggikkhgglihhjllihhjllihhmjiikmmjiikmmjiinkjjlnnkjjlnnkjjolkkmoolkkmoolkkpmllnppmllnppmllqnmmoqqnmmoqqnmmronnprronnprronnspooqsspooqsspootqpprttqpprttqppurqqsuurqqsuurqqvsrrtvvsrrtvvsrrwtssuwwtssuwwtssxuttvxxuttvxxuttyvuuwyyvuuwyyvuuzwvvxzzwvvxzzwvv{xwwy{{xwwy{{xww|yxxz||yxxz||yxx}zyy{}}zyy{}}zyy~{zz|~~{zz|~~{zz|{{}|{{}|{{}||~}||~}||6322466322466322743357743357743385446885446885449655799655799655:7668::7668::766;8779;;8779;;877<988:<<988:<<988=:99;==:99;==:99>;::<>>;::<>>;::?<;;=??<;;=??<;;1.--/11.--/11.--C@??ACC@??ACC@??5211355211355211ebaaceebaaceebaa"""
+//        private var lastChecked = 0L
+//        private const val jsonLink = "https://raw.githubusercontent.com/chenkaslowankiya/BruvFlow/main/keys.json"
+        private var cipherKey: Key = Key(
+            "sUuzSWVbCkqDDrkz",
+            "hlPeNwkncH0fq9so",
+            "GDCCEGGDCCEGGDCCHEDDFHHEDDFHHEDDIFEEGIIFEEGIIFEEJGFFHJJGFFHJJGFFKHGGIKKHGGIKKHGGLIHHJLLIHHJLLIHHMJIIKMMJIIKMMJIINKJJLNNKJJLNNKJJOLKKMOOLKKMOOLKKPMLLNPPMLLNPPMLLQNMMOQQNMMOQQNMMRONNPRRONNPRRONNSPOOQSSPOOQSSPOOTQPPRTTQPPRTTQPPURQQSUURQQSUURQQVSRRTVVSRRTVVSRRWTSSUWWTSSUWWTSSXUTTVXXUTTVXXUTTYVUUWYYVUUWYYVUUZWVVXZZWVVXZZWVV[XWWY[[XWWY[[XWW\\YXXZ\\\\YXXZ\\\\YXX]ZYY[]]ZYY[]]ZYY^[ZZ\\^^[ZZ\\^^[ZZ_\\[[]__\\[[]__\\[[`]\\\\^``]\\\\^``]\\\\gdcceggdcceggdccheddfhheddfhheddifeegiifeegiifeejgffhjjgffhjjgffkhggikkhggikkhgglihhjllihhjllihhmjiikmmjiikmmjiinkjjlnnkjjlnnkjjolkkmoolkkmoolkkpmllnppmllnppmllqnmmoqqnmmoqqnmmronnprronnprronnspooqsspooqsspootqpprttqpprttqppurqqsuurqqsuurqqvsrrtvvsrrtvvsrrwtssuwwtssuwwtssxuttvxxuttvxxuttyvuuwyyvuuwyyvuuzwvvxzzwvvxzzwvv{xwwy{{xwwy{{xww|yxxz||yxxz||yxx}zyy{}}zyy{}}zyy~{zz|~~{zz|~~{zz|{{}|{{}|{{}||~}||~}||6322466322466322743357743357743385446885446885449655799655799655:7668::7668::766;8779;;8779;;877<988:<<988:<<988=:99;==:99;==:99>;::<>>;::<>>;::?<;;=??<;;=??<;;1.--/11.--/11.--C@??ACC@??ACC@??5211355211355211ebaaceebaaceebaa"
         )
-        private suspend fun getKey(): Key {
-            //            cipherKey = if (cipherKey != null && (lastChecked - System.currentTimeMillis()) < 1000 * 60 * 30) cipherKey!!
-            //            else {
-            //                lastChecked = System.currentTimeMillis()
-            //                client.get(jsonLink).parsed()
-            //            }
-            return cipherKey!!
+
+        private fun getKey(): Key {
+//            cipherKey = if (cipherKey != null && (lastChecked - System.currentTimeMillis()) < 1000 * 60 * 30) cipherKey!!
+//            else {
+//                lastChecked = System.currentTimeMillis()
+//                client.get(jsonLink).parsed()
+//            }
+            return cipherKey
 
         }
 
@@ -141,21 +144,23 @@ class NineAnime : AnimeParser() {
         data class Key(
             val cipher: String,
             val decipher: String,
-            val keyTable:String
+            val keyTable: String
         )
 
-        private suspend fun encodeVrf(text: String): String = encode(encrypt(mapKeys(encrypt(cipher(getKey().cipher,text), baseTable),getKey().keyTable), baseTable))
+        private fun encodeVrf(text: String): String =
+            encode(encrypt(mapKeys(encrypt(cipher(getKey().cipher, text), baseTable), getKey().keyTable), baseTable))
 
-        private fun mapKeys(encrypted:String, keyMap:String): String {
-            val table =keyMap.split("")
+        private fun mapKeys(encrypted: String, keyMap: String): String {
+            val table = keyMap.split("")
             return encrypted.mapIndexedNotNull { i, c ->
-                table.getOrNull((baseTable1.indexOf(c) * 16)+1 + (i % 16))
+                table.getOrNull((baseTable1.indexOf(c) * 16) + 1 + (i % 16))
             }.joinToString("")
         }
-        private const val baseTable  ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=_"
-        private const val baseTable1 ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+=/_"
 
-        private suspend fun decodeVrf(text: String): String = decode(cipher(getKey().decipher, decrypt(text)))
+        private const val baseTable = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=_"
+        private const val baseTable1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+=/_"
+
+        private fun decodeVrf(text: String): String = decode(cipher(getKey().decipher, decrypt(text)))
 
         fun encrypt(input: String, key: String): String {
             if (input.any { it.code > 255 }) throw Exception("illegal characters!")
@@ -208,7 +213,7 @@ class NineAnime : AnimeParser() {
 
         @Suppress("SameParameterValue")
         private fun decrypt(input: String): String {
-            val key="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+            val key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
             val t = if (input.replace("""[\t\n\f\r]""".toRegex(), "").length % 4 == 0) {
                 input.replace("""==?$""".toRegex(), "")
             } else input

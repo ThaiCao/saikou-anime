@@ -13,6 +13,7 @@ open class Tenshi : AnimeParser() {
     override val name: String = "Tenshi"
     override val saveName: String = "tenshi_moe"
     override val hostUrl: String = "https://tenshi.moe"
+    override val malSyncBackupName: String = "Tenshi"
     override val isDubAvailableSeparately: Boolean = false
 
     private var cookieHeader = "Cookie" to "__ddg1_=;__ddg2_=;loop-view=thumb"
@@ -54,7 +55,7 @@ open class Tenshi : AnimeParser() {
         return htmlResponse.document.select("ul.loop.anime-loop.thumb > li > a").map {
             ShowResponse(
                 it.attr("title"),
-                it.attr("href"),
+                it.attr("href").apply{ println("c : $this")},
                 FileUrl(it.select(".image")[0].attr("src"), mapOf(cookieHeader))
             )
         }
