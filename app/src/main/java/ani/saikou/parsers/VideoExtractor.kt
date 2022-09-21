@@ -88,6 +88,8 @@ data class Video(
      *
      * This makes the app show it as a "Multi Quality" Link
      * **/
+
+    // TODO: Probably change this to `isPlaylist` or `isStreaming` to support both HLS and DASH streaming. We can keep this one to avoid breaking change.
     val isM3U8: Boolean,
 
     /**
