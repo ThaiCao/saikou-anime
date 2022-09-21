@@ -128,9 +128,9 @@ class Kamyroll : AnimeParser() {
                 mapOf("accept" to "*/*", "accept-encoding" to "gzip")
             )
             if (link.url.contains("pstream.net")) return PStream(VideoServer("PStream", link.url)).extract()
-            val vid = listOf(Video(null, true, link))
+            val vid = listOf(Video(null, VideoType.M3U8, link))
             val subtitle = if (foundSub) eps.subtitles?.find { it.locale == locale || it.locale == "en-GB" }
-                .let { listOf(Subtitle("English", it?.url ?: return@let null, "ass")) } else null
+                .let { listOf(Subtitle("English", it?.url ?: return@let null, SubtitleType.ASS)) } else null
             return VideoContainer(vid, subtitle ?: listOf())
         }
 

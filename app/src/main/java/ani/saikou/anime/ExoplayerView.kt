@@ -347,22 +347,20 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 }.toBooleanArray()
                 playerView.setExtraAdGroupMarkers(adGroups, playedAdGroups)
                 View.VISIBLE
-            }
-            else View.GONE
+            } else View.GONE
         }
 
-        exoSkipOpEd.alpha = if(settings.autoSkipOPED) 1f else 0.3f
+        exoSkipOpEd.alpha = if (settings.autoSkipOPED) 1f else 0.3f
         exoSkipOpEd.setOnClickListener {
-            settings.autoSkipOPED = if(settings.autoSkipOPED) {
+            settings.autoSkipOPED = if (settings.autoSkipOPED) {
                 toastString("Disabled Auto Skipping OP & ED")
                 false
-            }
-            else{
+            } else {
                 toastString("Auto Skipping OP & ED")
                 true
             }
             saveData("player_settings", settings)
-            exoSkipOpEd.alpha = if(settings.autoSkipOPED) 1f else 0.3f
+            exoSkipOpEd.alpha = if (settings.autoSkipOPED) 1f else 0.3f
         }
 
         //Play Pause
@@ -946,7 +944,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
 
         val but = playerView.findViewById<ImageButton>(R.id.exo_download)
-        if (video?.isM3U8 == false) {
+        if (video?.format == VideoType.CONTAINER) {
             but.visibility = View.VISIBLE
             but.setOnClickListener {
                 download(this, episode, animeTitle.text.toString())
@@ -981,9 +979,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 .setSelectionFlags(C.SELECTION_FLAG_FORCED)
                 .setMimeType(
                     when (subtitle?.type) {
-                        "vtt"        -> MimeTypes.TEXT_VTT
-                        "ass", "ssa" -> MimeTypes.TEXT_SSA
-                        else         -> MimeTypes.TEXT_UNKNOWN
+                        SubtitleType.VTT -> MimeTypes.TEXT_VTT
+                        SubtitleType.ASS -> MimeTypes.TEXT_SSA
+                        SubtitleType.SRT -> MimeTypes.APPLICATION_SUBRIP
+                        else             -> MimeTypes.TEXT_UNKNOWN
                     }
                 )
                 .build()
@@ -1150,7 +1149,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val height = (exoPlayer.videoFormat ?: return).height
         val width = (exoPlayer.videoFormat ?: return).width
 
-        if (video?.isM3U8 == true) {
+        if (video?.format != VideoType.CONTAINER) {
             saveData("maxHeight", height)
             saveData("maxWidth", width)
         }
@@ -1200,7 +1199,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     //TimeStamp Updating
     private var currentTimeStamp: AniSkip.Stamp? = null
-    private var skippedTimeStamps : MutableList<AniSkip.Stamp> = mutableListOf()
+    private var skippedTimeStamps: MutableList<AniSkip.Stamp> = mutableListOf()
     private fun updateTimeStamp() {
         if (isInitialized) {
             val playerCurrentTime = exoPlayer.currentPosition / 1000
@@ -1218,7 +1217,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                         exoPlayer.seekTo((new.interval.endTime * 1000).toLong())
                     }
                 }
-                if(settings.autoSkipOPED && (new.skipType=="op" || new.skipType=="ed") && !skippedTimeStamps.contains(new)){
+                if (settings.autoSkipOPED && (new.skipType == "op" || new.skipType == "ed") && !skippedTimeStamps.contains(new)) {
                     exoPlayer.seekTo((new.interval.endTime * 1000).toLong())
                     skippedTimeStamps.add(new)
                 }

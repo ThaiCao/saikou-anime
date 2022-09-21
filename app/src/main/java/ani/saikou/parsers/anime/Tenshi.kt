@@ -79,7 +79,7 @@ open class Tenshi : AnimeParser() {
             return VideoContainer(json.sources.mapNotNull {
                 if (it.src != null) {
                     val fileUrl = FileUrl(it.src, headers)
-                    Video(it.size, false, fileUrl, getSize(fileUrl))
+                    Video(it.size, VideoType.CONTAINER, fileUrl, getSize(fileUrl))
                 } else null
             })
         }

@@ -187,13 +187,13 @@ class AllAnime : AnimeParser() {
                 val urlPath = Uri.parse(it).path
                 if (urlPath != null) {
                     if (urlPath.endsWith(".m3u8")) {
-                        videos.add(Video(null, true, fileUrl, getSize(fileUrl)))
+                        videos.add(Video(null, VideoType.M3U8, fileUrl))
                     }
                     if (urlPath.endsWith(".mp4")) {
                         if ("king.stronganime" in it) {
                             headers["Referer"] = "https://allanime.site"
                         }
-                        videos.add(Video(null, false, fileUrl, getSize(fileUrl)))
+                        videos.add(Video(null, VideoType.CONTAINER, fileUrl, getSize(fileUrl)))
                     }
                 }
             }

@@ -46,10 +46,10 @@ class RapidCloud(override val server: VideoServer) : VideoExtractor() {
             else response.parsedSafe()
 
             sourceObject?.sources?.forEach {
-                videos.add(Video(0, true, FileUrl(it.file ?: return@forEach)))
+                videos.add(Video(0, VideoType.M3U8, FileUrl(it.file ?: return@forEach)))
             }
             sourceObject?.sourcesBackup?.forEach {
-                videos.add(Video(0, true, FileUrl(it.file ?: return@forEach), extraNote = "Backup"))
+                videos.add(Video(0, VideoType.M3U8, FileUrl(it.file ?: return@forEach), extraNote = "Backup"))
             }
             sourceObject?.tracks?.forEach {
                 if (it.kind == "captions" && it.label != null && it.file != null)
