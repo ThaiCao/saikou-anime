@@ -19,6 +19,7 @@ import android.net.NetworkCapabilities.*
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.text.InputFilter
 import android.text.Spanned
 import android.util.AttributeSet
@@ -581,10 +582,10 @@ abstract class GesturesListener : GestureDetector.SimpleOnGestureListener() {
     open fun onLongClick(event: MotionEvent?) {}
 }
 
-fun View.circularReveal(ex: Int, ey: Int, subX:Boolean, time: Long) {
+fun View.circularReveal(ex: Int, ey: Int, subX: Boolean, time: Long) {
     ViewAnimationUtils.createCircularReveal(
         this,
-        if(subX) (ex - x.toInt()) else ex,
+        if (subX) (ex - x.toInt()) else ex,
         ey - y.toInt(),
         0f,
         max(height, width).toFloat()
@@ -947,3 +948,21 @@ fun brightnessConverter(it: Float, fromLog: Boolean) =
             if (fromLog) log2((it * 256f)) * 12.5f / 100f else 2f.pow(it * 100f / 12.5f) / 256f
         else it, 0.001f, 1f
     )
+
+
+fun checkCountry(context: Context): Boolean {
+    val telMgr = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    println(TimeZone.getDefault().id)
+    println(telMgr.networkCountryIso)
+    return when (telMgr.simState) {
+        TelephonyManager.SIM_STATE_ABSENT -> {
+            val tz = TimeZone.getDefault().id
+            tz.equals("Asia/Kolkata", ignoreCase = true)
+        }
+        TelephonyManager.SIM_STATE_READY  -> {
+            val countryCodeValue = telMgr.networkCountryIso
+            countryCodeValue.equals("in", ignoreCase = true)
+        }
+        else -> false
+    }
+}

@@ -15,7 +15,7 @@ android {
         minSdk 21
         targetSdk 32
         versionCode 61
-        versionName "1.2.0.19"
+        versionName "1.2.0.20"
         signingConfig signingConfigs.debug
     }
 

@@ -176,6 +176,11 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                     binding.mediaListRewatch.setText(this.toString())
                 }
 
+                if(media?.inCustomListsOf?.isEmpty() != false)
+                    binding.mediaListAddCustomList.apply {
+                        (parent as ViewGroup).removeView(this)
+                    }
+
                 media?.inCustomListsOf?.forEach {
                     SwitchMaterial(requireContext()).apply {
                         isChecked = it.value

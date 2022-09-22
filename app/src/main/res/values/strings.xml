@@ -3,7 +3,7 @@
     <string name="repo">saikou-app/saikou</string>
 
     <string name="app_name">Saikou</string>
-    <string name="slogan">The Best Anime, Manga &amp; Novel app for Android.</string>
+    <string name="slogan">The Best Anime &amp; Manga app for Android.</string>
 
     <string name="login">Login</string>
     <string name="logout">Logout</string>
@@ -159,13 +159,16 @@
         <item>Internet sucks? search taking too much time? try spam-Clicking the Progress Bar</item>
         <item>Challenge: Go to the very bottom of the Popular Anime &amp; Manga</item>
         <item>Try Long Clicking the Show\'s Title.</item>
-        <item>Don\'t be like lonely, they meant the Kuro App.</item>
         <item>Damn, why are you wasting your Time?</item>
         <item>Looks like someone likes this Animation.</item>
-        <item>Upgrade to Android 12 to get this every time you open the App.</item>
-        <item>Lord &amp; Saviour - brahmkshatriya</item>
         <item>You can Long Click to copy this Message.</item>
         <item>Saikou!</item>
+        <item>OMG LOOK YOU! FOUND AN EASTER EGG!?!?</item>
+        <item>You know who else likes this Animation?</item>
+        <item>My Mom!</item>
+        <item>9anime be crying</item>
+        <item>MAL support? bruh.</item>
+        <item>Novels? more like NO vels.</item>
     </string-array>
 
     <string name="video">Video</string>
@@ -290,5 +293,7 @@
     <string name="requires_time_stamps_to_be_enabled">Requires Time Stamps to be Enabled</string>
     <string name="total_repeats">TOTAL REPEATS</string>
     <string name="custom_lists">Custom Lists</string>
+    <string name="donate_desc">Want to support Saikou\'s Creator?\nConsider Donating</string>
+    <string name="donate_goal">(We just reached a goal of $100!)</string>
 
 </resources>
