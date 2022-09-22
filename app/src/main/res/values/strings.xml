@@ -288,5 +288,7 @@
     <string name="other">Other</string>
     <string name="auto_skip_op_ed">Auto Skip OP / ED</string>
     <string name="requires_time_stamps_to_be_enabled">Requires Time Stamps to be Enabled</string>
+    <string name="total_repeats">TOTAL REPEATS</string>
+    <string name="custom_lists">Custom Lists</string>
 
 </resources>

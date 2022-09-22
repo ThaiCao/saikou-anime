@@ -4,14 +4,23 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
+import androidx.core.content.withStyledAttributes
 import androidx.core.view.children
+import ani.saikou.R
+
 
 class Xpandable @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
+    var expanded: Boolean? = true
+
+    init {
+        context.withStyledAttributes(attrs, R.styleable.Xpandable) {
+            expanded = getBoolean(R.styleable.Xpandable_isExpanded, false)
+        }
+    }
 
     override fun onAttachedToWindow() {
-        var expanded: Boolean? = false
 
         getChildAt(0)!!.setOnClickListener {
             expanded ?: return@setOnClickListener
@@ -23,7 +32,7 @@ class Xpandable @JvmOverloads constructor(
             }, 300)
         }
 
-        children.forEach {
+        if(!expanded!!) children.forEach {
             if (it != getChildAt(0)){
                 it.visibility = GONE
             }
