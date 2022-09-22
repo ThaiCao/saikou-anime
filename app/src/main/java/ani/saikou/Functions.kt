@@ -952,8 +952,6 @@ fun brightnessConverter(it: Float, fromLog: Boolean) =
 
 fun checkCountry(context: Context): Boolean {
     val telMgr = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    println(TimeZone.getDefault().id)
-    println(telMgr.networkCountryIso)
     return when (telMgr.simState) {
         TelephonyManager.SIM_STATE_ABSENT -> {
             val tz = TimeZone.getDefault().id

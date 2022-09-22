@@ -55,7 +55,7 @@ open class Tenshi : AnimeParser() {
         return htmlResponse.document.select("ul.loop.anime-loop.thumb > li > a").map {
             ShowResponse(
                 it.attr("title"),
-                it.attr("href").apply{ println("c : $this")},
+                it.attr("href"),
                 FileUrl(it.select(".image")[0].attr("src"), mapOf(cookieHeader))
             )
         }
