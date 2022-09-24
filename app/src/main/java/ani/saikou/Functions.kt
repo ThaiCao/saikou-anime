@@ -524,28 +524,28 @@ abstract class GesturesListener : GestureDetector.SimpleOnGestureListener() {
     private var timer: Timer? = null //at class level;
     private val delay: Long = 200
 
-    override fun onSingleTapUp(e: MotionEvent): Boolean {
+    override fun onSingleTapUp(e: MotionEvent?): Boolean {
         processSingleClickEvent(e)
         return super.onSingleTapUp(e)
     }
 
-    override fun onLongPress(e: MotionEvent) {
+    override fun onLongPress(e: MotionEvent?) {
         processLongClickEvent(e)
         super.onLongPress(e)
     }
 
-    override fun onDoubleTap(e: MotionEvent): Boolean {
+    override fun onDoubleTap(e: MotionEvent?): Boolean {
         processDoubleClickEvent(e)
         return super.onDoubleTap(e)
     }
 
-    override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+    override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
         onScrollYClick(distanceY)
         onScrollXClick(distanceX)
         return super.onScroll(e1, e2, distanceX, distanceY)
     }
 
-    private fun processSingleClickEvent(e: MotionEvent) {
+    private fun processSingleClickEvent(e: MotionEvent?) {
         val handler = Handler(Looper.getMainLooper())
         val mRunnable = Runnable {
             onSingleClick(e)

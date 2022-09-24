@@ -28,7 +28,10 @@ import android.util.Rational
 import android.util.TypedValue
 import android.view.*
 import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ImageButton
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -1184,7 +1187,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             lifecycleScope.launch(Dispatchers.IO) {
                 model.loadTimeStamps(
                     media.idMAL,
-                    media.anime?.selectedEpisode?.toInt(),
+                    media.anime?.selectedEpisode?.trim()?.toIntOrNull(),
                     dur / 1000
                 )
             }

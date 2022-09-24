@@ -178,7 +178,7 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
 
                 if(media?.inCustomListsOf?.isEmpty() != false)
                     binding.mediaListAddCustomList.apply {
-                        (parent as ViewGroup).removeView(this)
+                        (parent as? ViewGroup)?.removeView(this)
                     }
 
                 media?.inCustomListsOf?.forEach {
