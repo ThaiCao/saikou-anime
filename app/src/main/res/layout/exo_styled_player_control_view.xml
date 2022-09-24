@@ -360,6 +360,17 @@
                             tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
                         <ImageButton
+                            android:id="@+id/exo_settings"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:backgroundTint="#00FFFFFF"
+                            android:src="@drawable/ic_round_video_settings_24"
+                            app:tint="#fff"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+                        <ImageButton
                             android:id="@+id/exo_quality"
                             android:layout_width="wrap_content"
                             android:layout_height="48dp"

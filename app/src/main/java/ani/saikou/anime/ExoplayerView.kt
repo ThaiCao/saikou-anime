@@ -28,10 +28,7 @@ import android.util.Rational
 import android.util.TypedValue
 import android.view.*
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView
-import android.widget.ImageButton
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -98,6 +95,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private lateinit var playerView: StyledPlayerView
     private lateinit var exoPlay: ImageButton
     private lateinit var exoSource: ImageButton
+    private lateinit var exoSettings: ImageButton
     private lateinit var exoRotate: ImageButton
     private lateinit var exoQuality: ImageButton
     private lateinit var exoSpeed: ImageButton
@@ -142,17 +140,17 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     private var isFullscreen: Int = 0
     private var isInitialized = false
     private var isPlayerPlaying = true
-    private var changingServer = false
+    var changingServer = false
     private var interacted = false
 
     private var pipEnabled = false
     private var aspectRatio = Rational(16, 9)
 
-    private var settings = PlayerSettings()
+    var settings = PlayerSettings()
     private var uiSettings = UserInterfaceSettings()
 
     private val handler = Handler(Looper.getMainLooper())
-    private val model: MediaDetailsViewModel by viewModels()
+    val model: MediaDetailsViewModel by viewModels()
 
     private var isTimeStampsLoaded = false
 
@@ -196,6 +194,63 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
     }
 
+    private fun setupSubFormatting(playerView: StyledPlayerView, settings: PlayerSettings) {
+        val primaryColor = when (settings.primaryColor) {
+            0    -> Color.BLACK
+            1    -> Color.DKGRAY
+            2    -> Color.GRAY
+            3    -> Color.LTGRAY
+            4    -> Color.WHITE
+            5    -> Color.RED
+            6    -> Color.YELLOW
+            7    -> Color.GREEN
+            8    -> Color.CYAN
+            9    -> Color.BLUE
+            10   -> Color.MAGENTA
+            11   -> Color.TRANSPARENT
+            else -> Color.WHITE
+        }
+        val secondaryColor = when (settings.secondaryColor) {
+            0    -> Color.BLACK
+            1    -> Color.DKGRAY
+            2    -> Color.GRAY
+            3    -> Color.LTGRAY
+            4    -> Color.WHITE
+            5    -> Color.RED
+            6    -> Color.YELLOW
+            7    -> Color.GREEN
+            8    -> Color.CYAN
+            9    -> Color.BLUE
+            10   -> Color.MAGENTA
+            11   -> Color.TRANSPARENT
+            else -> Color.BLACK
+        }
+        val outline = when (settings.outline) {
+            0    -> EDGE_TYPE_OUTLINE // Normal
+            1    -> EDGE_TYPE_DEPRESSED // Shine
+            2    -> EDGE_TYPE_DROP_SHADOW // Drop shadow
+            3    -> EDGE_TYPE_NONE // No outline
+            else -> EDGE_TYPE_OUTLINE // Normal
+        }
+        val font = when (settings.font) {
+            0    -> ResourcesCompat.getFont(this, R.font.poppins_semi_bold)
+            1    -> ResourcesCompat.getFont(this, R.font.poppins_bold)
+            2    -> ResourcesCompat.getFont(this, R.font.poppins)
+            3    -> ResourcesCompat.getFont(this, R.font.poppins_thin)
+            else -> ResourcesCompat.getFont(this, R.font.poppins_semi_bold)
+        }
+        playerView.subtitleView?.setStyle(
+            CaptionStyleCompat(
+                primaryColor,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT,
+                outline,
+                secondaryColor,
+                font
+            )
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExoplayerBinding.inflate(layoutInflater)
@@ -212,6 +267,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         exoQuality = playerView.findViewById(R.id.exo_quality)
         exoPlay = playerView.findViewById(R.id.exo_play)
         exoSource = playerView.findViewById(R.id.exo_source)
+        exoSettings = playerView.findViewById(R.id.exo_settings)
         exoRotate = playerView.findViewById(R.id.exo_rotate)
         exoSpeed = playerView.findViewById(R.id.exo_playback_speed)
         exoScreen = playerView.findViewById(R.id.exo_screen)
@@ -261,61 +317,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             orientationListener?.enable()
         }
 
-        val primaryColor = when (settings.primaryColor) {
-            0    -> Color.BLACK
-            1    -> Color.DKGRAY
-            2    -> Color.GRAY
-            3    -> Color.LTGRAY
-            4    -> Color.WHITE
-            5    -> Color.RED
-            6    -> Color.YELLOW
-            7    -> Color.GREEN
-            8    -> Color.CYAN
-            9    -> Color.BLUE
-            10   -> Color.MAGENTA
-            11   -> Color.TRANSPARENT
-            else -> Color.WHITE
-        }
-        val secondaryColor = when (settings.secondaryColor) {
-            0    -> Color.BLACK
-            1    -> Color.DKGRAY
-            2    -> Color.GRAY
-            3    -> Color.LTGRAY
-            4    -> Color.WHITE
-            5    -> Color.RED
-            6    -> Color.YELLOW
-            7    -> Color.GREEN
-            8    -> Color.CYAN
-            9    -> Color.BLUE
-            10   -> Color.MAGENTA
-            11   -> Color.TRANSPARENT
-            else -> Color.BLACK
-        }
-        val outline = when (settings.outline) {
-            0    -> EDGE_TYPE_OUTLINE // Normal
-            1    -> EDGE_TYPE_DEPRESSED // Shine
-            2    -> EDGE_TYPE_DROP_SHADOW // Drop shadow
-            3    -> EDGE_TYPE_NONE // No outline
-            else -> EDGE_TYPE_OUTLINE // Normal
-        }
-        val font = when (settings.font) {
-            0    -> ResourcesCompat.getFont(this, R.font.poppins_semi_bold)
-            1    -> ResourcesCompat.getFont(this, R.font.poppins_bold)
-            2    -> ResourcesCompat.getFont(this, R.font.poppins)
-            3    -> ResourcesCompat.getFont(this, R.font.poppins_thin)
-            else -> ResourcesCompat.getFont(this, R.font.poppins_semi_bold)
-        }
+        setupSubFormatting(playerView, settings)
 
-        playerView.subtitleView?.setStyle(
-            CaptionStyleCompat(
-                primaryColor,
-                Color.TRANSPARENT,
-                Color.TRANSPARENT,
-                outline,
-                secondaryColor,
-                font
-            )
-        )
+
         playerView.subtitleView?.alpha = when (settings.subtitles) {
             true  -> 1f
             false -> 0f
@@ -1002,6 +1006,12 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //Source
         exoSource.setOnClickListener {
             sourceClick()
+        }
+
+        //Settings
+        exoSettings.setOnClickListener {
+            saveData("${media.id}_${media.anime!!.selectedEpisode}", exoPlayer.currentPosition, this)
+            PlayerSettingsDialogFragment.newInstance().show(supportFragmentManager, "settings")
         }
 
         //Quality Track
