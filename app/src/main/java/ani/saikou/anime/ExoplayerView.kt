@@ -988,7 +988,14 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 .build()
         else null
 
-        val builder = MediaItem.Builder().setUri(video!!.url.url)
+        val mimeType = when (video?.format) {
+            VideoType.M3U8 -> MimeTypes.APPLICATION_M3U8
+            VideoType.DASH -> MimeTypes.APPLICATION_MPD
+            else           -> MimeTypes.APPLICATION_MP4
+        }
+
+        val builder = MediaItem.Builder().setUri(video!!.url.url).setMimeType(mimeType)
+
         if (sub != null) builder.setSubtitleConfigurations(mutableListOf(sub))
         mediaItem = builder.build()
 
