@@ -81,7 +81,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                         fun load() {
                             val size = ep.extractors?.find { it.server.name == selected }?.videos?.size
                             if (size!=null && size >= media!!.selected!!.video) {
-                                media!!.anime!!.episodes?.get(media!!.anime!!.selectedEpisode!!)?.selectedServer = selected
+                                media!!.anime!!.episodes?.get(media!!.anime!!.selectedEpisode!!)?.selectedExtractor = selected
                                 media!!.anime!!.episodes?.get(media!!.anime!!.selectedEpisode!!)?.selectedVideo = media!!.selected!!.video
                                 startExoplayer(media!!)
                             } else fail()
@@ -222,7 +222,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                     (if (video.extraNote != null) " : " else "") + DecimalFormat("#.##").format(video.size ?: 0).toString() + " MB"
                 binding.urlDownload.visibility = View.VISIBLE
                 binding.urlDownload.setSafeOnClickListener {
-                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedServer = extractor.server.name
+                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedExtractor = extractor.server.name
                     media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.selectedVideo = position
                     binding.urlDownload.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                     download(
@@ -244,7 +244,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
         private inner class UrlViewHolder(val binding: ItemUrlBinding) : RecyclerView.ViewHolder(binding.root) {
             init {
                 itemView.setSafeOnClickListener {
-                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]?.selectedServer = extractor.server.name
+                    media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]?.selectedExtractor = extractor.server.name
                     media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]?.selectedVideo = bindingAdapterPosition
                     if (makeDefault) {
                         media!!.selected!!.server = extractor.server.name

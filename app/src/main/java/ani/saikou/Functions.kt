@@ -601,7 +601,7 @@ fun openLinkInBrowser(link: String?) {
 
 fun download(activity: Activity, episode: Episode, animeTitle: String) {
     val manager = activity.getSystemService(AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
-    val extractor = episode.extractors?.find { it.server.name == episode.selectedServer } ?: return
+    val extractor = episode.extractors?.find { it.server.name == episode.selectedExtractor } ?: return
     val video =
         if (extractor.videos.size > episode.selectedVideo) extractor.videos[episode.selectedVideo] else return
     val regex = "[\\\\/:*?\"<>|]".toRegex()

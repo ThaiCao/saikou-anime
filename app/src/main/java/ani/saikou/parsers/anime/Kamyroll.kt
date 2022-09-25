@@ -112,25 +112,29 @@ class Kamyroll : AnimeParser() {
                     "id" to server.embed.url,
                     localeHeader,
                     "type" to "adaptive_hls",
-                    "format" to "srt",
+                    "format" to "vtt",
                     "service" to service,
                 ),
                 timeout = 60
             ).parsed<StreamsResponse>()
 
-            var foundSub = false
             val link = FileUrl(
                 eps.streams?.find {
                     it.hardsubLocale == locale
                 }?.url ?: eps.streams?.find {
                     it.hardsubLocale == ""
-                }?.also { foundSub = true }?.url ?: return VideoContainer(listOf()),
+                }?.url ?: return VideoContainer(listOf()),
                 mapOf("accept" to "*/*", "accept-encoding" to "gzip")
             )
             if (link.url.contains("pstream.net")) return PStream(VideoServer("PStream", link.url)).extract()
             val vid = listOf(Video(null, VideoType.M3U8, link))
-            val subtitle = if (foundSub) eps.subtitles?.find { it.locale == locale || it.locale == "en-GB" }
-                .let { listOf(Subtitle("English", it?.url ?: return@let null, SubtitleType.ASS)) } else null
+            val subtitle = eps.subtitles?.mapNotNull {
+                Subtitle(
+                    it.locale ?: return@mapNotNull null,
+                    it.url ?: return@mapNotNull null,
+                    SubtitleType.VTT
+                )
+            }
             return VideoContainer(vid, subtitle ?: listOf())
         }
 
@@ -228,7 +232,7 @@ class Kamyroll : AnimeParser() {
             14   -> "tr-TR"
             else -> "en-US"
         }
-        private val locale = when(settings.subtitles){
+        private val locale = when (settings.subtitles) {
             true -> subLocale
             false -> ""
         }
