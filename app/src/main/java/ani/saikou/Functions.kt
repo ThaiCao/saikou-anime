@@ -14,6 +14,7 @@ import android.content.res.Configuration
 import android.content.res.Resources.getSystem
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.media.MediaScannerConnection
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities.*
 import android.net.Uri
@@ -679,7 +680,14 @@ fun saveImage(image: Bitmap, path: String, imageFileName: String): File? {
         val fOut: OutputStream = FileOutputStream(imageFile)
         image.compress(Bitmap.CompressFormat.PNG, 0, fOut)
         fOut.close()
+        scanFile(imageFile.absolutePath, currActivity()!!)
         imageFile
+    }
+}
+
+private fun scanFile(path: String, context: Context) {
+    MediaScannerConnection.scanFile(context, arrayOf(path), null) { p, _ ->
+        logger("Finished scanning $p")
     }
 }
 
@@ -961,6 +969,6 @@ fun checkCountry(context: Context): Boolean {
             val countryCodeValue = telMgr.networkCountryIso
             countryCodeValue.equals("in", ignoreCase = true)
         }
-        else -> false
+        else                              -> false
     }
 }

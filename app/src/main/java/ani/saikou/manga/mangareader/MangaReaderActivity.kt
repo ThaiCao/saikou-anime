@@ -356,8 +356,8 @@ class MangaReaderActivity : AppCompatActivity() {
                 }
             }
             else {
-                binding.RightSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex - 1) ?: "No Chapter"
-                binding.LeftSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex + 1) ?: "No Chapter"
+                binding.RightSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex + 1) ?: "No Chapter"
+                binding.LeftSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex - 1) ?: "No Chapter"
                 binding.mangaReaderSwipy.onLeftSwiped = {
                     binding.mangaReaderNextChapter.performClick()
                 }
