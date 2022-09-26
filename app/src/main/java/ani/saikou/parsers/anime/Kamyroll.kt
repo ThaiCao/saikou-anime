@@ -118,16 +118,22 @@ class Kamyroll : AnimeParser() {
                 timeout = 60
             ).parsed<StreamsResponse>()
 
-            val link = FileUrl(
-                eps.streams?.find {
-                    it.hardsubLocale == locale
-                }?.url ?: eps.streams?.find {
-                    it.hardsubLocale == ""
-                }?.url ?: return VideoContainer(listOf()),
-                mapOf("accept" to "*/*", "accept-encoding" to "gzip")
-            )
-            if (link.url.contains("pstream.net")) return PStream(VideoServer("PStream", link.url)).extract()
-            val vid = listOf(Video(null, VideoType.M3U8, link))
+            val video = eps.streams?.mapNotNull {
+                it.url ?: return@mapNotNull null
+                if (it.url.contains("pstream.net"))
+                    return PStream(VideoServer("PStream", it.url)).extract()
+                Video(
+                    null,
+                    VideoType.M3U8,
+                    FileUrl(
+                        it.url,
+                        mapOf("accept" to "*/*", "accept-encoding" to "gzip")
+                    ),
+                    null,
+                    it.hardsubLocale
+                )
+            }
+
             val subtitle = eps.subtitles?.mapNotNull {
                 Subtitle(
                     it.locale ?: return@mapNotNull null,
@@ -135,13 +141,13 @@ class Kamyroll : AnimeParser() {
                     SubtitleType.VTT
                 )
             }
-            return VideoContainer(vid, subtitle ?: listOf())
+            return VideoContainer(video ?: listOf(), subtitle ?: listOf())
         }
 
         @Serializable
         private data class StreamsResponse(
             @SerialName("subtitles") val subtitles: List<Subtitle>? = null,
-            @SerialName("streams") val streams: List<Stream>? = null
+            @SerialName("streams") var streams: List<Stream>? = null
         ) {
             @Serializable
             data class Stream(
@@ -233,7 +239,7 @@ class Kamyroll : AnimeParser() {
             else -> "en-US"
         }
         private val locale = when (settings.subtitles) {
-            true -> subLocale
+            true  -> subLocale
             false -> ""
         }
         private const val apiUrl = "https://kamyroll.herokuapp.com"
