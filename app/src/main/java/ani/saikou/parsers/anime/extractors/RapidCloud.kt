@@ -20,6 +20,7 @@ import javax.crypto.spec.SecretKeySpec
 class RapidCloud(override val server: VideoServer) : VideoExtractor() {
 
     override suspend fun extract(): VideoContainer {
+        println(server.embed.url)
         val videos = mutableListOf<Video>()
         val subtitles = mutableListOf<Subtitle>()
 
@@ -28,7 +29,7 @@ class RapidCloud(override val server: VideoServer) : VideoExtractor() {
 
         if (sId.isNotEmpty() && decryptKey.isNotEmpty()) {
             val jsonLink = "https://rapid-cloud.co/ajax/embed-6/getSources?id=${
-                server.embed.url.findBetween("/embed-6/", "?z=")!!
+                server.embed.url.findBetween("/embed-6/", "?")!!
             }&sId=$sId"
             val response = client.get(jsonLink)
 
