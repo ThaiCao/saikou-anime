@@ -18,8 +18,8 @@ import java.net.URLEncoder.encode
 class NineAnime : AnimeParser() {
 
     override val name = "9anime"
-    override val saveName = "9anime_id"
-    override val hostUrl = "https://9anime.id"
+    override val saveName = "9anime_pl"
+    override val hostUrl = "https://9anime.pl"
     override val malSyncBackupName = "9anime"
     override val isDubAvailableSeparately = true
 
