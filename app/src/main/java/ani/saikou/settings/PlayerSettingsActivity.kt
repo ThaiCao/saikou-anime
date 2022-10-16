@@ -392,7 +392,13 @@ class PlayerSettingsActivity : AppCompatActivity() {
             "[pt-PT] Portuguese (Portugal)",
             "[ru-RU] Russian",
             "[zh-CN] Chinese",
-            "[tr-TR] Turkish"
+            "[tr-TR] Turkish",
+            "[ar-SA] Arabic",
+            "[uk-UK] Ukrainian",
+            "[he-IL] Hebrew",
+            "[pl-PL] Polish",
+            "[ro-RO] Romanian",
+            "[sv-SE] Swedish"
         )
         val localeDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Subtitle Language")
         binding.subLang.setOnClickListener {

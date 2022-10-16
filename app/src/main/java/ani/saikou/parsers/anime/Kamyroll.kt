@@ -113,7 +113,6 @@ class Kamyroll : AnimeParser() {
                     localeHeader,
                     "type" to "adaptive_hls",
                     "format" to "vtt",
-                    "service" to service,
                 ),
                 timeout = 60
             ).parsed<StreamsResponse>()
@@ -144,6 +143,12 @@ class Kamyroll : AnimeParser() {
                         "zh-CN" -> "[zh-CN] Chinese (Simplified)"
                         "tr-TR" -> "[tr-TR] Turkish"
                         "ar-ME" -> "[ar-ME] Arabic"
+                        "ar-SA" -> "[ar-SA] Arabic"
+                        "uk-UK" -> "[uk-UK] Ukrainian"
+                        "he-IL" -> "[he-IL] Hebrew"
+                        "pl-PL" -> "[pl-PL] Polish"
+                        "ro-RO" -> "[ro-RO] Romanian"
+                        "sv-SE" -> "[sv-SE] Swedish"
                         ""      -> ""
                         else -> "[${it.hardsubLocale}] "
                     } + if(it.hardsubLocale != "") " Hard-Subbed" else "Soft/No Subs",
@@ -252,15 +257,20 @@ class Kamyroll : AnimeParser() {
             12   -> "ru-RU"
             13   -> "zh-CN"
             14   -> "tr-TR"
+            15   -> "ar-SA"
+            16   -> "uk-UK"
+            17   -> "he-IL"
+            18   -> "pl-PL"
+            19   -> "ro-RO"
+            20   -> "sv-SE"
             else -> "en-US"
         }
         private val locale = when (settings.subtitles) {
             true  -> subLocale
             false -> ""
         }
-        private const val apiUrl = "https://kamyroll.herokuapp.com"
+        private const val apiUrl = "https://api.kamyroll.tech"
         private const val channel = "crunchyroll"
-        private const val service = "google"
 
         private var headers: Map<String, String>? = null
         private val channelHeader = "channel_id" to channel
@@ -270,13 +280,10 @@ class Kamyroll : AnimeParser() {
             headers = headers ?: let {
                 val res = client.post(
                     "$apiUrl/auth/v1/token",
-                    mapOf(
-                        "authorization" to "Basic vrvluizpdr2eby+RjSKM17dOLacExxq1HAERdxQDO6+2pHvFHTKKnByPD7b6kZVe1dJXifb6SG5NWMz49ABgJA=="
-                    ),
                     data = mapOf(
-                        "refresh_token" to "IV+FtTI+SYR0d5CQy2KOc6Q06S6aEVPIjZdWA6mmO7nDWrMr04cGjSkk4o6urP/6yDmE4yzccSX/rP/OIgDgK4ildzNf2G/pPS9Ze1XbEyJAEUyN+oKT7Gs1PhVTFdz/vYXvxp/oZmLWQGoGgSQLwgoRqnJddWjqk0ageUbgT1FwLazdL3iYYKdNN98BqGFbs/baeqqa8aFre5SzF/4G62y201uLnsElgd07OAh1bnJOy8PTNHpGqEBxxbo1VENqtYilG9ZKY18nEz8vLPQBbin/IIEjKITjSa+LvSDQt/0AaxCkhClNDUX2uUZ8q7fKuSDisJtEyIFDXtuZGFhaaA==",
-                        "grant_type" to "refresh_token",
-                        "scope" to "offline_access",
+                        "device_id" to "ani.saikou",
+                        "device_type" to "com.service.data",
+                        "access_token" to "HMbQeThWmZq4t7w",
                     )
                 ).parsed<AccessToken>()
                 mapOf("authorization" to "${res.tokenType} ${res.accessToken}")
