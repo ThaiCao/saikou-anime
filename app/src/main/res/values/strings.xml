@@ -194,8 +194,8 @@
     <string name="sub_color_info"><b>Note:</b> Changing Subtitle formatting only works with Soft-Subbed Sources such as Zoro and Kamyroll!</string>
     <string name="sub_font_select">Subtitle Font</string>
     <string name="subtitle_font_size">Subtitle Size</string>
-    <string name="subtitle_language_button">Subtitle Language</string>
-    <string name="subtitle_language_info"><b>Note:</b> The episode title- and description language can only be changed for <b>Kamyroll</b>. For changes to take effect the app needs to restart. <b>Some languages might not work!</b></string>
+    <string name="kamyroll_language_button">Kamyroll Language</string>
+    <string name="subtitle_language_info"><b>Note:</b> This changes the episode title and description language. For changes to take effect the app needs to restart. <b>Some languages might not work!</b></string>
 
     <string name="auto">Auto</string>
     <string name="auto_play_next_episode">Autoplay Next Episode</string>

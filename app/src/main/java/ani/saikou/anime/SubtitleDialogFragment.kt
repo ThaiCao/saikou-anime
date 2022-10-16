@@ -81,7 +81,7 @@ class SubtitleDialogFragment : BottomSheetDialogFragment() {
                     "zh-CN" -> "[zh-CN] Chinese (Simplified)"
                     "tr-TR" -> "[tr-TR] Turkish"
                     "ar-ME" -> "[ar-ME] Arabic"
-                    "ar-SA" -> "[ar-SA] Arabic"
+                    "ar-SA" -> "[ar-SA] Arabic (Saudi Arabia)"
                     "uk-UK" -> "[uk-UK] Ukrainian"
                     "he-IL" -> "[he-IL] Hebrew"
                     "pl-PL" -> "[pl-PL] Polish"

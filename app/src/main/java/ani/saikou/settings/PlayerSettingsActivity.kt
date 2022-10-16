@@ -255,7 +255,7 @@ class PlayerSettingsActivity : AppCompatActivity() {
             toggleButton(binding.videoSubColorSecondary, isChecked)
             toggleButton(binding.videoSubOutline, isChecked)
             toggleButton(binding.videoSubFont, isChecked)
-            toggleButton(binding.subLang, isChecked)
+            toggleButton(binding.kamyLang, isChecked)
             binding.subtitleFontSizeCard.isEnabled = isChecked
             binding.subtitleFontSizeCard.isClickable = isChecked
             binding.subtitleFontSizeCard.alpha = when (isChecked) {
@@ -392,16 +392,10 @@ class PlayerSettingsActivity : AppCompatActivity() {
             "[pt-PT] Portuguese (Portugal)",
             "[ru-RU] Russian",
             "[zh-CN] Chinese",
-            "[tr-TR] Turkish",
-            "[ar-SA] Arabic",
-            "[uk-UK] Ukrainian",
-            "[he-IL] Hebrew",
-            "[pl-PL] Polish",
-            "[ro-RO] Romanian",
-            "[sv-SE] Swedish"
+            "[tr-TR] Turkish"
         )
-        val localeDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Subtitle Language")
-        binding.subLang.setOnClickListener {
+        val localeDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Kamyroll Language")
+        binding.kamyLang.setOnClickListener {
             localeDialog.setSingleChoiceItems(locales, settings.locale) { dialog, count ->
                 settings.locale = count
                 saveData(player, settings)
