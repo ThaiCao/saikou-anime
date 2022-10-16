@@ -111,7 +111,12 @@ class Kamyroll : AnimeParser() {
                     channelHeader,
                     "id" to server.embed.url,
                     "type" to "adaptive_hls",
-                    "format" to "ass",
+                    "format" to when(settings.kamySubType){
+                        0 -> "ass"
+                        1 -> "vtt"
+                        2 -> "srt"
+                        else -> "vtt"
+                    },
                 ),
                 timeout = 60
             ).parsed<StreamsResponse>()
@@ -158,7 +163,12 @@ class Kamyroll : AnimeParser() {
                 Subtitle(
                     it.locale ?: return@mapNotNull null,
                     it.url ?: return@mapNotNull null,
-                    SubtitleType.ASS
+                    when(settings.kamySubType){
+                        0 -> SubtitleType.ASS
+                        1 -> SubtitleType.VTT
+                        2 -> SubtitleType.SRT
+                        else -> SubtitleType.VTT
+                    }
                 )
             }
             return VideoContainer(video ?: listOf(), subtitle ?: listOf())
@@ -230,7 +240,7 @@ class Kamyroll : AnimeParser() {
                 ShowResponse(
                     name = it.title,
                     link = it.id,
-                    coverUrl = it.images?.posterTall?.getOrNull(5)?.source ?: "",
+                    coverUrl = it.images?.posterTall?.getOrNull(it.images.posterTall.size / 2)?.source ?: "",
                     extra = if (filter == null) mapOf(type) else mapOf(type, "filter" to filter)
                 )
             }
