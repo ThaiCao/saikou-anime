@@ -282,12 +282,22 @@ class PlayerSettingsActivity : AppCompatActivity() {
             toggleSubOptions(isChecked)
             restartApp()
         }
+        val subtitleTypes =
+            arrayOf("ASS", "VTT", "SRT")
+        val kamyrollSubTypeDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Primary Sub Color")
+        binding.kamySubtitleType.setOnClickListener {
+            kamyrollSubTypeDialog.setSingleChoiceItems(subtitleTypes, settings.kamySubType) { dialog, count ->
+                settings.kamySubType = count
+                saveData(player, settings)
+                dialog.dismiss()
+            }.show()
+        }
         val colorsPrimary =
             arrayOf("Black", "Dark Gray", "Gray", "Light Gray", "White", "Red", "Yellow", "Green", "Cyan", "Blue", "Magenta")
         val primaryColorDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Primary Sub Color")
         binding.videoSubColorPrimary.setOnClickListener {
-            primaryColorDialog.setSingleChoiceItems(colorsPrimary, settings.primaryColor) { dialog, count1 ->
-                settings.primaryColor = count1
+            primaryColorDialog.setSingleChoiceItems(colorsPrimary, settings.primaryColor) { dialog, count ->
+                settings.primaryColor = count
                 saveData(player, settings)
                 dialog.dismiss()
             }.show()
@@ -308,8 +318,8 @@ class PlayerSettingsActivity : AppCompatActivity() {
         )
         val secondaryColorDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Outline Sub Color")
         binding.videoSubColorSecondary.setOnClickListener {
-            secondaryColorDialog.setSingleChoiceItems(colorsSecondary, settings.secondaryColor) { dialog, count2 ->
-                settings.secondaryColor = count2
+            secondaryColorDialog.setSingleChoiceItems(colorsSecondary, settings.secondaryColor) { dialog, count ->
+                settings.secondaryColor = count
                 saveData(player, settings)
                 dialog.dismiss()
             }.show()
@@ -317,8 +327,8 @@ class PlayerSettingsActivity : AppCompatActivity() {
         val typesOutline = arrayOf("Outline", "Shine", "Drop Shadow", "None")
         val outlineDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Outline Type")
         binding.videoSubOutline.setOnClickListener {
-            outlineDialog.setSingleChoiceItems(typesOutline, settings.outline) { dialog, count3 ->
-                settings.outline = count3
+            outlineDialog.setSingleChoiceItems(typesOutline, settings.outline) { dialog, count ->
+                settings.outline = count
                 saveData(player, settings)
                 dialog.dismiss()
             }.show()
@@ -339,8 +349,8 @@ class PlayerSettingsActivity : AppCompatActivity() {
         )
         val subBackgroundDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Outline Sub Color")
         binding.videoSubColorBackground.setOnClickListener {
-            subBackgroundDialog.setSingleChoiceItems(colorsSubBackground, settings.subBackground) { dialog, count2 ->
-                settings.subBackground = count2
+            subBackgroundDialog.setSingleChoiceItems(colorsSubBackground, settings.subBackground) { dialog, count ->
+                settings.subBackground = count
                 saveData(player, settings)
                 dialog.dismiss()
             }.show()
@@ -362,8 +372,8 @@ class PlayerSettingsActivity : AppCompatActivity() {
         )
         val subWindowDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Outline Sub Color")
         binding.videoSubColorWindow.setOnClickListener {
-            subWindowDialog.setSingleChoiceItems(colorsSubWindow, settings.subWindow) { dialog, count2 ->
-                settings.subWindow = count2
+            subWindowDialog.setSingleChoiceItems(colorsSubWindow, settings.subWindow) { dialog, count ->
+                settings.subWindow = count
                 saveData(player, settings)
                 dialog.dismiss()
             }.show()
@@ -371,8 +381,8 @@ class PlayerSettingsActivity : AppCompatActivity() {
         val fonts = arrayOf("Poppins Semi Bold", "Poppins Bold", "Poppins", "Poppins Thin")
         val fontDialog = AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Subtitle Font")
         binding.videoSubFont.setOnClickListener {
-            fontDialog.setSingleChoiceItems(fonts, settings.font) { dialog, count4 ->
-                settings.font = count4
+            fontDialog.setSingleChoiceItems(fonts, settings.font) { dialog, count ->
+                settings.font = count
                 saveData(player, settings)
                 dialog.dismiss()
             }.show()

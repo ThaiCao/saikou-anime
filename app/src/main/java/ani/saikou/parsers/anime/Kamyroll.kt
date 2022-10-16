@@ -110,9 +110,8 @@ class Kamyroll : AnimeParser() {
                 params = mapOf(
                     channelHeader,
                     "id" to server.embed.url,
-                    localeHeader,
                     "type" to "adaptive_hls",
-                    "format" to "vtt",
+                    "format" to "ass",
                 ),
                 timeout = 60
             ).parsed<StreamsResponse>()
@@ -143,7 +142,7 @@ class Kamyroll : AnimeParser() {
                         "zh-CN" -> "[zh-CN] Chinese (Simplified)"
                         "tr-TR" -> "[tr-TR] Turkish"
                         "ar-ME" -> "[ar-ME] Arabic"
-                        "ar-SA" -> "[ar-SA] Arabic"
+                        "ar-SA" -> "[ar-SA] Arabic (Saudi Arabia)"
                         "uk-UK" -> "[uk-UK] Ukrainian"
                         "he-IL" -> "[he-IL] Hebrew"
                         "pl-PL" -> "[pl-PL] Polish"
@@ -159,7 +158,7 @@ class Kamyroll : AnimeParser() {
                 Subtitle(
                     it.locale ?: return@mapNotNull null,
                     it.url ?: return@mapNotNull null,
-                    SubtitleType.VTT
+                    SubtitleType.ASS
                 )
             }
             return VideoContainer(video ?: listOf(), subtitle ?: listOf())
@@ -220,9 +219,8 @@ class Kamyroll : AnimeParser() {
             getHeaders(),
             params = mapOf(
                 channelHeader,
-                localeHeader,
                 "limit" to "25",
-                "query" to query
+                "query" to encode(query)
             )
         ).parsed<SearchResponse>()
         return (res.items ?: listOf()).map { item ->
