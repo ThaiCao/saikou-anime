@@ -303,26 +303,19 @@ class Kamyroll : AnimeParser() {
         }
 
         suspend fun getHeaders(): Map<String, String> {
-
-            // get unix timestamp and last time stamp of token
             val timestamp = System.currentTimeMillis()
             val lastTime = loadData<Long>("kamyrollTokenCreationDate", currActivity(), false)
 
-            // if a token exists (confirmed by lastTime)
             if(lastTime != null){
-                // if the difference between timestamp and lastTime is greater than 7 days, create a new token
                 if(timestamp - lastTime >= 604800000){
                        newToken()
                 }
-                // else the token exists and is not expired, so just load and return it
                 else{
                     val headers: Map<String, String>? = loadData<Map<String, String>>("kamyrollToken", currActivity(), false)
                     return headers!!
                 }
             }
-            // No previous token exists
             else{
-                // request new token
                newToken()
             }
             return headers!!
