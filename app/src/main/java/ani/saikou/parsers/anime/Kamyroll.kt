@@ -284,7 +284,7 @@ class Kamyroll : AnimeParser() {
         private val channelHeader = "channel_id" to channel
         private val localeHeader = "locale" to locale
 
-        suspend fun getHeaders(): Map<String, String> {
+        private suspend fun newToken(): Map<String, String>{
             headers = headers ?: let {
                 val res = client.post(
                     "$apiUrl/auth/v1/token",
@@ -295,6 +295,35 @@ class Kamyroll : AnimeParser() {
                     )
                 ).parsed<AccessToken>()
                 mapOf("authorization" to "${res.tokenType} ${res.accessToken}")
+            }
+            val timestamp = System.currentTimeMillis()
+            saveData("kamyrollTokenCreationDate", timestamp)
+            saveData("kamyrollToken", headers)
+            return headers as Map<String, String>
+        }
+
+        suspend fun getHeaders(): Map<String, String> {
+
+            // get unix timestamp and last time stamp of token
+            val timestamp = System.currentTimeMillis()
+            val lastTime = loadData<Long>("kamyrollTokenCreationDate", currActivity(), false)
+
+            // if a token exists (confirmed by lastTime)
+            if(lastTime != null){
+                // if the difference between timestamp and lastTime is greater than 7 days, create a new token
+                if(timestamp - lastTime >= 604800000){
+                       newToken()
+                }
+                // else the token exists and is not expired, so just load and return it
+                else{
+                    val headers: Map<String, String>? = loadData<Map<String, String>>("kamyrollToken", currActivity(), false)
+                    return headers!!
+                }
+            }
+            // No previous token exists
+            else{
+                // request new token
+               newToken()
             }
             return headers!!
         }
