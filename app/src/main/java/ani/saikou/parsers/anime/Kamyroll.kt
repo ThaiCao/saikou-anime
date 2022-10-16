@@ -279,8 +279,8 @@ class Kamyroll : AnimeParser() {
                 val res = client.post(
                     "$apiUrl/auth/v1/token",
                     data = mapOf(
-                        "device_id" to "ani.saikou",
-                        "device_type" to "com.service.data",
+                        "device_id" to "com.service.data",
+                        "device_type" to "ani.saikou",
                         "access_token" to "HMbQeThWmZq4t7w",
                     )
                 ).parsed<AccessToken>()
