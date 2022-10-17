@@ -1228,7 +1228,7 @@
                 android:fontFamily="@font/poppins_family"
                 android:paddingStart="32dp"
                 android:paddingEnd="32dp"
-                android:text="@string/subtitle_language_info"
+                android:text="@string/kamyroll_language_info"
                 android:textSize="14sp" />
 
         </LinearLayout>

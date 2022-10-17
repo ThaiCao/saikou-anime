@@ -749,7 +749,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         }
 
         // Subtitle View Margin fix for Kamyroll
-        if(model.watchSources!!.names[media.selected!!.source] == "Kamyroll" && settings.kamySubType == 0){
+        if(model.watchSources!!.names[media.selected!!.source] == "Kamyroll" && (settings.kamySubType == 0 || settings.kamySubType == 2)) {
             val marginInt = -19 // This gets rounded to -18dp
             val margin = (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, marginInt.toFloat(), getResources().getDisplayMetrics())).roundToInt()
             exoSubtitleView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -882,6 +882,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             saveData("${media.id}_${media.anime!!.selectedEpisode}", exoPlayer.currentPosition, this)
             val intent = Intent(this, PlayerSettingsActivity::class.java).apply {
                 putExtra("media", media)
+                putExtra("subtitle", subtitle)
             }
             finish()
             startActivity(intent)
@@ -1031,38 +1032,34 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             subClick()
         }
 
-        var kamySubUrl = ""
-        if(subtitle != null){
-        // Change Kamyroll Subtitle Type
-            if (model.watchSources!!.names[media.selected!!.source] == "Kamyroll") {
-                if (settings.kamySubType == 0) kamySubUrl =
-                    subtitle!!.url.url.replace("&out=vtt", "&out=ass").replace("&out=srt", "&out=ass")
-                if (settings.kamySubType == 1) kamySubUrl =
-                    subtitle!!.url.url.replace("&out=ass", "&out=vtt").replace("&out=srt", "&out=vtt")
-                if (settings.kamySubType == 2) kamySubUrl =
-                    subtitle!!.url.url.replace("&out=ass", "&out=srt").replace("&out=vtt", "&out=srt")
-            }
+        val newSub: Subtitle? = intent.getSerializableExtra("subtitle") as Subtitle?
+        var sub: MediaItem.SubtitleConfiguration? = null
+        if(newSub == null && subtitle != null) {
+            sub = MediaItem.SubtitleConfiguration
+                    .Builder(Uri.parse(subtitle!!.url.url))
+                    .setSelectionFlags(C.SELECTION_FLAG_FORCED)
+                    .setMimeType(
+                        when (subtitle?.type) {
+                            SubtitleType.VTT -> MimeTypes.TEXT_VTT
+                            SubtitleType.ASS -> MimeTypes.TEXT_SSA
+                            SubtitleType.SRT -> MimeTypes.APPLICATION_SUBRIP
+                            else             -> MimeTypes.TEXT_UNKNOWN
+                        }
+                    )
+                    .build()
         }
-
-        val sub = if (subtitle != null)
-            MediaItem.SubtitleConfiguration
-                .Builder(Uri.parse(if(kamySubUrl != "") kamySubUrl else subtitle!!.url.url))
-                .setSelectionFlags(C.SELECTION_FLAG_FORCED)
-                .setMimeType(
-                    if(kamySubUrl != "") when(settings.kamySubType){
-                        0 -> MimeTypes.TEXT_SSA
-                        1 -> MimeTypes.TEXT_VTT
-                        2 -> MimeTypes.APPLICATION_SUBRIP
-                        else -> MimeTypes.TEXT_UNKNOWN
-                    } else when (subtitle?.type) {
+        if(newSub != null){
+            sub = MediaItem.SubtitleConfiguration
+                    .Builder(Uri.parse(newSub.url.url))
+                    .setSelectionFlags(C.SELECTION_FLAG_FORCED)
+                    .setMimeType(when (newSub.type) {
                         SubtitleType.VTT -> MimeTypes.TEXT_VTT
                         SubtitleType.ASS -> MimeTypes.TEXT_SSA
                         SubtitleType.SRT -> MimeTypes.APPLICATION_SUBRIP
-                        else             -> MimeTypes.TEXT_UNKNOWN
-                    }
-                )
-                .build()
-        else null
+                        }
+                    )
+                    .build()
+        }
 
         lifecycleScope.launch(Dispatchers.IO) {
             ext.onVideoPlayed(video)

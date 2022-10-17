@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -14,6 +15,7 @@ import ani.saikou.*
 import ani.saikou.anime.ExoplayerView
 import ani.saikou.databinding.ActivityPlayerSettingsBinding
 import ani.saikou.media.Media
+import ani.saikou.parsers.*
 import com.google.android.material.snackbar.Snackbar
 import kotlin.math.roundToInt
 
@@ -23,10 +25,36 @@ class PlayerSettingsActivity : AppCompatActivity() {
     private val player = "player_settings"
 
     var media:Media?=null
+    var subtitle:Subtitle?=null
     override fun onBackPressed() {
+        val settings = loadData<PlayerSettings>(player, toast = false) ?: PlayerSettings().apply { saveData(player, this) }
         if(media!=null) {
+            var newSubtitle: Subtitle? = null
+            if(subtitle != null){
+                // Change Kamyroll Subtitle Type
+                var newUrl: FileUrl? = null
+                var newType: SubtitleType? = null
+                val newLanguage: String
+                Log.d("Subtitle","SOURCE URL: ${subtitle!!.url.url}")
+                if (subtitle!!.url.url.contains("api.kamyroll.tech", true)) {
+                    if (settings.kamySubType == 0) {
+                        newUrl = FileUrl[subtitle!!.url.url.replace("&out=vtt", "&out=ass").replace("&out=srt", "&out=ass")]!!
+                        newType = SubtitleType.ASS
+                    }
+                    if (settings.kamySubType == 1) {
+                        newUrl = FileUrl[subtitle!!.url.url.replace("&out=ass", "&out=vtt").replace("&out=srt", "&out=vtt")]!!
+                        newType = SubtitleType.VTT
+                    }
+                    if (settings.kamySubType == 2) {
+                        newUrl = FileUrl[subtitle!!.url.url.replace("&out=ass", "&out=srt").replace("&out=vtt", "&out=srt")]!!
+                        newType = SubtitleType.SRT
+                    }
+                    newLanguage = subtitle!!.language
+                newSubtitle = Subtitle(newLanguage, newUrl!!, newType!!) }
+                }
             val intent = Intent(this, ExoplayerView::class.java).apply {
                 putExtra("media", media)
+                if(newSubtitle != null) putExtra("subtitle", newSubtitle)
             }
             finish()
             startActivity(intent)
@@ -45,6 +73,7 @@ class PlayerSettingsActivity : AppCompatActivity() {
 
         try {
             media = intent.getSerializableExtra("media") as? Media
+            subtitle = intent.getSerializableExtra("subtitle") as? Subtitle
         } catch (e: Exception) {
             toast(e.toString())
         }

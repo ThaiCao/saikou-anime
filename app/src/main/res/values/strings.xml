@@ -197,7 +197,7 @@
     <string name="sub_font_select">Subtitle Font</string>
     <string name="subtitle_font_size">Subtitle Size</string>
     <string name="kamyroll_language_button">Kamyroll Language</string>
-    <string name="subtitle_language_info"><b>Note:</b> This changes the episode title and description language. <b>New Episodes won\'t be available with translated titles for up to 2 hours and will not be shown in the episode list. To view them as they release please switch to english.</b> For changes to take effect the app needs to restart. <b>Some languages might not work!</b></string>
+    <string name="kamyroll_language_info"><b>Note:</b> This changes the episode title and description language. <b>New Episodes won\'t be available with translated titles for up to 2 hours and will not be shown in the episode list. To view them as they release please switch to english.</b> For changes to take effect the app needs to restart. <b>Some languages might not work!</b></string>
 
     <string name="auto">Auto</string>
     <string name="auto_play_next_episode">Autoplay Next Episode</string>
