@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -32,25 +31,26 @@ class PlayerSettingsActivity : AppCompatActivity() {
             var newSubtitle: Subtitle? = null
             if(subtitle != null){
                 // Change Kamyroll Subtitle Type
-                var newUrl: FileUrl? = null
+                val oldUrl = subtitle?.url?.url
+                if (oldUrl?.contains("api.kamyroll.tech", true) == true) {
+                var newUrl: FileUrl? = subtitle?.url
                 var newType: SubtitleType? = null
-                val newLanguage: String
-                Log.d("Subtitle","SOURCE URL: ${subtitle!!.url.url}")
-                if (subtitle!!.url.url.contains("api.kamyroll.tech", true)) {
-                    if (settings.kamySubType == 0) {
-                        newUrl = FileUrl[subtitle!!.url.url.replace("&out=vtt", "&out=ass").replace("&out=srt", "&out=ass")]!!
-                        newType = SubtitleType.ASS
+                    when(settings.kamySubType){
+                        0 -> {
+                            newType = SubtitleType.ASS
+                            newUrl = FileUrl(oldUrl.replace("&out=vtt", "&out=ass").replace("&out=srt", "&out=ass"))
+                        }
+                        1 -> {
+                            newType = SubtitleType.VTT
+                            newUrl = FileUrl(oldUrl.replace("&out=ass", "&out=vtt").replace("&out=srt", "&out=vtt"))
+                        }
+                        2 -> {
+                            newType = SubtitleType.SRT
+                            newUrl = FileUrl(oldUrl.replace("&out=ass", "&out=srt").replace("&out=vtt", "&out=srt"))
+                        }
                     }
-                    if (settings.kamySubType == 1) {
-                        newUrl = FileUrl[subtitle!!.url.url.replace("&out=ass", "&out=vtt").replace("&out=srt", "&out=vtt")]!!
-                        newType = SubtitleType.VTT
-                    }
-                    if (settings.kamySubType == 2) {
-                        newUrl = FileUrl[subtitle!!.url.url.replace("&out=ass", "&out=srt").replace("&out=vtt", "&out=srt")]!!
-                        newType = SubtitleType.SRT
-                    }
-                    newLanguage = subtitle!!.language
-                newSubtitle = Subtitle(newLanguage, newUrl!!, newType!!) }
+                    val newLanguage: String = subtitle!!.language
+                if(newUrl != null && newType != null) newSubtitle = Subtitle(newLanguage, newUrl, newType) }
                 }
             val intent = Intent(this, ExoplayerView::class.java).apply {
                 putExtra("media", media)
