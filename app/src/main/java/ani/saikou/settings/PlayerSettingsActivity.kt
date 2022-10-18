@@ -35,21 +35,21 @@ class PlayerSettingsActivity : AppCompatActivity() {
                 if (oldUrl?.contains("api.kamyroll.tech", true) == true) {
                 var newUrl: FileUrl? = subtitle?.url
                 var newType: SubtitleType? = null
-                    when(settings.kamySubType){
-                        0 -> {
-                            newType = SubtitleType.ASS
-                            newUrl = FileUrl(oldUrl.replace("&out=vtt", "&out=ass").replace("&out=srt", "&out=ass"))
-                        }
-                        1 -> {
-                            newType = SubtitleType.VTT
-                            newUrl = FileUrl(oldUrl.replace("&out=ass", "&out=vtt").replace("&out=srt", "&out=vtt"))
-                        }
-                        2 -> {
-                            newType = SubtitleType.SRT
-                            newUrl = FileUrl(oldUrl.replace("&out=ass", "&out=srt").replace("&out=vtt", "&out=srt"))
-                        }
+                when(settings.kamySubType){
+                    0 -> {
+                        newType = SubtitleType.ASS
+                        newUrl = FileUrl(oldUrl.replace("&out=vtt", "&out=ass").replace("&out=srt", "&out=ass"))
                     }
-                    val newLanguage: String = subtitle!!.language
+                    1 -> {
+                        newType = SubtitleType.VTT
+                        newUrl = FileUrl(oldUrl.replace("&out=ass", "&out=vtt").replace("&out=srt", "&out=vtt"))
+                    }
+                    2 -> {
+                        newType = SubtitleType.SRT
+                        newUrl = FileUrl(oldUrl.replace("&out=ass", "&out=srt").replace("&out=vtt", "&out=srt"))
+                    }
+                }
+                val newLanguage: String = subtitle!!.language
                 if(newUrl != null && newType != null) newSubtitle = Subtitle(newLanguage, newUrl, newType) }
                 }
             val intent = Intent(this, ExoplayerView::class.java).apply {
