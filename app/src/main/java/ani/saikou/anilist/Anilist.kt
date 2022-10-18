@@ -22,13 +22,25 @@ object Anilist {
 
     var genres: ArrayList<String>? = null
     var tags: ArrayList<String>? = null
-    var sortBy = mapOf(
-        Pair("Score", "SCORE_DESC"),
-        Pair("Popular", "POPULARITY_DESC"),
-        Pair("Trending", "TRENDING_DESC"),
-        Pair("A-Z", "TITLE_ENGLISH"),
-        Pair("Z-A", "TITLE_ENGLISH_DESC"),
-        Pair("Trash", "SCORE"),
+    val sortBy = mapOf(
+        "Score" to "SCORE_DESC",
+        "Popular" to "POPULARITY_DESC",
+        "Trending" to "TRENDING_DESC",
+        "A-Z" to "TITLE_ENGLISH",
+        "Z-A" to "TITLE_ENGLISH_DESC",
+        "Trash" to "SCORE",
+    )
+
+    val seasons = listOf(
+        "SPRING","WINTER","SUMMER","FALL"
+    )
+
+    val anime_formats = listOf(
+        "TV","TV SHORT","MOVIE","SPECIAL","OVA","ONA","MUSIC"
+    )
+
+    val manga_formats = listOf(
+        "MANGA", "NOVEL", "ONE SHOT"
     )
 
     fun loginIntent(context: Context) {

@@ -77,8 +77,10 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         binding.animeTopScore.setOnClickListener {
             ContextCompat.startActivity(
                 it.context,
-                Intent(it.context, SearchActivity::class.java).putExtra("type", "ANIME")
-                    .putExtra("sortBy", "Score"),
+                Intent(it.context, SearchActivity::class.java)
+                    .putExtra("type", "ANIME")
+                    .putExtra("sortBy", "Score")
+                    .putExtra("search", true),
                 null
             )
         }

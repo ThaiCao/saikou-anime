@@ -37,7 +37,7 @@ suspend inline fun <reified T : Any> executeQuery(
             if (Anilist.token != null && useToken) headers["Authorization"] = "Bearer ${Anilist.token}"
 
             val json = client.post("https://graphql.anilist.co/", headers, data = data, cacheTime = cache ?: 10)
-            if(!json.text.startsWith("{")) throw Exception("Seems like Anilist is down, maybe try using a VPN or you can wait for it to comeback.")
+            if (!json.text.startsWith("{")) throw Exception("Seems like Anilist is down, maybe try using a VPN or you can wait for it to comeback.")
             if (show) println("Response : ${json.text}")
             json.parsed()
         } else null
@@ -51,13 +51,64 @@ data class SearchResults(
     var perPage: Int? = null,
     var search: String? = null,
     var sort: String? = null,
-    var genres: ArrayList<String>? = null,
-    var tags: ArrayList<String>? = null,
+    var genres: MutableList<String>? = null,
+    var excludedGenres: MutableList<String>? = null,
+    var tags: MutableList<String>? = null,
+    var excludedTags: MutableList<String>? = null,
     var format: String? = null,
+    var seasonYear: Int? = null,
+    var season: String? = null,
     var page: Int = 1,
-    var results: ArrayList<Media>,
+    var results: MutableList<Media>,
     var hasNextPage: Boolean,
-) : Serializable
+) : Serializable {
+    fun toChipList(): List<SearchChip> {
+        val list = mutableListOf<SearchChip>()
+        sort?.let {
+            list.add(SearchChip("SORT", it))
+        }
+        format?.let {
+            list.add(SearchChip("FORMAT", it))
+        }
+        season?.let {
+            list.add(SearchChip("SEASON", it))
+        }
+        seasonYear?.let {
+            list.add(SearchChip("SEASON_YEAR", it.toString()))
+        }
+        genres?.forEach {
+            list.add(SearchChip("GENRE", it))
+        }
+        excludedGenres?.forEach {
+            list.add(SearchChip("EXCLUDED_GENRE", it))
+        }
+        tags?.forEach {
+            list.add(SearchChip("TAG", it))
+        }
+        excludedTags?.forEach {
+            list.add(SearchChip("EXCLUDED_TAG", it))
+        }
+        return list
+    }
+
+    fun removeChip(chip: SearchChip) {
+        when(chip.type) {
+            "SORT"           -> sort = null
+            "FORMAT"         -> format = null
+            "SEASON"         -> season = null
+            "SEASON_YEAR"    -> seasonYear = null
+            "GENRE"          -> genres?.remove(chip.text)
+            "EXCLUDED_GENRE" -> excludedGenres?.remove(chip.text)
+            "TAG"            -> tags?.remove(chip.text)
+            "EXCLUDED_TAG"   -> excludedTags?.remove(chip.text)
+        }
+    }
+}
+
+data class SearchChip(
+    val type: String,
+    val text: String
+)
 
 class AnilistQueries {
     suspend fun getUserData(): Boolean {
@@ -226,9 +277,9 @@ class AnilistQueries {
 
                             fetchedMedia.externalLinks?.forEach { i ->
                                 when (i.site.lowercase()) {
-                                    "youtube" -> media.anime.youtube = i.url
+                                    "youtube"     -> media.anime.youtube = i.url
                                     "crunchyroll" -> media.crunchySlug = i.url?.split("/")?.getOrNull(3)
-                                    "vrv" -> media.vrvId = i.url?.split("/")?.getOrNull(4)
+                                    "vrv"         -> media.vrvId = i.url?.split("/")?.getOrNull(4)
                                 }
                             }
                         } else if (media.manga != null) {
@@ -511,13 +562,17 @@ class AnilistQueries {
         perPage: Int? = null,
         search: String? = null,
         sort: String? = null,
-        genres: ArrayList<String>? = null,
-        tags: ArrayList<String>? = null,
+        genres: MutableList<String>? = null,
+        tags: MutableList<String>? = null,
         format: String? = null,
         isAdult: Boolean = false,
         onList: Boolean? = null,
+        excludedGenres: MutableList<String>? = null,
+        excludedTags: MutableList<String>? = null,
+        seasonYear: Int? = null,
+        season: String? = null,
         id: Int? = null,
-        hd: Boolean = false
+        hd: Boolean = false,
     ): SearchResults? {
         val query = """
 query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult: Boolean = false, ${"$"}search: String, ${"$"}format: [MediaFormat], ${"$"}status: MediaStatus, ${"$"}countryOfOrigin: CountryCode, ${"$"}source: MediaSource, ${"$"}season: MediaSeason, ${"$"}seasonYear: Int, ${"$"}year: String, ${"$"}onList: Boolean, ${"$"}yearLesser: FuzzyDateInt, ${"$"}yearGreater: FuzzyDateInt, ${"$"}episodeLesser: Int, ${"$"}episodeGreater: Int, ${"$"}durationLesser: Int, ${"$"}durationGreater: Int, ${"$"}chapterLesser: Int, ${"$"}chapterGreater: Int, ${"$"}volumeLesser: Int, ${"$"}volumeGreater: Int, ${"$"}licensedBy: [String], ${"$"}isLicensed: Boolean, ${"$"}genres: [String], ${"$"}excludedGenres: [String], ${"$"}tags: [String], ${"$"}excludedTags: [String], ${"$"}minimumTagRank: Int, ${"$"}sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]) {
@@ -567,12 +622,17 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
             ${if (onList != null) ""","onList":$onList""" else ""}
             ${if (page != null) ""","page":"$page"""" else ""}
             ${if (id != null) ""","id":"$id"""" else ""}
+            ${if (seasonYear != null) ""","seasonYear":"$seasonYear"""" else ""}
+            ${if (season != null) ""","season":"$season"""" else ""}
             ${if (search != null) ""","search":"$search"""" else ""}
             ${if (Anilist.sortBy.containsKey(sort)) ""","sort":"${Anilist.sortBy[sort]}"""" else ""}
             ${if (format != null) ""","format":"$format"""" else ""}
-            ${if (genres?.isNotEmpty() == true) ""","genres":"${genres[0]}"""" else ""}
-            ${if (tags?.isNotEmpty() == true) ""","tags":"${tags[0]}"""" else ""}
+            ${if (genres?.isNotEmpty() == true) ""","genres":[${genres.joinToString { "\"$it\"" }}]""" else ""}
+            ${if (excludedGenres?.isNotEmpty() == true) ""","excludedGenres":[${excludedGenres.joinToString { "\"$it\"" }}]""" else ""}
+            ${if (tags?.isNotEmpty() == true) ""","tags":[${tags.joinToString { "\"$it\"" }}]""" else ""}
+            ${if (excludedTags?.isNotEmpty() == true) ""","excludedTags":[${excludedTags.joinToString { "\"$it\"" }}]""" else ""}
             }""".replace("\n", " ").replace("""  """, "")
+
         val response = executeQuery<Query.Page>(query, variables, true)?.data?.page
         if (response?.media != null) {
             val responseArray = arrayListOf<Media>()
@@ -601,8 +661,12 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
                 isAdult = isAdult,
                 onList = onList,
                 genres = genres,
+                excludedGenres = excludedGenres,
                 tags = tags,
+                excludedTags = excludedTags,
                 format = format,
+                seasonYear = seasonYear,
+                season = season,
                 results = responseArray,
                 page = pageInfo.currentPage.toString().toIntOrNull() ?: 0,
                 hasNextPage = pageInfo.hasNextPage == true,
@@ -611,16 +675,21 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
         return null
     }
 
-    suspend fun recentlyUpdated(): ArrayList<Media>? {
+    suspend fun recentlyUpdated(
+        smaller: Boolean = true,
+        page: Int = 1,
+        greater: Long = 0,
+        lesser: Long = System.currentTimeMillis() / 1000 - 10000
+    ): MutableList<Media>? {
         val query = """{
-Page(page:1,perPage:50) {
+Page(page:$page,perPage:50) {
     pageInfo {
         hasNextPage
         total
     }
     airingSchedules(
-        airingAt_greater: 0
-        airingAt_lesser: ${System.currentTimeMillis() / 1000 - 10000}
+        airingAt_greater: $greater
+        airingAt_lesser: $lesser
         sort:TIME_DESC
     ) {
         media {
@@ -654,20 +723,19 @@ Page(page:1,perPage:50) {
         }""".replace("\n", " ").replace("""  """, "")
         val response = executeQuery<Query.Page>(query, force = true)?.data?.page?.airingSchedules ?: return null
 
-        val responseArray = arrayListOf<Media>()
-        val idArr = arrayListOf<Int>()
-        fun addMedia(listOnly: Boolean) {
-            response.forEach {
-                it.media?.apply {
-                    if (!idArr.contains(id)) if (!listOnly && (countryOfOrigin == "JP" && (if (!Anilist.adult) isAdult == false else true)) || (listOnly && mediaListEntry != null)) {
-                        idArr.add(id)
-                        responseArray.add(Media(this))
-                    }
-                }
+        val idArr = mutableListOf<Int>()
+        val listOnly = loadData("recently_list_only") ?: false
+        return response.mapNotNull { i ->
+            i.media?.let {
+                if (!smaller) Media(it)
+                else if (!idArr.contains(it.id))
+                    if (!listOnly && (it.countryOfOrigin == "JP" && (if (!Anilist.adult) it.isAdult == false else true)) || (listOnly && it.mediaListEntry != null)) {
+                        idArr.add(it.id)
+                        Media(it)
+                    } else null
+                else null
             }
-        }
-        addMedia(loadData("recently_list_only") ?: false)
-        return responseArray
+        }.toMutableList()
     }
 
     suspend fun getCharacterDetails(character: Character): Character {

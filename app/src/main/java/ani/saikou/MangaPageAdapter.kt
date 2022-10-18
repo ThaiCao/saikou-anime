@@ -77,8 +77,10 @@ class MangaPageAdapter : RecyclerView.Adapter<MangaPageAdapter.MangaPageViewHold
         binding.mangaTopScore.setOnClickListener {
             ContextCompat.startActivity(
                 it.context,
-                Intent(it.context, SearchActivity::class.java).putExtra("type", "MANGA")
-                    .putExtra("sortBy", "Score"),
+                Intent(it.context, SearchActivity::class.java)
+                    .putExtra("type", "MANGA")
+                    .putExtra("sortBy", "Score")
+                    .putExtra("search", true),
                 null
             )
         }

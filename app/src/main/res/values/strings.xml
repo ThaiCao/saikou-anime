@@ -300,5 +300,9 @@
     <string name="custom_lists">Custom Lists</string>
     <string name="donate_desc">Want to support Saikou\'s Creator?\nConsider Donating</string>
     <string name="donate_goal">(We just reached a goal of $100!)</string>
+    <string name="filter">Filter</string>
+    <string name="year">Year</string>
+    <string name="apply">Apply</string>
+    <string name="cancel">Cancel</string>
 
 </resources>
