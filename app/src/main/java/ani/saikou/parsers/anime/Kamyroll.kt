@@ -7,6 +7,7 @@ import ani.saikou.parsers.anime.extractors.PStream
 import ani.saikou.settings.PlayerSettings
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.math.floor
 
 class Kamyroll : AnimeParser() {
 
@@ -240,7 +241,7 @@ class Kamyroll : AnimeParser() {
                 ShowResponse(
                     name = it.title,
                     link = it.id,
-                    coverUrl = it.images?.posterTall?.getOrNull(it.images.posterTall.size / 2)?.source ?: "",
+                    coverUrl = it.images?.posterTall?.getOrNull(floor((it.images.posterTall.size / 2).toDouble()).toInt())?.source ?: "",
                     extra = if (filter == null) mapOf(type) else mapOf(type, "filter" to filter)
                 )
             }
