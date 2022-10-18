@@ -306,17 +306,12 @@ class Kamyroll : AnimeParser() {
             val timestamp = System.currentTimeMillis()
             val lastTime = loadData<Long>("kamyrollTokenCreationDate", currActivity(), false)
 
-            if(lastTime != null){
-                if(timestamp - lastTime >= 604800000){
+            if(lastTime == null || (timestamp - lastTime) >= 604800000){
                        newToken()
                 }
-                else{
-                    val headers: Map<String, String>? = loadData<Map<String, String>>("kamyrollToken", currActivity(), false)
-                    return headers!!
-                }
-            }
             else{
-               newToken()
+                val headers: Map<String, String>? = loadData<Map<String, String>>("kamyrollToken", currActivity(), false)
+                return headers!!
             }
             return headers!!
         }
