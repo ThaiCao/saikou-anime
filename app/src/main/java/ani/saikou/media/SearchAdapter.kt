@@ -32,7 +32,7 @@ class SearchAdapter(private val activity: SearchActivity) : RecyclerView.Adapter
     override fun onBindViewHolder(holder: SearchHeaderViewHolder, position: Int) {
         val binding = holder.binding
 
-        binding.searchBar.hint = activity.type
+
         val imm: InputMethodManager = activity.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE) as InputMethodManager
 
         when (activity.style) {
@@ -46,6 +46,7 @@ class SearchAdapter(private val activity: SearchActivity) : RecyclerView.Adapter
             }
         }
 
+        binding.searchBar.hint = activity.result.type
         var adult = activity.result.isAdult
         var listOnly = activity.result.onList
 

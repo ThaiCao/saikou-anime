@@ -88,6 +88,45 @@
 
     </FrameLayout>
 
+    <HorizontalScrollView
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:clipToPadding="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.chip.Chip
+                android:layout_marginEnd="8dp"
+                android:id="@+id/animeThisSeason"
+                android:text="@string/this_season"
+                android:textAppearance="@style/Suffix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.chip.Chip
+                android:layout_marginEnd="8dp"
+                android:id="@+id/animeNextSeason"
+                android:text="@string/next_season"
+                android:textAppearance="@style/Suffix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/animePreviousSeason"
+                android:text="@string/previous_season"
+                android:textAppearance="@style/Suffix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/animeListContainer"
         android:layout_width="match_parent"

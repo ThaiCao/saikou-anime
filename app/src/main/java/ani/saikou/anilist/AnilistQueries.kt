@@ -65,10 +65,10 @@ data class SearchResults(
     fun toChipList(): List<SearchChip> {
         val list = mutableListOf<SearchChip>()
         sort?.let {
-            list.add(SearchChip("SORT", it))
+            list.add(SearchChip("SORT", "Sort : $it"))
         }
         format?.let {
-            list.add(SearchChip("FORMAT", it))
+            list.add(SearchChip("FORMAT", "Format : $it"))
         }
         season?.let {
             list.add(SearchChip("SEASON", it))
@@ -80,19 +80,19 @@ data class SearchResults(
             list.add(SearchChip("GENRE", it))
         }
         excludedGenres?.forEach {
-            list.add(SearchChip("EXCLUDED_GENRE", it))
+            list.add(SearchChip("EXCLUDED_GENRE", "Not $it"))
         }
         tags?.forEach {
             list.add(SearchChip("TAG", it))
         }
         excludedTags?.forEach {
-            list.add(SearchChip("EXCLUDED_TAG", it))
+            list.add(SearchChip("EXCLUDED_TAG", "Not $it"))
         }
         return list
     }
 
     fun removeChip(chip: SearchChip) {
-        when(chip.type) {
+        when (chip.type) {
             "SORT"           -> sort = null
             "FORMAT"         -> format = null
             "SEASON"         -> season = null
@@ -485,7 +485,7 @@ class AnilistQueries {
 
     suspend fun getGenresAndTags(activity: Activity): Boolean {
         var genres: ArrayList<String>? = loadData("genres_list", activity)
-        var tags: ArrayList<String>? = loadData("tags_list", activity)
+        var tags: Map<Boolean, List<String>>? = loadData("tags_map", activity)
 
         if (genres == null) {
             executeQuery<Query.GenreCollection>(
@@ -505,11 +505,17 @@ class AnilistQueries {
                 """{ MediaTagCollection { name isAdult } }""",
                 force = true
             )?.data?.mediaTagCollection?.apply {
-                tags = arrayListOf()
+                val adult = mutableListOf<String>()
+                val good = mutableListOf<String>()
                 forEach { node ->
-                    if (node.isAdult == true) tags?.add(node.name)
+                    if (node.isAdult == true) adult.add(node.name)
+                    else good.add(node.name)
                 }
-                saveData("tags_list", tags)
+                tags = mapOf(
+                    true to adult,
+                    false to good
+                )
+                saveData("tags_map", tags)
             }
         }
         return if (genres != null && tags != null) {
@@ -626,11 +632,19 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
             ${if (season != null) ""","season":"$season"""" else ""}
             ${if (search != null) ""","search":"$search"""" else ""}
             ${if (Anilist.sortBy.containsKey(sort)) ""","sort":"${Anilist.sortBy[sort]}"""" else ""}
-            ${if (format != null) ""","format":"$format"""" else ""}
+            ${if (format != null) ""","format":"${format.replace(" ", "_")}"""" else ""}
             ${if (genres?.isNotEmpty() == true) ""","genres":[${genres.joinToString { "\"$it\"" }}]""" else ""}
-            ${if (excludedGenres?.isNotEmpty() == true) ""","excludedGenres":[${excludedGenres.joinToString { "\"$it\"" }}]""" else ""}
+            ${
+            if (excludedGenres?.isNotEmpty() == true)
+                ""","excludedGenres":[${excludedGenres.joinToString { "\"${it.replace("Not ", "")}\"" }}]"""
+            else ""
+        }
             ${if (tags?.isNotEmpty() == true) ""","tags":[${tags.joinToString { "\"$it\"" }}]""" else ""}
-            ${if (excludedTags?.isNotEmpty() == true) ""","excludedTags":[${excludedTags.joinToString { "\"$it\"" }}]""" else ""}
+            ${
+            if (excludedTags?.isNotEmpty() == true)
+                ""","excludedTags":[${excludedTags.joinToString { "\"${it.replace("Not ", "")}\"" }}]"""
+            else ""
+        }
             }""".replace("\n", " ").replace("""  """, "")
 
         val response = executeQuery<Query.Page>(query, variables, true)?.data?.page

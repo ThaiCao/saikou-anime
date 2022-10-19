@@ -81,6 +81,7 @@ class AnimeFragment : Fragment() {
         binding.animePageRecyclerView.updatePaddingRelative(bottom = navBarHeight + 160f.px)
 
         val animePageAdapter = AnimePageAdapter()
+
         var loading = true
         if (model.notSet) {
             model.notSet = false
@@ -88,7 +89,7 @@ class AnimeFragment : Fragment() {
                 "ANIME",
                 isAdult = false,
                 onList = false,
-                results = arrayListOf(),
+                results = mutableListOf(),
                 hasNextPage = true,
                 sort = "Popular"
             )
@@ -152,7 +153,7 @@ class AnimeFragment : Fragment() {
             }
         })
         animePageAdapter.ready.observe(viewLifecycleOwner) { i ->
-            if (i == true) {
+            if (i) {
                 model.getUpdated().observe(viewLifecycleOwner) {
                     if (it != null) {
                         animePageAdapter.updateRecent(MediaAdaptor(0, it, requireActivity()))
@@ -199,6 +200,12 @@ class AnimeFragment : Fragment() {
             animePageAdapter.updateAvatar()
         }
 
+        animePageAdapter.onSeasonClick = { i ->
+            scope.launch(Dispatchers.IO){
+                model.loadTrending(i)
+            }
+        }
+
         val live = Refresh.activity.getOrPut(this.hashCode()) { MutableLiveData(false) }
         live.observe(viewLifecycleOwner) {
             if (it) {
@@ -208,7 +215,7 @@ class AnimeFragment : Fragment() {
                             load()
                         }
                         model.loaded = true
-                        model.loadTrending()
+                        model.loadTrending(0)
                         model.loadUpdated()
                         model.loadPopular("ANIME", sort = "Popular")
                     }

@@ -3,6 +3,7 @@ package ani.saikou.media
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,7 +41,7 @@ class SearchFilterBottomDialog(
 
         binding.searchFilterApply.setOnClickListener {
             activity.result.apply {
-                format = binding.searchFormat.text.toString().ifBlank { null }?.replace(" ","_")
+                format = binding.searchFormat.text.toString().ifBlank { null }
                 sort = binding.searchSortBy.text.toString().ifBlank { null }
                 season = binding.searchSeason.text.toString().ifBlank { null }
                 seasonYear = binding.searchYear.text.toString().toIntOrNull()
@@ -75,49 +76,67 @@ class SearchFilterBottomDialog(
             )
         )
 
-        binding.searchSeason.setText(activity.result.season)
-        binding.searchSeason.setAdapter(
-            ArrayAdapter(
-                binding.root.context,
-                R.layout.item_dropdown,
-                Anilist.seasons.toTypedArray()
+        if(activity.result.type=="MANGA"){
+            binding.searchSeason.visibility = GONE
+            binding.searchYear.visibility = GONE
+        }
+        else{
+            binding.searchSeason.setText(activity.result.season)
+            binding.searchSeason.setAdapter(
+                ArrayAdapter(
+                    binding.root.context,
+                    R.layout.item_dropdown,
+                    Anilist.seasons.toTypedArray()
+                )
             )
-        )
 
-        binding.searchYear.setText(activity.result.seasonYear?.toString())
-        binding.searchYear.setAdapter(
-            ArrayAdapter(
-                binding.root.context,
-                R.layout.item_dropdown,
-                (1970 until 2024).map { it.toString() }.reversed().toTypedArray()
+            binding.searchYear.setText(activity.result.seasonYear?.toString())
+            binding.searchYear.setAdapter(
+                ArrayAdapter(
+                    binding.root.context,
+                    R.layout.item_dropdown,
+                    (1970 until 2024).map { it.toString() }.reversed().toTypedArray()
+                )
             )
-        )
+        }
 
-        binding.searchFilterGenres.adapter = FilterChipAdapter(Anilist.genres ?: arrayListOf()) { chip ->
+        binding.searchFilterGenres.adapter = FilterChipAdapter(Anilist.genres ?: listOf()) { chip ->
             val genre = chip.text.toString()
             chip.isChecked = selectedGenres.contains(genre)
             chip.isCloseIconVisible = exGenres.contains(genre)
-            chip.setOnClickListener {
-                exGenres.remove(genre)
-                selectedGenres.add(genre)
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                if(isChecked){
+                    chip.isCloseIconVisible = false
+                    exGenres.remove(genre)
+                    selectedGenres.add(genre)
+                }
+                else
+                    selectedGenres.remove(genre)
             }
             chip.setOnLongClickListener {
-                selectedGenres.remove(genre)
+                chip.isChecked = false
+                chip.isCloseIconVisible = true
                 exGenres.add(genre)
             }
         }
         binding.searchFilterGenres.layoutManager = LinearLayoutManager(binding.root.context, HORIZONTAL, false)
 
-        binding.searchFilterTags.adapter = FilterChipAdapter(Anilist.tags ?: arrayListOf()) { chip ->
+        binding.searchFilterTags.adapter = FilterChipAdapter(Anilist.tags?.get(activity.result.isAdult) ?: listOf()) { chip ->
             val tag = chip.text.toString()
             chip.isChecked = selectedTags.contains(tag)
             chip.isCloseIconVisible = exTags.contains(tag)
-            chip.setOnClickListener {
-                exTags.remove(tag)
-                selectedTags.add(tag)
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                if(isChecked){
+                    chip.isCloseIconVisible = false
+                    exTags.remove(tag)
+                    selectedTags.add(tag)
+                }
+                else
+                    selectedTags.remove(tag)
             }
             chip.setOnLongClickListener {
-                selectedTags.remove(tag)
+                chip.isChecked = false
+                chip.isCloseIconVisible = true
                 exTags.add(tag)
             }
         }
@@ -125,7 +144,7 @@ class SearchFilterBottomDialog(
     }
 
 
-    class FilterChipAdapter(val list: ArrayList<String>, private val perform: ((Chip) -> Unit)) :
+    class FilterChipAdapter(val list: List<String>, private val perform: ((Chip) -> Unit)) :
         RecyclerView.Adapter<FilterChipAdapter.SearchChipViewHolder>() {
         inner class SearchChipViewHolder(val binding: ItemChipBinding) : RecyclerView.ViewHolder(binding.root)
 

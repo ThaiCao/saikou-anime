@@ -21,26 +21,34 @@ object Anilist {
     var chapterRead: Int? = null
 
     var genres: ArrayList<String>? = null
-    var tags: ArrayList<String>? = null
+    var tags: Map<Boolean, List<String>>? = null
+
     val sortBy = mapOf(
         "Score" to "SCORE_DESC",
         "Popular" to "POPULARITY_DESC",
         "Trending" to "TRENDING_DESC",
         "A-Z" to "TITLE_ENGLISH",
         "Z-A" to "TITLE_ENGLISH_DESC",
-        "Trash" to "SCORE",
+        "What?" to "SCORE",
     )
 
     val seasons = listOf(
-        "SPRING","WINTER","SUMMER","FALL"
+        "SPRING", "WINTER", "SUMMER", "FALL"
     )
 
     val anime_formats = listOf(
-        "TV","TV SHORT","MOVIE","SPECIAL","OVA","ONA","MUSIC"
+        "TV", "TV SHORT", "MOVIE", "SPECIAL", "OVA", "ONA", "MUSIC"
     )
 
     val manga_formats = listOf(
         "MANGA", "NOVEL", "ONE SHOT"
+    )
+
+    //Need to make a dynamic way to make this list
+    val currentSeasons = listOf(
+        "SUMMER" to 2022,
+        "FALL" to 2022,
+        "SPRING" to 2023
     )
 
     fun loginIntent(context: Context) {

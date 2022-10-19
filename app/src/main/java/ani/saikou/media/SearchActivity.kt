@@ -25,7 +25,6 @@ class SearchActivity : AppCompatActivity() {
     private val scope = lifecycleScope
     val model: AnilistSearch by viewModels()
 
-    var type = "ANIME"
     var style: Int = 0
     private var screenWidth: Float = 0f
 
@@ -56,7 +55,7 @@ class SearchActivity : AppCompatActivity() {
         if (model.notSet) {
             model.notSet = false
             model.searchResults = SearchResults(
-                intent.getStringExtra("type") ?: type,
+                intent.getStringExtra("type") ?: "ANIME",
                 isAdult = if (Anilist.adult) intent.getBooleanExtra("hentai", false) else false,
                 onList = listOnly,
                 genres = intent.getStringExtra("genre")?.let { mutableListOf(it) },

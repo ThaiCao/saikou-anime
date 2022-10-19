@@ -62,8 +62,10 @@ class AnilistAnimeViewModel : ViewModel() {
     private val type = "ANIME"
     private val trending: MutableLiveData<MutableList<Media>> = MutableLiveData<MutableList<Media>>(null)
     fun getTrending(): LiveData<MutableList<Media>> = trending
-    suspend fun loadTrending() =
-        trending.postValue(Anilist.query.search(type, perPage = 10, sort = "Trending", hd = true)?.results)
+    suspend fun loadTrending(i:Int) {
+        val (season,year) = Anilist.currentSeasons[i]
+        trending.postValue(Anilist.query.search(type, perPage = 10, sort = "Trending", season = season, seasonYear = year, hd = true)?.results)
+    }
 
     private val updated: MutableLiveData<MutableList<Media>> = MutableLiveData<MutableList<Media>>(null)
     fun getUpdated(): LiveData<MutableList<Media>> = updated

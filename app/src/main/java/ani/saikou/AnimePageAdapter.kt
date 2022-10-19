@@ -64,8 +64,18 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
             SettingsDialogFragment().show((it.context as AppCompatActivity).supportFragmentManager, "dialog")
         }
 
-        binding.animeGenreImage.loadImage("https://bit.ly/31bsIHq")
-        binding.animeTopScoreImage.loadImage("https://bit.ly/2ZGfcuG")
+        binding.animeThisSeason.setOnClickListener{
+            onSeasonClick.invoke(1)
+        }
+        binding.animeNextSeason.setOnClickListener{
+            onSeasonClick.invoke(2)
+        }
+        binding.animePreviousSeason.setOnClickListener{
+            onSeasonClick.invoke(0)
+        }
+
+        binding.animeGenreImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/anime/banner/16498-8jpFCOcDmneX.jpg")
+        binding.animeTopScoreImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/anime/banner/125367-hGPJLSNfprO3.jpg")
 
         binding.animeGenre.setOnClickListener {
             ContextCompat.startActivity(
@@ -87,6 +97,8 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         if (ready.value == false)
             ready.postValue(true)
     }
+
+    lateinit var onSeasonClick : ((Int)->Unit)
 
     override fun getItemCount(): Int = 1
 

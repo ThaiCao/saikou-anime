@@ -64,8 +64,8 @@ class MangaPageAdapter : RecyclerView.Adapter<MangaPageAdapter.MangaPageViewHold
             binding.mangaSearchBarText.performClick()
         }
 
-        binding.mangaGenreImage.loadImage("https://bit.ly/31bsIHq")
-        binding.mangaTopScoreImage.loadImage("https://bit.ly/2ZGfcuG")
+        binding.mangaGenreImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/manga/banner/105778-wk5qQ7zAaTGl.jpg")
+        binding.mangaTopScoreImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/manga/banner/30002-3TuoSMl20fUX.jpg")
 
         binding.mangaGenre.setOnClickListener {
             ContextCompat.startActivity(
