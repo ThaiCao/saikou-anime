@@ -94,33 +94,35 @@
         android:clipToPadding="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
+
         <LinearLayout
+            android:id="@+id/animeSeasonsCont"
             android:layout_width="wrap_content"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <com.google.android.material.chip.Chip
-                android:layout_marginEnd="8dp"
                 android:id="@+id/animeThisSeason"
-                android:text="@string/this_season"
-                android:textAppearance="@style/Suffix"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/this_season"
+                android:textAppearance="@style/Suffix" />
 
             <com.google.android.material.chip.Chip
-                android:layout_marginEnd="8dp"
                 android:id="@+id/animeNextSeason"
-                android:text="@string/next_season"
-                android:textAppearance="@style/Suffix"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/next_season"
+                android:textAppearance="@style/Suffix" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/animePreviousSeason"
-                android:text="@string/previous_season"
-                android:textAppearance="@style/Suffix"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:text="@string/previous_season"
+                android:textAppearance="@style/Suffix" />
 
 
         </LinearLayout>
@@ -256,7 +258,8 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="250dp">
+        android:minHeight="250dp"
+        tools:visibility="gone">
 
         <ProgressBar
             android:id="@+id/animeUpdatedProgressBar"
@@ -281,16 +284,33 @@
 
     </FrameLayout>
 
-    <TextView
+    <LinearLayout
         android:id="@+id/animePopular"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:fontFamily="@font/poppins_bold"
-        android:padding="8dp"
-        android:text="@string/popular_anime"
-        android:textSize="16sp"
+        android:layout_marginEnd="24dp"
         android:visibility="invisible"
-        tools:visibility="visible" />
+        tools:visibility="visible"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/poppins_bold"
+            android:padding="8dp"
+            android:text="@string/popular_anime"
+            android:textSize="16sp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/animeIncludeList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/include_media_in_list"
+            android:checked="true"/>
+
+
+    </LinearLayout>
 
 </LinearLayout>

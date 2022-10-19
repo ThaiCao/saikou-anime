@@ -307,5 +307,6 @@
     <string name="this_season">This Season</string>
     <string name="next_season">Next Season</string>
     <string name="previous_season">Previous Season</string>
+    <string name="include_media_in_list">Include List</string>
 
 </resources>

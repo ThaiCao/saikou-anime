@@ -84,9 +84,16 @@ class MangaPageAdapter : RecyclerView.Adapter<MangaPageAdapter.MangaPageViewHold
                 null
             )
         }
+
+        binding.mangaIncludeList.setOnCheckedChangeListener { _, isChecked ->
+            onIncludeListClick.invoke(isChecked)
+        }
+
         if (ready.value == false)
             ready.postValue(true)
     }
+
+    lateinit var onIncludeListClick : ((Boolean)->Unit)
 
     override fun getItemCount(): Int = 1
 

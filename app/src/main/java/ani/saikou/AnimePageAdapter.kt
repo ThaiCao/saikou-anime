@@ -94,11 +94,16 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
                 null
             )
         }
+
+        binding.animeIncludeList.setOnCheckedChangeListener { _, isChecked ->
+            onIncludeListClick.invoke(isChecked)
+        }
         if (ready.value == false)
             ready.postValue(true)
     }
 
     lateinit var onSeasonClick : ((Int)->Unit)
+    lateinit var onIncludeListClick : ((Boolean)->Unit)
 
     override fun getItemCount(): Int = 1
 
@@ -130,6 +135,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         binding.animeTrendingViewPager.layoutAnimation = LayoutAnimationController(setSlideIn(uiSettings), 0.25f)
         binding.animeTitleContainer.startAnimation(setSlideUp(uiSettings))
         binding.animeListContainer.layoutAnimation = LayoutAnimationController(setSlideIn(uiSettings), 0.25f)
+        binding.animeSeasonsCont.layoutAnimation = LayoutAnimationController(setSlideIn(uiSettings), 0.25f)
     }
 
     fun updateRecent(adaptor: MediaAdaptor) {
