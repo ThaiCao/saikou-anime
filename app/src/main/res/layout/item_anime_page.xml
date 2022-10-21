@@ -89,11 +89,12 @@
     </FrameLayout>
 
     <HorizontalScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
-        android:clipToPadding="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:scrollbarSize="0dp">
 
         <LinearLayout
             android:id="@+id/animeSeasonsCont"
@@ -145,7 +146,7 @@
             app:cardCornerRadius="16dp"
             app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/animeTopScore"
+            app:layout_constraintEnd_toStartOf="@+id/animeCalendar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="256dp">
@@ -189,7 +190,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/animeTopScore"
+            android:id="@+id/animeCalendar"
             android:layout_width="match_parent"
             android:layout_height="72dp"
             android:layout_margin="8dp"
@@ -203,7 +204,7 @@
             app:layout_constraintWidth_max="256dp">
 
             <ImageView
-                android:id="@+id/animeTopScoreImage"
+                android:id="@+id/animeCalendarImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
@@ -227,7 +228,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:fontFamily="@font/poppins_bold"
-                    android:text="@string/top_score"
+                    android:text="@string/release_calender"
                     android:textAllCaps="true"
                     android:textColor="@color/bg_white"
                     android:textSize="16sp" />
@@ -258,8 +259,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="250dp"
-        tools:visibility="gone">
+        android:minHeight="250dp">
 
         <ProgressBar
             android:id="@+id/animeUpdatedProgressBar"
@@ -290,9 +290,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:visibility="invisible"
-        tools:visibility="visible"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="invisible">
 
         <TextView
             android:layout_width="0dp"
@@ -307,8 +306,8 @@
             android:id="@+id/animeIncludeList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/include_media_in_list"
-            android:checked="true"/>
+            android:checked="true"
+            android:text="@string/include_media_in_list" />
 
 
     </LinearLayout>

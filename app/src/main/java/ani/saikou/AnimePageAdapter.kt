@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import ani.saikou.anilist.Anilist
 import ani.saikou.databinding.ItemAnimePageBinding
+import ani.saikou.media.CalendarActivity
 import ani.saikou.media.MediaAdaptor
 import ani.saikou.media.SearchActivity
 import ani.saikou.settings.SettingsDialogFragment
@@ -75,7 +76,7 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
         }
 
         binding.animeGenreImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/anime/banner/16498-8jpFCOcDmneX.jpg")
-        binding.animeTopScoreImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/anime/banner/125367-hGPJLSNfprO3.jpg")
+        binding.animeCalendarImage.loadImage("https://s4.anilist.co/file/anilistcdn/media/anime/banner/125367-hGPJLSNfprO3.jpg")
 
         binding.animeGenre.setOnClickListener {
             ContextCompat.startActivity(
@@ -84,13 +85,10 @@ class AnimePageAdapter : RecyclerView.Adapter<AnimePageAdapter.AnimePageViewHold
                 null
             )
         }
-        binding.animeTopScore.setOnClickListener {
+        binding.animeCalendar.setOnClickListener {
             ContextCompat.startActivity(
                 it.context,
-                Intent(it.context, SearchActivity::class.java)
-                    .putExtra("type", "ANIME")
-                    .putExtra("sortBy", "Score")
-                    .putExtra("search", true),
+                Intent(it.context, CalendarActivity::class.java),
                 null
             )
         }

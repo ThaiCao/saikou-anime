@@ -3,6 +3,7 @@ package ani.saikou.anilist
 import android.app.Activity
 import ani.saikou.*
 import ani.saikou.anilist.api.FuzzyDate
+import ani.saikou.anilist.api.Page
 import ani.saikou.anilist.api.Query
 import ani.saikou.anilist.api.User
 import ani.saikou.media.Character
@@ -691,11 +692,11 @@ query (${"$"}page: Int = 1, ${"$"}id: Int, ${"$"}type: MediaType, ${"$"}isAdult:
 
     suspend fun recentlyUpdated(
         smaller: Boolean = true,
-        page: Int = 1,
         greater: Long = 0,
         lesser: Long = System.currentTimeMillis() / 1000 - 10000
     ): MutableList<Media>? {
-        val query = """{
+        suspend fun execute(page:Int = 1):Page?{
+            val query = """{
 Page(page:$page,perPage:50) {
     pageInfo {
         hasNextPage
@@ -706,6 +707,8 @@ Page(page:$page,perPage:50) {
         airingAt_lesser: $lesser
         sort:TIME_DESC
     ) {
+        episode
+        airingAt
         media {
             id
             idMal
@@ -735,21 +738,43 @@ Page(page:$page,perPage:50) {
     }
 }
         }""".replace("\n", " ").replace("""  """, "")
-        val response = executeQuery<Query.Page>(query, force = true)?.data?.page?.airingSchedules ?: return null
-
-        val idArr = mutableListOf<Int>()
-        val listOnly = loadData("recently_list_only") ?: false
-        return response.mapNotNull { i ->
-            i.media?.let {
-                if (!smaller) Media(it)
-                else if (!idArr.contains(it.id))
-                    if (!listOnly && (it.countryOfOrigin == "JP" && (if (!Anilist.adult) it.isAdult == false else true)) || (listOnly && it.mediaListEntry != null)) {
-                        idArr.add(it.id)
-                        Media(it)
-                    } else null
-                else null
+            return executeQuery<Query.Page>(query, force = true)?.data?.page
+        }
+        if(smaller) {
+            val response = execute()?.airingSchedules ?: return null
+            val idArr = mutableListOf<Int>()
+            val listOnly = loadData("recently_list_only") ?: false
+            return response.mapNotNull { i ->
+                i.media?.let {
+                    if (!idArr.contains(it.id))
+                        if (!listOnly && (it.countryOfOrigin == "JP" && (if (!Anilist.adult) it.isAdult == false else true)) || (listOnly && it.mediaListEntry != null)) {
+                            idArr.add(it.id)
+                            Media(it)
+                        } else null
+                    else null
+                }
+            }.toMutableList()
+        }else{
+            var i = 1
+            val list = mutableListOf<Media>()
+            var res : Page? = null
+            suspend fun next(){
+                res = execute(i)
+                list.addAll(res?.airingSchedules?.mapNotNull { j ->
+                    j.media?.let {
+                        if (it.countryOfOrigin == "JP" && (if (!Anilist.adult) it.isAdult == false else true)) {
+                            Media(it).apply { relation = "${j.episode},${j.airingAt}" }
+                        } else null
+                    }
+                }?: listOf())
             }
-        }.toMutableList()
+            next()
+            while (res?.pageInfo?.hasNextPage == true){
+                next()
+                i++
+            }
+            return list
+        }
     }
 
     suspend fun getCharacterDetails(character: Character): Character {
