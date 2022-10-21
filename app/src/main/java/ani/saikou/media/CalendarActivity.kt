@@ -37,7 +37,7 @@ class CalendarActivity : AppCompatActivity() {
         binding.root.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
         binding.studioRecycler.updatePadding(bottom = 64f.px + navBarHeight)
         binding.studioTitle.isSelected = true
-        binding.studioTitle.setText(R.string.release_calender)
+        binding.studioTitle.setText(R.string.release_calendar)
 
         binding.studioClose.setOnClickListener {
             onBackPressed()

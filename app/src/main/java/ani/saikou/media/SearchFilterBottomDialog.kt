@@ -156,6 +156,7 @@ class SearchFilterBottomDialog(
 
         override fun onBindViewHolder(holder: SearchChipViewHolder, position: Int) {
             val title = list[position]
+            holder.setIsRecyclable(false)
             holder.binding.root.apply {
                 text = title
                 isCheckable = true

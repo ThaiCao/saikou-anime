@@ -228,7 +228,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:fontFamily="@font/poppins_bold"
-                    android:text="@string/release_calender"
+                    android:text="@string/release_calendar"
                     android:textAllCaps="true"
                     android:textColor="@color/bg_white"
                     android:textSize="16sp" />
