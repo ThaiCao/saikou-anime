@@ -27,6 +27,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.util.Rational
 import android.util.TypedValue
 import android.view.*
+import android.view.KeyEvent.*
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.ImageButton
@@ -608,6 +609,9 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 }
             }
         }
+
+        keyMap[KEYCODE_DPAD_RIGHT] = { seek(true) }
+        keyMap[KEYCODE_DPAD_LEFT] = { seek(false) }
 
         //Screen Gestures
         if (settings.gestures || settings.doubleTap) {
@@ -1559,5 +1563,24 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         onPiPChanged(isInPictureInPictureMode)
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+    }
+
+    private val keyMap: MutableMap<Int,(() -> Unit)?> = mutableMapOf(
+        KEYCODE_DPAD_RIGHT to null,
+        KEYCODE_DPAD_LEFT to null,
+        KEYCODE_SPACE to { exoPlay.performClick() },
+        KEYCODE_N to { exoNext.performClick() },
+        KEYCODE_B to { exoPrev.performClick() }
+    )
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        return if (keyMap.containsKey(event.keyCode)) {
+            (event.action == ACTION_DOWN).also {
+                if(isInitialized) keyMap[event.keyCode]?.invoke()
+            }
+        }
+        else {
+            super.dispatchKeyEvent(event)
+        }
     }
 }
