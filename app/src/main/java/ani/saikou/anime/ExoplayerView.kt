@@ -33,6 +33,7 @@ import android.widget.AdapterView
 import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -51,6 +52,7 @@ import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.others.AniSkip
 import ani.saikou.others.AniSkip.getType
 import ani.saikou.others.ResettableTimer
+import ani.saikou.others.getSerializable
 import ani.saikou.parsers.*
 import ani.saikou.settings.PlayerSettings
 import ani.saikou.settings.PlayerSettingsActivity
@@ -295,6 +297,10 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemBars()
 
+        onBackPressedDispatcher.addCallback(this){
+            finishAndRemoveTask()
+        }
+
         settings = loadData("player_settings") ?: PlayerSettings().apply { saveData("player_settings", this) }
         uiSettings = loadData("ui_settings") ?: UserInterfaceSettings().apply { saveData("ui_settings", this) }
 
@@ -372,7 +378,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         //BackButton
         playerView.findViewById<ImageButton>(R.id.exo_back).setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         //TimeStamps
@@ -616,7 +622,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         //Screen Gestures
         if (settings.gestures || settings.doubleTap) {
 
-            fun doubleTap(forward: Boolean, event: MotionEvent?) {
+            fun doubleTap(forward: Boolean, event: MotionEvent) {
                 if (!locked && isInitialized && settings.doubleTap) {
                     seek(forward, event)
                 }
@@ -671,7 +677,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
             //FastRewind (Left Panel)
             val fastRewindDetector = GestureDetector(this, object : GesturesListener() {
-                override fun onDoubleClick(event: MotionEvent?) {
+                override fun onDoubleClick(event: MotionEvent) {
                     doubleTap(false, event)
                 }
 
@@ -685,7 +691,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     }
                 }
 
-                override fun onSingleClick(event: MotionEvent?) = handleController()
+                override fun onSingleClick(event: MotionEvent) = handleController()
             })
             val rewindArea = playerView.findViewById<View>(R.id.exo_rewind_area)
             rewindArea.isClickable = true
@@ -697,7 +703,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
             //FastForward (Right Panel)
             val fastForwardDetector = GestureDetector(this, object : GesturesListener() {
-                override fun onDoubleClick(event: MotionEvent?) {
+                override fun onDoubleClick(event: MotionEvent) {
                     doubleTap(true, event)
                 }
 
@@ -711,7 +717,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                     }
                 }
 
-                override fun onSingleClick(event: MotionEvent?) = handleController()
+                override fun onSingleClick(event: MotionEvent) = handleController()
             })
             val forwardArea = playerView.findViewById<View>(R.id.exo_forward_area)
             forwardArea.isClickable = true
@@ -724,7 +730,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         //Handle Media
         try {
-            media = (intent.getSerializableExtra("media") as? Media) ?: return
+            media = (intent.getSerializable("media",Media::class)) ?: return
         } catch (e: Exception) {
             toast(e.toString())
             return
@@ -755,7 +761,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         // Subtitle View Margin fix for Kamyroll
         if(model.watchSources!!.names[media.selected!!.source] == "Kamyroll" && (settings.kamySubType == 0 || settings.kamySubType == 2)) {
             val marginInt = -19 // This gets rounded to -18dp
-            val margin = (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, marginInt.toFloat(), getResources().getDisplayMetrics())).roundToInt()
+            val margin = (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, marginInt.toFloat(), resources.displayMetrics)).roundToInt()
             exoSubtitleView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = margin
             }
@@ -1036,7 +1042,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             subClick()
         }
 
-        val newSub: Subtitle? = intent.getSerializableExtra("subtitle") as Subtitle?
+        val newSub = intent.getSerializable("subtitle", Subtitle::class)
         var sub: MediaItem.SubtitleConfiguration? = null
         if(newSub == null && subtitle != null) {
             sub = MediaItem.SubtitleConfiguration
@@ -1424,11 +1430,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         super.onNewIntent(intent)
         finishAndRemoveTask()
         startActivity(intent)
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finishAndRemoveTask()
     }
 
     override fun onDestroy() {
