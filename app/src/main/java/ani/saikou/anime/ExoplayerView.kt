@@ -1576,7 +1576,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return if (keyMap.containsKey(event.keyCode)) {
-            (event.action == ACTION_DOWN).also {
+            (event.action == ACTION_UP).also {
                 if(isInitialized) keyMap[event.keyCode]?.invoke()
             }
         }
