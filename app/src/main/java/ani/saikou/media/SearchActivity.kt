@@ -60,6 +60,8 @@ class SearchActivity : AppCompatActivity() {
                 onList = listOnly,
                 genres = intent.getStringExtra("genre")?.let { mutableListOf(it) },
                 sort = intent.getStringExtra("sortBy"),
+                season = intent.getStringExtra("season"),
+                seasonYear = intent.getStringExtra("seasonYear")?.toIntOrNull(),
                 results = mutableListOf(),
                 hasNextPage = false
             )
