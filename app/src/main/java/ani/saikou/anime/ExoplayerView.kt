@@ -1571,8 +1571,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         KEYCODE_DPAD_LEFT to null,
         KEYCODE_SPACE to { exoPlay.performClick() },
         KEYCODE_N to { exoNext.performClick() },
-        KEYCODE_B to { exoPrev.performClick() },
-        KEYCODE_VOLUME_UP to { toastString("Aye") }
+        KEYCODE_B to { exoPrev.performClick() }
     )
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
