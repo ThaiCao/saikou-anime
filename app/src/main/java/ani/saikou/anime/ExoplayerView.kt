@@ -52,7 +52,7 @@ import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.others.AniSkip
 import ani.saikou.others.AniSkip.getType
 import ani.saikou.others.ResettableTimer
-import ani.saikou.others.getSerializable
+import ani.saikou.others.getSerialized
 import ani.saikou.parsers.*
 import ani.saikou.settings.PlayerSettings
 import ani.saikou.settings.PlayerSettingsActivity
@@ -730,7 +730,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
 
         //Handle Media
         try {
-            media = (intent.getSerializable("media",Media::class)) ?: return
+            media = (intent.getSerialized("media")) ?: return
         } catch (e: Exception) {
             toast(e.toString())
             return
@@ -1042,7 +1042,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
             subClick()
         }
 
-        val newSub = intent.getSerializable("subtitle", Subtitle::class)
+        val newSub = intent.getSerialized<Subtitle>("subtitle")
         var sub: MediaItem.SubtitleConfiguration? = null
         if(newSub == null && subtitle != null) {
             sub = MediaItem.SubtitleConfiguration
@@ -1571,13 +1571,14 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         KEYCODE_DPAD_LEFT to null,
         KEYCODE_SPACE to { exoPlay.performClick() },
         KEYCODE_N to { exoNext.performClick() },
-        KEYCODE_B to { exoPrev.performClick() }
+        KEYCODE_B to { exoPrev.performClick() },
+        KEYCODE_VOLUME_UP to { toastString("Aye") }
     )
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return if (keyMap.containsKey(event.keyCode)) {
             (event.action == ACTION_UP).also {
-                if(isInitialized) keyMap[event.keyCode]?.invoke()
+                if(isInitialized && it) keyMap[event.keyCode]?.invoke()
             }
         }
         else {

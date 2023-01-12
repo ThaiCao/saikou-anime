@@ -29,7 +29,7 @@ import ani.saikou.manga.MangaChapter
 import ani.saikou.media.Media
 import ani.saikou.media.MediaDetailsViewModel
 import ani.saikou.others.ImageViewDialog
-import ani.saikou.others.getSerializable
+import ani.saikou.others.getSerialized
 import ani.saikou.parsers.HMangaSources
 import ani.saikou.parsers.MangaImage
 import ani.saikou.parsers.MangaSources
@@ -150,7 +150,7 @@ class MangaReaderActivity : AppCompatActivity() {
 
         media = if (model.getMedia().value == null)
             try {
-                (intent.getSerializable("media",Media::class)) ?: return
+                (intent.getSerialized("media")) ?: return
             } catch (e: Exception) {
                 logError(e)
                 return
