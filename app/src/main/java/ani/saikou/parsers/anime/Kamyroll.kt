@@ -131,7 +131,7 @@ class Kamyroll : AnimeParser() {
                     VideoType.M3U8,
                     FileUrl(
                         it.url,
-                        mapOf("accept" to "*/*", "accept-encoding" to "gzip")
+                        mapOf("accept" to "*/*", "accept-encoding" to "utf-8")
                     ),
                     null,
                     when (it.hardsubLocale){
