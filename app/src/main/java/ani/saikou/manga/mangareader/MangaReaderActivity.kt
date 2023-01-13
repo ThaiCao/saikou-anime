@@ -354,21 +354,21 @@ class MangaReaderActivity : AppCompatActivity() {
             if (settings.default.direction == RIGHT_TO_LEFT) {
                 binding.LeftSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex + 1) ?: "No Chapter"
                 binding.RightSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex - 1) ?: "No Chapter"
-                binding.mangaReaderSwipy.onRightSwiped = {
-                    binding.mangaReaderPreviousChapter.performClick()
-                }
                 binding.mangaReaderSwipy.onLeftSwiped = {
                     binding.mangaReaderNextChapter.performClick()
+                }
+                binding.mangaReaderSwipy.onRightSwiped = {
+                    binding.mangaReaderPreviousChapter.performClick()
                 }
             }
             else {
-                binding.RightSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex + 1) ?: "No Chapter"
                 binding.LeftSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex - 1) ?: "No Chapter"
+                binding.RightSwipeText.text = chaptersTitleArr.getOrNull(currentChapterIndex + 1) ?: "No Chapter"
                 binding.mangaReaderSwipy.onLeftSwiped = {
-                    binding.mangaReaderNextChapter.performClick()
+                    binding.mangaReaderPreviousChapter.performClick()
                 }
                 binding.mangaReaderSwipy.onRightSwiped = {
-                    binding.mangaReaderPreviousChapter.performClick()
+                    binding.mangaReaderNextChapter.performClick()
                 }
             }
             binding.mangaReaderSwipy.leftBeingSwiped = { value ->
