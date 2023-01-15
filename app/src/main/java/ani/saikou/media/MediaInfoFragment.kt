@@ -308,8 +308,8 @@ class MediaInfoFragment : Fragment() {
                                 chip.context,
                                 Intent(chip.context, SearchActivity::class.java)
                                     .putExtra("type", type)
-                                    .putExtra("tag", media.tags[position])
                                     .putExtra("sortBy", "Trending")
+                                    .putExtra("tag", media.tags[position].substringBefore(" :"))
                                     .putExtra("search", true)
                                     .also {
                                         if (media.isAdult) {
