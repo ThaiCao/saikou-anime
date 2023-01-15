@@ -99,7 +99,7 @@ fun <A, B> Collection<A>.asyncMap(f: suspend (A) -> B): List<B> = runBlocking {
 //}
 
 fun logError(e: Exception) {
-    toastString(e.localizedMessage)
+    toastString(e.localizedMessage, null , e.stackTrace.map { it.toString() }.joinToString { "\n" })
     e.printStackTrace()
 }
 
