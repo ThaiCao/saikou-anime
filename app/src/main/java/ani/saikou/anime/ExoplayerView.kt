@@ -1297,7 +1297,8 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 model.loadTimeStamps(
                     media.idMAL,
                     media.anime?.selectedEpisode?.trim()?.toIntOrNull(),
-                    dur / 1000
+                    dur / 1000,
+                    settings.useProxyForTimeStamps
                 )
             }
         }
