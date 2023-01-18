@@ -301,7 +301,7 @@
     <string name="total_repeats">TOTAL REPEATS</string>
     <string name="custom_lists">Custom Lists</string>
     <string name="donate_desc">Want to support Saikou\'s Creator?\nConsider Donating</string>
-    <string name="donate_goal">(We just reached a goal of $100!)</string>
+    <string name="donate_goal">(We reached a donation of $500!)</string>
     <string name="filter">Filter</string>
     <string name="year">Year</string>
     <string name="apply">Apply</string>
@@ -314,5 +314,8 @@
     <string name="planned_anime">Planned Anime</string>
     <string name="planned_manga">Planned Manga</string>
     <string name="image_long_clicking">Open image by Long Clicking</string>
+    <string name="always_continue_shows">Always continue Shows</string>
+    <string name="timestamp_proxy_desc">Useful if you are getting Handshake Fails</string>
+    <string name="timestamp_proxy">Use Proxy for Timestamps</string>
 
 </resources>

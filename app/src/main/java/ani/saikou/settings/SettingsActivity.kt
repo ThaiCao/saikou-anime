@@ -89,6 +89,11 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
             } else saveData("sd_dl", false)
         }
 
+        binding.settingsContinueMedia.isChecked = loadData("continue_media") ?: true
+        binding.settingsContinueMedia.setOnCheckedChangeListener { _, isChecked ->
+            saveData("continue_media", isChecked)
+        }
+
         binding.settingsRecentlyListOnly.isChecked = loadData("recently_list_only") ?: false
         binding.settingsRecentlyListOnly.setOnCheckedChangeListener { _, isChecked ->
             saveData("recently_list_only", isChecked)
