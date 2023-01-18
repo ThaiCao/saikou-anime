@@ -144,7 +144,9 @@ class MangaReadAdapter(
         if (binding != null) {
             if (media.manga?.chapters != null) {
                 val chapters = media.manga.chapters!!.keys.toTypedArray()
-                var continueEp = loadData<String>("${media.id}_current_chp") ?: media.userProgress?.plus(1).toString()
+                val anilistEp = (media.userProgress?:0).plus(1)
+                val appEp = loadData<String>("${media.id}_current_chp")?.toIntOrNull() ?: 1
+                var continueEp = (if(anilistEp>appEp) anilistEp else appEp).toString()
                 if (chapters.contains(continueEp)) {
                     binding.animeSourceContinue.visibility = View.VISIBLE
                     handleProgress(

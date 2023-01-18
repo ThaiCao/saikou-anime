@@ -170,8 +170,12 @@ class AnimeWatchAdapter(
         if (binding != null) {
             if (media.anime?.episodes != null) {
                 val episodes = media.anime.episodes!!.keys.toTypedArray()
-                var continueEp = loadData<String>("${media.id}_current_ep") ?: media.userProgress?.plus(1)?.toString()
-                if (continueEp!=null && episodes.contains(continueEp)) {
+
+                val anilistEp = (media.userProgress?:0).plus(1)
+                val appEp = loadData<String>("${media.id}_current_ep")?.toIntOrNull() ?: 1
+
+                var continueEp = (if(anilistEp>appEp) anilistEp else appEp).toString()
+                if (episodes.contains(continueEp)) {
                     binding.animeSourceContinue.visibility = View.VISIBLE
                     handleProgress(
                         binding.itemEpisodeProgressCont,
@@ -206,7 +210,6 @@ class AnimeWatchAdapter(
                             binding.animeSourceContinue.performClick()
                             fragment.continueEp = false
                         }
-
                     }
                 }
                 else{
