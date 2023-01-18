@@ -63,8 +63,9 @@ class AnimeWatchAdapter(
         }
 
         //Source Selection
-        binding.animeSource.setText(watchSources.names[media.selected!!.source])
-        watchSources[media.selected!!.source].apply {
+        val source = media.selected!!.source.let { if(it>=watchSources.names.size) 0 else it }
+        binding.animeSource.setText(watchSources.names[source])
+        watchSources[source].apply {
             this.selectDub = media.selected!!.preferDub
             binding.animeSourceTitle.text = showUserText
             showUserTextListener = { MainScope().launch { binding.animeSourceTitle.text = it } }

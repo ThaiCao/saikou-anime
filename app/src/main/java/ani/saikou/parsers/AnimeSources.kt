@@ -10,11 +10,10 @@ object AnimeSources : WatchSources() {
         "Gogo" to ::Gogo,
         "Zoro" to ::Zoro,
         "Kamyroll" to ::Kamyroll,
-        "Tenshi" to ::Tenshi,
-        "9Anime" to ::NineAnime,
-        "9Anime Backup" to ::AniWatchPro,
+        "Marin" to ::Marin,
         "AnimePahe" to ::AnimePahe,
-        "ConsumeBili" to ::ConsumeBili
+        "ConsumeBili" to ::ConsumeBili,
+//        "9Anime" to ::NineAnime,
     )
 }
 
