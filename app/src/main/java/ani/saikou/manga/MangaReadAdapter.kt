@@ -42,7 +42,7 @@ class MangaReadAdapter(
 
         //Source Selection
         val source = media.selected!!.source.let { if(it>=mangaReadSources.names.size) 0 else it }
-        binding.animeSource.setText(source)
+        binding.animeSource.setText(mangaReadSources.names[source])
         mangaReadSources[source].apply {
             binding.animeSourceTitle.text = showUserText
             showUserTextListener = { MainScope().launch { binding.animeSourceTitle.text = it } }

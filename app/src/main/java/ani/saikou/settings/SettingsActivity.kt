@@ -13,11 +13,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import ani.saikou.*
 import ani.saikou.databinding.ActivitySettingsBinding
+import ani.saikou.others.AppUpdater
 import ani.saikou.others.CustomBottomDialog
 import ani.saikou.parsers.AnimeSources
 import ani.saikou.parsers.MangaSources
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -280,8 +284,7 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
 
         binding.settingsLogo.setSafeOnClickListener {
             (binding.settingsLogo.drawable as Animatable).start()
-            if (Math.random() * 69 < 42.0)
-                toastString(array[(Math.random() * array.size).toInt()], this)
+            toastString(array[(Math.random() * array.size).toInt()], this)
         }
 
         binding.settingsDev.setOnClickListener {
@@ -300,6 +303,28 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
                 }
                 show(supportFragmentManager, "dialog")
             }
+        }
+
+        binding.settingsCheckUpdate.isChecked = loadData("check_update") ?: true
+        binding.settingsCheckUpdate.setOnCheckedChangeListener { _, isChecked ->
+            saveData("check_update", isChecked)
+            if(!isChecked){
+                toastString("You Long Click the button to check for App Update")
+            }
+        }
+
+        binding.settingsLogo.setOnLongClickListener {
+            lifecycleScope.launch(Dispatchers.IO){
+                AppUpdater.check(this@SettingsActivity,true)
+            }
+            true
+        }
+
+        binding.settingsCheckUpdate.setOnLongClickListener {
+            lifecycleScope.launch(Dispatchers.IO){
+                AppUpdater.check(this@SettingsActivity,true)
+            }
+            true
         }
     }
 }
