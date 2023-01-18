@@ -314,5 +314,6 @@
     <string name="timestamp_proxy_desc">Useful if you are getting Handshake Fails</string>
     <string name="timestamp_proxy">Use Proxy for Timestamps</string>
     <string name="check_app_updates">Always check for App Updates</string>
+    <string name="author">Author</string>
 
 </resources>
