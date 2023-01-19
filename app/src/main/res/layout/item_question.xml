@@ -10,12 +10,11 @@
     android:insetTop="0dp"
     android:insetBottom="0dp"
     android:paddingStart="32dp"
-    android:paddingEnd="32dp"
+    android:paddingEnd="64dp"
     android:textAlignment="viewStart"
     android:textAllCaps="false"
     android:textColor="@color/bg_opp"
     app:cornerRadius="0dp"
-    app:icon="@drawable/ic_round_help_24"
     app:iconPadding="16dp"
     app:iconSize="24dp"
     app:iconTint="?attr/colorPrimary" />

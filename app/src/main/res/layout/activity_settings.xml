@@ -761,30 +761,6 @@
                     app:thumbTint="@color/button_switch_track" />
 
                 <Button
-                    android:id="@+id/settingsFAQ"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:layout_marginStart="-32dp"
-                    android:layout_marginEnd="-32dp"
-                    android:background="@drawable/ui_bg"
-                    android:backgroundTint="?attr/colorSecondary"
-                    android:backgroundTintMode="src_atop"
-                    android:fontFamily="@font/poppins_bold"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:paddingStart="32dp"
-                    android:paddingEnd="32dp"
-                    android:text="@string/faq"
-                    android:textAlignment="viewStart"
-                    android:textAllCaps="false"
-                    android:textColor="@color/bg_opp"
-                    app:cornerRadius="0dp"
-                    app:icon="@drawable/ic_round_help_24"
-                    app:iconPadding="16dp"
-                    app:iconSize="24dp"
-                    app:iconTint="?attr/colorPrimary" />
-
-                <Button
                     android:id="@+id/settingsDev"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="match_parent"
@@ -850,6 +826,28 @@
 
             </ani.saikou.others.Xpandable>
 
+            <Button
+                android:id="@+id/settingsFAQ"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginStart="-32dp"
+                android:layout_marginEnd="-32dp"
+                android:background="@drawable/ui_bg"
+                android:backgroundTint="?attr/colorSecondary"
+                android:backgroundTintMode="src_atop"
+                android:fontFamily="@font/poppins_bold"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:text="@string/faq"
+                android:textAlignment="viewStart"
+                android:textAllCaps="false"
+                android:textColor="@color/bg_opp"
+                app:cornerRadius="0dp"
+                app:iconPadding="16dp"
+                app:iconSize="24dp"
+                app:iconTint="?attr/colorPrimary" />
 
             <TextView
                 android:layout_width="match_parent"

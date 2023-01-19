@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
-import ani.saikou.R
 import ani.saikou.databinding.ItemQuestionBinding
 import ani.saikou.loadData
 import ani.saikou.others.CustomBottomDialog
@@ -13,7 +12,7 @@ import ani.saikou.setAnimation
 import io.noties.markwon.Markwon
 import io.noties.markwon.SoftBreakAddsNewLinePlugin
 
-class FAQAdapter(private val questions: List<Triple<Int, String, String>>, val manager: FragmentManager) :
+class FAQAdapter(private val questions: List<Triple<Int, String, String>>, private val manager: FragmentManager) :
     RecyclerView.Adapter<FAQAdapter.FAQViewHolder>() {
     private val uiSettings = loadData<UserInterfaceSettings>("ui_settings") ?: UserInterfaceSettings()
 
@@ -28,7 +27,7 @@ class FAQAdapter(private val questions: List<Triple<Int, String, String>>, val m
         setAnimation(b.context, b, uiSettings)
         val dev = questions[position]
         b.text = dev.second
-        b.setCompoundDrawablesWithIntrinsicBounds(dev.first, 0, R.drawable.ui_bg, 0)
+        b.setCompoundDrawablesWithIntrinsicBounds(dev.first, 0, 0, 0)
         b.setOnClickListener {
             CustomBottomDialog.newInstance().apply {
                 setTitleText(dev.second)
