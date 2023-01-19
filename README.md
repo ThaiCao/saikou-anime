@@ -39,40 +39,40 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 
 * **Available Anime sources:-**
 
-| SITE                                      | STATUS  | DOWNLOADS |
-|:-----------------------------------------:|:-------:|:---------:|
-| [9Anime](https://9anime.pl)               | SEMI-WORKING | SOME |
-| [Gogo](https://gogoanime.cm)              | WORKING | SOME |
-| [AllAnime](https://allanime.site)         | SEMI-WORKING | SOME |
-| [Zoro](https://zoro.to)                   | WORKING | SOME |
-| [Tenshi](https://tenshi.moe)              | WORKING | YES  |
-| [Kamyroll](https://github.com/kamyroll/Kamyroll-Wiki/wiki)| WORKING | NO   |
-| [AnimePahe](https://animepahe.ru)| SEMI-WORKING | NO   |
-| [ConsumeBili](https://www.bilibili.tv)     | WORKING | NO   |
-| [Haho (18+)](https://haho.moe)                  | WORKING | YES  |
-| [HentaiMama (18+)](https://hentaimama.io)       | WORKING | SOME |
-| [HentaiStream (18+)](https://hentaistream.com)  | WORKING | YES  |
-| [HentaiFF (18+)](https://hentaiff.com)          | WORKING | SOME |
+|                            SITE                            |    STATUS    | DOWNLOADS |
+|:----------------------------------------------------------:|:------------:|:---------:|
+|             [AllAnime](https://allanime.site)              | SEMI-WORKING |   SOME    |
+|                [Gogo](https://gogoanime.cm)                |   WORKING    |   SOME    |
+|                  [Zoro](https://zoro.to)                   |   WORKING    |    NO     |
+|                 [Marin](https://marin.moe)                 |   WORKING    |    YES    |
+| [Kamyroll](https://github.com/kamyroll/Kamyroll-Wiki/wiki) |   WORKING    |    NO     |
+|             [AnimePahe](https://animepahe.ru)              |   WORKING    |    YES    |
+|                [9Anime](https://9anime.pl)                 | NOT WORKING  |   SOME    |
+|           [ConsumeBili](https://www.bilibili.tv)           |   WORKING    |    NO     |
+|               [Haho (18+)](https://haho.moe)               |   WORKING    |    YES    |
+|         [HentaiMama (18+)](https://hentaimama.io)          |   WORKING    |   SOME    |
+|       [HentaiStream (18+)](https://hentaistream.com)       |   WORKING    |    YES    |
+|           [HentaiFF (18+)](https://hentaiff.com)           |   WORKING    |   SOME    |
 
 
 * **Available Manga sources:-**
 
-| SITE                                     | STATUS  |
-|:----------------------------------------:|:-------:|
-| [MangaKakalot](https://mangakakalot.com)| WORKING |
-| [MangaBuddy](https://mangabuddy.com)    | WORKING |
-| [MangaSee](https://mangasee123.com)     | SEMI-WORKING |
-| [MangaPill](https://mangapill.com)      | WORKING |
-| [MangaDex](https://mangadex.org)        | SEMI-WORKING |
-| [MangaReaderTo](https://mangareader.to) | WORKING |
-| [AllAnime](https://allanime.site)       | WORKING |
-| [Comickfun](https://comick.fun)         | WORKING |
-| [MangaHub](https://mangahub.io)         | WORKING |
-| [MangaKatana](https://mangakatana.com)  | WORKING |
-| [Toonily](https://toonily.com/)         | WORKING |
-| [NHentai (18+)](https://nhentai.net)      | NOT WORKING |
-| [NineHentai (18+)](https://ninehentai.net)| WORKING |
-| [Manwha18 (18+)](https://manhwa18.cc)   | WORKING |
+|                    SITE                    |   STATUS    |
+|:------------------------------------------:|:-----------:|
+|  [MangaKakalot](https://mangakakalot.com)  |   WORKING   |
+|    [MangaBuddy](https://mangabuddy.com)    |   WORKING   |
+|    [MangaSee](https://mangasee123.com)     |   WORKING   |
+|     [MangaPill](https://mangapill.com)     |   WORKING   |
+|      [MangaDex](https://mangadex.org)      |   WORKING   |
+|  [MangaReaderTo](https://mangareader.to)   |   WORKING   |
+|     [AllAnime](https://allanime.site)      |   WORKING   |
+|      [Comickfun](https://comick.fun)       |   WORKING   |
+|      [MangaHub](https://mangahub.io)       | NOT WORKING |
+|   [MangaKatana](https://mangakatana.com)   |   WORKING   |
+|      [Toonily](https://toonily.com/)       |   WORKING   |
+|    [NHentai (18+)](https://nhentai.net)    | NOT WORKING |
+| [NineHentai (18+)](https://ninehentai.net) |   WORKING   |
+|   [Manwha18 (18+)](https://manhwa18.cc)    |   WORKING   |
 
 ## Planned Stuff
 

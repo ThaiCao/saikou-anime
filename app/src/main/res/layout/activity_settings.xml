@@ -833,7 +833,7 @@
                 android:layout_marginStart="-32dp"
                 android:layout_marginEnd="-32dp"
                 android:background="@drawable/ui_bg"
-                android:backgroundTint="?attr/colorSecondary"
+                android:backgroundTint="@color/bg_opp"
                 android:backgroundTintMode="src_atop"
                 android:fontFamily="@font/poppins_bold"
                 android:insetTop="0dp"
@@ -843,11 +843,10 @@
                 android:text="@string/faq"
                 android:textAlignment="viewStart"
                 android:textAllCaps="false"
-                android:textColor="@color/bg_opp"
+                android:textColor="?attr/colorSecondary"
                 app:cornerRadius="0dp"
                 app:iconPadding="16dp"
-                app:iconSize="24dp"
-                app:iconTint="?attr/colorPrimary" />
+                app:iconSize="24dp" />
 
             <TextView
                 android:layout_width="match_parent"
