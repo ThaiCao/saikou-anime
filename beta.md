@@ -1,5 +1,6 @@
 # 1.2.0.24
 
+- Fixed Small App Crash
 - Added ConsumeBili Source (Api Currently Down) by @hoangvu12
 - Added Toonily by @scrazzz
 - Removed AnimixPlay, 9anime & MangaHub
