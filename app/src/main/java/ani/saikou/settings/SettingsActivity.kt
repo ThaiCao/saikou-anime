@@ -290,6 +290,9 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
         binding.settingsDev.setOnClickListener {
             DevelopersDialogFragment().show(supportFragmentManager, "dialog")
         }
+        binding.settingsForks.setOnClickListener {
+            ForksDialogFragment().show(supportFragmentManager, "dialog")
+        }
         binding.settingsDisclaimer.setOnClickListener {
             val title = getString(R.string.disclaimer)
             val text = TextView(this)
