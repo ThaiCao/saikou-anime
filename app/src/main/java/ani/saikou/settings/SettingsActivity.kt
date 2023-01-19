@@ -279,6 +279,10 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
             startActivity(Intent(this, UserInterfaceSettingsActivity::class.java))
         }
 
+        binding.settingsFAQ.setOnClickListener {
+            startActivity(Intent(this, FAQActivity::class.java))
+        }
+
         (binding.settingsLogo.drawable as Animatable).start()
         val array = resources.getStringArray(R.array.tips)
 
@@ -311,21 +315,21 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
         binding.settingsCheckUpdate.isChecked = loadData("check_update") ?: true
         binding.settingsCheckUpdate.setOnCheckedChangeListener { _, isChecked ->
             saveData("check_update", isChecked)
-            if(!isChecked){
+            if (!isChecked) {
                 toastString("You Long Click the button to check for App Update")
             }
         }
 
         binding.settingsLogo.setOnLongClickListener {
-            lifecycleScope.launch(Dispatchers.IO){
-                AppUpdater.check(this@SettingsActivity,true)
+            lifecycleScope.launch(Dispatchers.IO) {
+                AppUpdater.check(this@SettingsActivity, true)
             }
             true
         }
 
         binding.settingsCheckUpdate.setOnLongClickListener {
-            lifecycleScope.launch(Dispatchers.IO){
-                AppUpdater.check(this@SettingsActivity,true)
+            lifecycleScope.launch(Dispatchers.IO) {
+                AppUpdater.check(this@SettingsActivity, true)
             }
             true
         }

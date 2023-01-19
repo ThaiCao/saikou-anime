@@ -316,5 +316,6 @@
     <string name="check_app_updates">Always check for App Updates</string>
     <string name="author">Author</string>
     <string name="forks">Forks</string>
+    <string name="faq">FAQ</string>
 
 </resources>
