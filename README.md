@@ -1,6 +1,6 @@
 # **Saikou**
 <p align="center">
-   <a href="https://discord.gg/5TXAWTU5qr"><img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"></a>
+   <a href="https://discord.gg/saikou-app"><img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"></a>
    <a href="https://telegram.me/saikou_app" ><img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"></a> 
    <a href="https://github.com/saikou-app/saikou/releases"><img src="https://img.shields.io/github/downloads/saikou-app/saikou/total?color=%233DDC84&logo=android&logoColor=%23fff&style=for-the-badge"></a>
 </p>
@@ -67,9 +67,11 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 |  [MangaReaderTo](https://mangareader.to)   |   WORKING   |
 |     [AllAnime](https://allanime.site)      |   WORKING   |
 |      [Comickfun](https://comick.fun)       |   WORKING   |
-|      [MangaHub](https://mangahub.io)       | NOT WORKING |
+| [Manga4Life](https://manga4life.com/)      |   WORKING   |
+| [MangaRead](https://www.mangaread.org)     |   WORKING   |
 |   [MangaKatana](https://mangakatana.com)   |   WORKING   |
 |      [Toonily](https://toonily.com/)       |   WORKING   |
+|      [MangaHub](https://mangahub.io)       | NOT WORKING |
 |    [NHentai (18+)](https://nhentai.net)    | NOT WORKING |
 | [NineHentai (18+)](https://ninehentai.net) |   WORKING   |
 |   [Manwha18 (18+)](https://manhwa18.cc)    |   WORKING   |
@@ -99,7 +101,6 @@ Saikou is crafted based on simplistic yet state-of-the-art elegance. It is an [A
 
 - Accent Color Change (Hot Pink Supremacy.)
 
-- Subtitles Customization
 
 ## Help wanted for:
 
