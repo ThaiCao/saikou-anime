@@ -68,7 +68,7 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
             onBackPressedDispatcher.onBackPressed()
         }
 
-        val animeSource = loadData<Int>("settings_def_anime_source")?.let{ if(it>=AnimeSources.names.size) it else 0} ?: 0
+        val animeSource = loadData<Int>("settings_def_anime_source")?.let{ if(it>=AnimeSources.names.size) 0 else it} ?: 0
         binding.animeSource.setText(AnimeSources.names[animeSource], false)
         binding.animeSource.setAdapter(ArrayAdapter(this, R.layout.item_dropdown, AnimeSources.names))
         binding.animeSource.setOnItemClickListener { _, _, i, _ ->
@@ -118,7 +118,7 @@ OS Version: $CODENAME $RELEASE ($SDK_INT)
             saveData("settings_prefer_dub", isChecked)
         }
 
-        val mangaSource = loadData<Int>("settings_def_manga_source")?.let{ if(it>=MangaSources.names.size) it else 0} ?: 0
+        val mangaSource = loadData<Int>("settings_def_manga_source")?.let{ if(it>=MangaSources.names.size) 0 else it} ?: 0
         binding.mangaSource.setText(MangaSources.names[mangaSource], false)
         binding.mangaSource.setAdapter(ArrayAdapter(this, R.layout.item_dropdown, MangaSources.names))
         binding.mangaSource.setOnItemClickListener { _, _, i, _ ->
