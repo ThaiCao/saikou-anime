@@ -17,9 +17,11 @@ open class Marin : AnimeParser() {
 
     private var cookie:String?=null
     private var token:String?=null
+    private val ddosCookie = ";__ddg1_=;__ddg2_=;"
     private suspend fun getCookieHeaders(): List<Pair<String,String>> {
         if(cookie==null)
-            cookie = client.head(hostUrl).headers.toMultimap()["set-cookie"]!!.joinToString(";")
+            cookie = client.head(hostUrl, mapOf("cookie" to ddosCookie)).headers.toMultimap()["set-cookie"]!!.joinToString(";")
+            cookie?.plus(ddosCookie)
         token = decode(cookie?.findBetween("XSRF-TOKEN=", ";")!!)
         return listOf("cookie" to cookie!!,"x-xsrf-token" to token!!)
     }
