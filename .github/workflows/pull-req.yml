@@ -31,4 +31,4 @@ jobs:
     - name: Upload APK to Discord
       shell: bash
       run: |
-        curl -F 'payload_json={"username": "Saikou PR Build", "avatar_url": "https://media.discordapp.net/attachments/927944825016311858/1046676593252253726/saikou.png"}' -F "saikou_debug=@app/build/outputs/apk/debug/app-debug.apk" ${{ secrets.DISCORD_WEBHOOK_URL }}
+        curl -F 'payload_json={"username": "Saikou PR Build", "avatar_url": "https://media.discordapp.net/attachments/927944825016311858/1046676593252253726/saikou.png"}' -F "saikou_debug=@app/build/outputs/apk/debug/app-debug.apk" https://discord.com/api/webhooks/902250039311732806/kuEWdhZUESxBMUN72D9-Ft3e_wdcI8X5j-zHUYs0y2NaJYLtrX6LY5jUKFxdialWL7Zc
