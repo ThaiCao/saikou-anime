@@ -25,7 +25,7 @@ import java.io.File
 
 object AppUpdater {
     suspend fun check(activity: FragmentActivity,post:Boolean=false) {
-        if(post) toastString("Checking for Update")
+        if(post) snackString("Checking for Update")
         val repo = activity.getString(R.string.repo)
         tryWithSuspend {
             val md =
@@ -72,7 +72,7 @@ object AppUpdater {
                 }
             }
             else{
-                if(post) toastString("No Update Found")
+                if(post) snackString("No Update Found")
             }
         }
     }

@@ -130,7 +130,7 @@ fun <T> loadData(fileName: String, activity: Context? = null, toast: Boolean = t
                 return data
             }
     } catch (e: Exception) {
-        if (toast) toastString("Error loading data $fileName")
+        if (toast) snackString("Error loading data $fileName")
         e.printStackTrace()
     }
     return null
@@ -734,7 +734,7 @@ fun copyToClipboard(string: String, toast: Boolean = true) {
     val clipboard = getSystemService(activity, ClipboardManager::class.java)
     val clip = ClipData.newPlainText("label", string)
     clipboard?.setPrimaryClip(clip)
-    if (toast) toastString("Copied \"$string\"")
+    if (toast) snackString("Copied \"$string\"")
 }
 
 @SuppressLint("SetTextI18n")
@@ -752,7 +752,7 @@ fun countDown(media: Media, view: ViewGroup) {
 
             override fun onFinish() {
                 v.mediaCountdownContainer.visibility = View.GONE
-                toastString("Congrats Vro")
+                snackString("Congrats Vro")
             }
         }.start()
     }
@@ -836,7 +836,7 @@ fun toast(string: String?, activity: Activity? = null) {
     }
 }
 
-fun toastString(s: String?, activity: Activity? = null, clipboard: String? = null) {
+fun snackString(s: String?, activity: Activity? = null, clipboard: String? = null) {
     if (s != null) {
         (activity ?: currActivity())?.apply {
             runOnUiThread {
