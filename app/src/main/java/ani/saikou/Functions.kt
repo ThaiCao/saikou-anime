@@ -44,6 +44,7 @@ import ani.saikou.anilist.Genre
 import ani.saikou.anilist.api.FuzzyDate
 import ani.saikou.anime.Episode
 import ani.saikou.databinding.ItemCountDownBinding
+import ani.saikou.mal.MAL
 import ani.saikou.media.Media
 import ani.saikou.others.DisabledReports
 import ani.saikou.others.Download.adm
@@ -660,6 +661,12 @@ fun updateAnilistProgress(media: Media, number: String) {
                     media.id,
                     a,
                     status = if (media.userStatus == "REPEATING") media.userStatus else "CURRENT"
+                )
+                MAL.query.editList(
+                    media.id,
+                    media.anime!=null,
+                    a,  null,
+                    if (media.userStatus == "REPEATING") media.userStatus!! else "CURRENT"
                 )
                 toast("Setting progress to $a")
             }
