@@ -12,6 +12,13 @@
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <queries>
+        <package android:name="idm.internet.download.manager.plus"/>
+        <package android:name="idm.internet.download.manager"/>
+        <package android:name="idm.internet.download.manager.adm.lite"/>
+        <package android:name="com.dv.adm"/>
+    </queries>
+
     <application
         android:name=".App"
         android:allowBackup="true"
