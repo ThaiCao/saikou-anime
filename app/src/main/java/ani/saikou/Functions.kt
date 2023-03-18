@@ -663,7 +663,7 @@ fun updateAnilistProgress(media: Media, number: String) {
                     status = if (media.userStatus == "REPEATING") media.userStatus else "CURRENT"
                 )
                 MAL.query.editList(
-                    media.id,
+                    media.idMAL,
                     media.anime!=null,
                     a,  null,
                     if (media.userStatus == "REPEATING") media.userStatus!! else "CURRENT"
