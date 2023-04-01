@@ -1,5 +1,7 @@
 # 1.2.1.1
 
+Happy April Fools Dev
+
 - Added Monet Icon support
 - Download Manager Integration (1DM) by @adolar0042
 - Fix AllAnime
