@@ -11,9 +11,9 @@ object AnimeSources : WatchSources() {
         "Zoro" to ::Zoro,
         "Marin" to ::Marin,
         "AnimePahe" to ::AnimePahe,
-        "ConsumeBili" to ::ConsumeBili,
+        "Consume Bili" to ::ConsumeBili,
 //        "KickAssAnime" to ::KickAssAnime,
-//        "9Anime" to ::NineAnime,
+        "Consume 9Anime" to ::Consumet9Anime,
     )
 }
 
