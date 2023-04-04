@@ -50,6 +50,7 @@ import ani.saikou.others.DisabledReports
 import ani.saikou.others.Download.adm
 import ani.saikou.others.Download.defaultDownload
 import ani.saikou.others.Download.onedm
+import ani.saikou.others.SubscriptionWorker
 import ani.saikou.parsers.ShowResponse
 import ani.saikou.settings.UserInterfaceSettings
 import com.bumptech.glide.Glide
@@ -474,6 +475,7 @@ class App : MultiDexApplication() {
         Firebase.crashlytics.setCrashlyticsCollectionEnabled(!DisabledReports)
         initializeNetwork(baseContext)
 
+        SubscriptionWorker.enqueue(baseContext)
     }
 
     companion object {
