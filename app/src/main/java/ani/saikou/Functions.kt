@@ -58,12 +58,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.internal.ViewUtils
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import nl.joery.animatedbottombar.AnimatedBottomBar
 import java.io.*
+import java.lang.Runnable
 import java.lang.reflect.Field
 import java.util.*
 import kotlin.math.*
@@ -894,4 +892,17 @@ fun checkCountry(context: Context): Boolean {
         }
         else                              -> false
     }
+}
+
+suspend fun View.pop() {
+    currActivity()?.runOnUiThread {
+        ObjectAnimator.ofFloat(this@pop, "scaleX", 1f, 1.25f).setDuration(120).start()
+        ObjectAnimator.ofFloat(this@pop, "scaleY", 1f, 1.25f).setDuration(120).start()
+    }
+    delay(120)
+    currActivity()?.runOnUiThread {
+        ObjectAnimator.ofFloat(this@pop, "scaleX", 1.25f, 1f).setDuration(100).start()
+        ObjectAnimator.ofFloat(this@pop, "scaleY", 1.25f, 1f).setDuration(100).start()
+    }
+    delay(100)
 }
