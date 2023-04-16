@@ -34,9 +34,9 @@ import androidx.core.view.*
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.MutableLiveData
-import androidx.multidex.BuildConfig
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import ani.saikou.BuildConfig.APPLICATION_ID
 import ani.saikou.anilist.Anilist
 import ani.saikou.anilist.Genre
 import ani.saikou.anilist.api.FuzzyDate
@@ -546,7 +546,7 @@ fun download(activity: Activity, episode: Episode, animeTitle: String) {
 fun saveImageToDownloads(title: String, bitmap: Bitmap, context: Context) {
     FileProvider.getUriForFile(
         context,
-        BuildConfig.APPLICATION_ID + ".provider",
+        "$APPLICATION_ID.provider",
         saveImage(
             bitmap,
             Environment.getExternalStorageDirectory().absolutePath + "/" + Environment.DIRECTORY_DOWNLOADS,
@@ -559,7 +559,7 @@ fun shareImage(title: String, bitmap: Bitmap, context: Context) {
 
     val contentUri = FileProvider.getUriForFile(
         context,
-        BuildConfig.APPLICATION_ID + ".provider",
+        "$APPLICATION_ID.provider",
         saveImage(bitmap, context.cacheDir.absolutePath, title) ?: return
     )
 
