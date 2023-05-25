@@ -10,7 +10,7 @@ class NineAnime : AnimeParser() {
 
     override val name = "9anime"
     override val saveName = "9anime_to"
-    override val hostUrl = "https://9anime.pl"
+    override val hostUrl = "https://9animehq.to"
     override val malSyncBackupName = "9anime"
     override val isDubAvailableSeparately = true
 
