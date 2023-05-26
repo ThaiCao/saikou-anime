@@ -57,7 +57,7 @@ class Gogo : AnimeParser() {
             "goload" in domain  -> GogoCDN(server)
             "playgo" in domain  -> GogoCDN(server)
             "anihdplay" in domain  -> GogoCDN(server)
-            "playtaku" in domain  -> GogoCDN(server)
+            "taku" in domain  -> GogoCDN(server)
             "sb" in domain      -> StreamSB(server)
             "sss" in domain      -> StreamSB(server)
             "fplayer" in domain -> FPlayer(server)
