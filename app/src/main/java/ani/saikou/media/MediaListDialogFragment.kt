@@ -173,6 +173,10 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                     binding.mediaListRewatch.setText(this.toString())
                 }
 
+                media?.notes?.apply {
+                    binding.mediaListNotes.setText(this)
+                }
+
                 if (media?.inCustomListsOf?.isEmpty() != false)
                     binding.mediaListAddCustomList.apply {
                         (parent as? ViewGroup)?.removeView(this)
@@ -199,6 +203,7 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                                     (_binding?.mediaListScore?.text.toString().toDoubleOrNull()?.times(10))?.toInt()
                                 val status = _binding?.mediaListStatus?.text.toString()
                                 val rewatch = _binding?.mediaListRewatch?.text?.toString()?.toIntOrNull()
+                                val notes = _binding?.mediaListNotes?.text?.toString()
                                 val startD = if (start.date.year != null) start.date else null
                                 val endD = if (end.date.year != null) end.date else null
                                 Anilist.mutation.editList(
@@ -206,6 +211,7 @@ class MediaListDialogFragment : BottomSheetDialogFragment() {
                                     progress,
                                     score,
                                     rewatch,
+                                    notes,
                                     status,
                                     media?.isListPrivate ?: false,
                                     startD,

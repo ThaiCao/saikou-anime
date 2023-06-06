@@ -128,7 +128,7 @@ class MediaListDialogSmallFragment : BottomSheetDialogFragment() {
                         val progress = _binding?.mediaListProgress?.text.toString().toIntOrNull()
                         val score = (_binding?.mediaListScore?.text.toString().toDoubleOrNull()?.times(10))?.toInt()
                         val status = _binding?.mediaListStatus?.text.toString()
-                        Anilist.mutation.editList(media.id, progress, score, null, status, media.isListPrivate)
+                        Anilist.mutation.editList(media.id, progress, score, null, status, null, media.isListPrivate)
                         MAL.query.editList(media.idMAL, media.anime != null, progress, score, status)
                     }
                 }

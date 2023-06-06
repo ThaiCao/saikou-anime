@@ -344,4 +344,5 @@
     <string name="grid">Grid</string>
     <string name="sort_by_release_date">Sort by Release Date</string>
     <string name="crop_borders">Crop Borders</string>
+    <string name="note">NOTE</string>
 </resources>

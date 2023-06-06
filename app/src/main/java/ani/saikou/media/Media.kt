@@ -32,6 +32,7 @@ data class Media(
 
     var userListId: Int? = null,
     var isListPrivate: Boolean = false,
+    var notes: String? = null,
     var userProgress: Int? = null,
     var userStatus: String? = null,
     var userScore: Int = 0,

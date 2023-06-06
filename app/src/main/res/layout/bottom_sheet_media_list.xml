@@ -293,6 +293,36 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/mediaListNotesLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/note"
+                    android:layout_marginTop="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:endIconMode="none"
+                    app:hintAnimationEnabled="true"
+                    app:startIconDrawable="@drawable/ic_round_edit_note_24"
+                    app:suffixTextAppearance="@style/Suffix">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/mediaListNotes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/poppins_bold"
+                        android:inputType="textMultiLine"
+                        android:padding="8dp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="14sp"
+                        tools:ignore="LabelFor,TextContrastCheck" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:layout_marginTop="16dp"
                     android:id="@+id/mediaListPrivate"

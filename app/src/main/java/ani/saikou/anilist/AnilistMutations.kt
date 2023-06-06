@@ -18,6 +18,7 @@ class AnilistMutations {
         progress: Int? = null,
         score: Int? = null,
         repeat: Int? = null,
+        notes: String? = null,
         status: String? = null,
         private:Boolean = false,
         startedAt: FuzzyDate? = null,
@@ -26,8 +27,8 @@ class AnilistMutations {
     ) {
 
         val query = """
-            mutation ( ${"$"}mediaID: Int, ${"$"}progress: Int,${"$"}private:Boolean,${"$"}repeat: Int, ${"$"}customLists: [String], ${"$"}scoreRaw:Int, ${"$"}status:MediaListStatus, ${"$"}start:FuzzyDateInput${if (startedAt != null) "=" + startedAt.toVariableString() else ""}, ${"$"}completed:FuzzyDateInput${if (completedAt != null) "=" + completedAt.toVariableString() else ""} ) {
-                SaveMediaListEntry( mediaId: ${"$"}mediaID, progress: ${"$"}progress, repeat: ${"$"}repeat, private: ${"$"}private, scoreRaw: ${"$"}scoreRaw, status:${"$"}status, startedAt: ${"$"}start, completedAt: ${"$"}completed , customLists: ${"$"}customLists ) {
+            mutation ( ${"$"}mediaID: Int, ${"$"}progress: Int,${"$"}private:Boolean,${"$"}repeat: Int, ${"$"}notes: String, ${"$"}customLists: [String], ${"$"}scoreRaw:Int, ${"$"}status:MediaListStatus, ${"$"}start:FuzzyDateInput${if (startedAt != null) "=" + startedAt.toVariableString() else ""}, ${"$"}completed:FuzzyDateInput${if (completedAt != null) "=" + completedAt.toVariableString() else ""} ) {
+                SaveMediaListEntry( mediaId: ${"$"}mediaID, progress: ${"$"}progress, repeat: ${"$"}repeat, notes: ${"$"}notes, private: ${"$"}private, scoreRaw: ${"$"}scoreRaw, status:${"$"}status, startedAt: ${"$"}start, completedAt: ${"$"}completed , customLists: ${"$"}customLists ) {
                     score(format:POINT_10_DECIMAL) startedAt{year month day} completedAt{year month day}
                 }
             }
@@ -37,6 +38,7 @@ class AnilistMutations {
             ${if (progress != null) ""","progress":$progress""" else ""}
             ${if (score != null) ""","scoreRaw":$score""" else ""}
             ${if (repeat != null) ""","repeat":$repeat""" else ""}
+            ${if (notes != null) ""","notes":"${notes.replace("\n", "\\n")}"""" else ""}
             ${if (status != null) ""","status":"$status"""" else ""}
             ${if (customList !=null) ""","customLists":[${customList.joinToString { "\"$it\"" }}]""" else ""}
             }""".replace("\n", "").replace("""    """, "")
