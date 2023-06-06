@@ -581,7 +581,7 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         var seekTimesR = 0
 
         fun seek(forward: Boolean, event: MotionEvent? = null) {
-            val views = if (forward) {
+            val (card, text) = if (forward) {
                 forwardText.text = "+${settings.seekTime * ++seekTimesF}"
                 handler.post { exoPlayer.seekTo(exoPlayer.currentPosition + settings.seekTime * 1000) }
                 fastForwardCard to forwardText
@@ -590,18 +590,48 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
                 handler.post { exoPlayer.seekTo(exoPlayer.currentPosition - settings.seekTime * 1000) }
                 fastRewindCard to rewindText
             }
-            startDoubleTapped(views.first, views.second, event, forward)
+
+            //region Double Tap Animation
+            val showCardAnim = ObjectAnimator.ofFloat(card, "alpha", 0f, 1f).setDuration(300)
+            val showTextAnim = ObjectAnimator.ofFloat(text, "alpha", 0f, 1f).setDuration(150)
+
+            fun startAnim() {
+                showTextAnim.start()
+
+                (text.compoundDrawables[1] as Animatable).apply {
+                    if (!isRunning) start()
+                }
+
+                if (event != null) {
+                    playerView.hideController()
+                    card.circularReveal(event.x.toInt(), event.y.toInt(), !forward, 800)
+                    showCardAnim.start()
+                }
+            }
+
+            fun stopAnim() {
+                handler.post {
+                    showCardAnim.cancel()
+                    showTextAnim.cancel()
+                    ObjectAnimator.ofFloat(card, "alpha", card.alpha, 0f).setDuration(150).start()
+                    ObjectAnimator.ofFloat(text, "alpha", 1f, 0f).setDuration(150).start()
+                }
+            }
+            //endregion
+
+            startAnim()
+
             if (forward) {
                 seekTimerR.reset(object : TimerTask() {
                     override fun run() {
-                        stopDoubleTapped(views.first, views.second)
+                        stopAnim()
                         seekTimesF = 0
                     }
                 }, 850)
             } else {
                 seekTimerF.reset(object : TimerTask() {
                     override fun run() {
-                        stopDoubleTapped(views.first, views.second)
+                        stopAnim()
                         seekTimesR = 0
                     }
                 }, 850)
@@ -1418,30 +1448,6 @@ class ExoplayerView : AppCompatActivity(), Player.Listener {
         val trackDialog = trackSelectionDialogBuilder.build()
         trackDialog.setOnDismissListener { hideSystemBars() }
         return trackDialog
-    }
-
-    //Double Tap Animation
-    private fun startDoubleTapped(v: View, text: TextView, event: MotionEvent? = null, forward: Boolean) {
-        ObjectAnimator.ofFloat(text, "alpha", 1f, 1f).setDuration(600).start()
-        ObjectAnimator.ofFloat(text, "alpha", 0f, 1f).setDuration(150).start()
-
-        (text.compoundDrawables[1] as Animatable).apply {
-            if (!isRunning) start()
-        }
-
-        if (event != null) {
-            playerView.hideController()
-            v.circularReveal(event.x.toInt(), event.y.toInt(), !forward, 800)
-            ObjectAnimator.ofFloat(v, "alpha", 1f, 1f).setDuration(800).start()
-            ObjectAnimator.ofFloat(v, "alpha", 0f, 1f).setDuration(300).start()
-        }
-    }
-
-    private fun stopDoubleTapped(v: View, text: TextView) {
-        handler.post {
-            ObjectAnimator.ofFloat(v, "alpha", v.alpha, 0f).setDuration(150).start()
-            ObjectAnimator.ofFloat(text, "alpha", 1f, 0f).setDuration(150).start()
-        }
     }
 
     // Cast
